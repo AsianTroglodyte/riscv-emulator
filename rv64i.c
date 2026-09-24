@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <inttypes.h>
 #define NUM_REGISTERS 32
 
 
@@ -7,7 +8,7 @@ void print_register_values(const uint64_t registers[NUM_REGISTERS]) {
   // add bounds check later
   
   for (int i = 0; i < NUM_REGISTERS; i++) {
-    printf("register x%d = %u\n", i, registers[i]);
+    printf("register x%d = %" PRIu64 "\n", i, registers[i]);
   }
 }
 
@@ -32,9 +33,9 @@ int main() {
   uint64_t cur_return_address = return_address(registers);
   uint64_t cur_alternate_return_address = alternate_return_address(registers);
 
-  printf("cur_stack_pointer: %u\n", cur_stack_pointer);
-  printf("cur_return_address: %u\n", cur_return_address);
-  printf("cur_alternate_return_address: %u\n", cur_alternate_return_address);
+  printf("cur_stack_pointer: %" PRIu64 "\n", cur_stack_pointer);
+  printf("cur_return_address: %" PRIu64 "\n", cur_return_address);
+  printf("cur_alternate_return_address: %" PRIu64 "\n", cur_alternate_return_address);
 
   return 0;
 }
