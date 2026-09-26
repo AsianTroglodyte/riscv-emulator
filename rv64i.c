@@ -13,6 +13,18 @@ int opcode_bits_6_5(uint32_t instruction);
 int get_opcode(uint32_t instruction);
 void run_instructions(uint32_t instruction[]);
 void run_instruction(uint32_t instruction);
+uint64_t stack_pointer(const uint64_t registers[NUM_REGISTERS]) {
+  return registers[2];
+};
+
+uint64_t return_address(const uint64_t registers[NUM_REGISTERS]) {
+  return registers[1];
+};
+
+uint64_t alternate_return_address(const uint64_t registers[NUM_REGISTERS]) {
+  return registers[5];
+};
+
 
 static inline uint32_t bits(uint32_t instruction, int start, int length);
 
@@ -105,7 +117,6 @@ void run_instruction(uint32_t instruction) {
   case OP_IMM_32:
     printf("OP_IMM_32\n");
     break;
-
   case STORE:
     printf("STORE\n");
     break;
@@ -210,18 +221,18 @@ uint32_t get_func7(uint32_t instruction) {
 }
 
 uint32_t i_immediate(uint32_t instruction) {
-  uint32_t imm_11_0 = bits(instruction, 20, 31); // at end so only bitshift
+  uint32_t imm_11_0 = bits(instruction, 20, 31);
   return imm_11_0;
 }
 
 uint32_t s_immediate(uint32_t instruction) {
-  uint32_t imm_11_5 = bits(instruction, 25, 31) << 5; // at end so only bitshift
-  uint32_t imm_4_0 = bits(instruction, 7, 11);        // at end so only bitshift
+  uint32_t imm_11_5 = bits(instruction, 25, 31) << 5;
+  uint32_t imm_4_0 = bits(instruction, 7, 11);
   return imm_11_5 + imm_4_0;
 }
 
 uint32_t b_immediate(uint32_t instruction) {
-  uint32_t imm_12 = bits(instruction, 31, 1) << 12;
+  uint32_t imm_12 = bits(instruction, 31, 31) << 12;
   uint32_t imm_10_5 = bits(instruction, 25, 30) << 5;
   uint32_t imm_4_1 = bits(instruction, 8, 11) << 1;
   uint32_t imm_11 = bits(instruction, 7, 7) << 11;
@@ -229,12 +240,12 @@ uint32_t b_immediate(uint32_t instruction) {
 }
 
 uint32_t u_immediate(uint32_t instruction) {
-  uint32_t imm_31_12 = bits(instruction, 31, 12) << 12;
+  uint32_t imm_31_12 = bits(instruction, 12, 31) << 12;
   return imm_31_12;
 }
 
 int j_immediate(uint32_t instruction) {
-  uint32_t imm_20 = bits(instruction, 31, 31) << 20; // at end so only bitshift
+  uint32_t imm_20 = bits(instruction, 31, 31) << 20;
   uint32_t imm_10_1 = bits(instruction, 21, 30) << 1;
   uint32_t imm_11 = bits(instruction, 20, 20) << 11;
   uint32_t imm_19_12 = bits(instruction, 12, 19) << 12;
@@ -248,18 +259,6 @@ void print_register_values(const uint64_t registers[NUM_REGISTERS]) {
     printf("register x%d = %" PRIu64 "\n", i, registers[i]);
   }
 }
-
-uint64_t stack_pointer(const uint64_t registers[NUM_REGISTERS]) {
-  return registers[2];
-}
-
-uint64_t return_address(const uint64_t registers[NUM_REGISTERS]) {
-  return registers[1];
-}
-
-uint64_t alternate_return_address(const uint64_t registers[NUM_REGISTERS]) {
-  return registers[5];
-};
 
 int opcode_bits_1_0(uint32_t instruction) {
   return instruction & 0b11;
