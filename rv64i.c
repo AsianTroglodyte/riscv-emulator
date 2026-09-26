@@ -14,7 +14,7 @@ int get_opcode(uint32_t instruction);
 void run_instructions(uint32_t instruction[]);
 void run_instruction(uint32_t instruction);
 
-static inline int bits(uint32_t instruction, int start, int length);
+static inline uint32_t bits(uint32_t instruction, int start, int length);
 
 enum Instruction_Enums: uint32_t {
   LOAD=       0b0000011,
@@ -177,47 +177,68 @@ void run_instruction(uint32_t instruction) {
   }
 }
 
-
-int get_rd(uint32_t instruction) {
-  return instruction & 0b111110000000 >> 7;
+/**
+ * @brief gets the bits from a particular 32 bit
+ *
+ * @param digit index (right to left) to start slicing from
+ * @param the length of slice
+ * @return uint32_t bit slice shifted so start is beginning digit.
+ **/
+static inline uint32_t bits(uint32_t instruction, int start, int end) {
+  int length = end - start + 1;
+  return (instruction >> start) & ((1u << length) - 1);
 }
 
-int get_rs1(uint32_t instruction) {
-  return instruction & 0b11111000000000000000 >> 15;
+uint32_t get_rd(uint32_t instruction) {
+  return bits(instruction, 7, 11);
 }
 
-int get_rs2(uint32_t instruction) {
-  return instruction & 0b1111100000000000000000000 >> 20;
+uint32_t get_rs1(uint32_t instruction) {
+  return bits(instruction, 15, 19);
 }
 
-int i_immediate(uint32_t instruction) {
-  int imm_11_5 = bits(instruction, 20, 12) << 5; // at end so only bitshift
-  int imm_4_0  = bits(instruction, 7, 5);
+uint32_t get_rs2(uint32_t instruction) {
+  return bits(instruction, 20, 24);
+}
+
+uint32_t get_func3(uint32_t instruction) {
+  return bits(instruction, 12, 14);
+}
+
+uint32_t get_func7(uint32_t instruction) {
+  return bits(instruction, 25, 31);
+}
+
+uint32_t i_immediate(uint32_t instruction) {
+  uint32_t imm_11_0 = bits(instruction, 20, 31); // at end so only bitshift
+  return imm_11_0;
+}
+
+uint32_t s_immediate(uint32_t instruction) {
+  uint32_t imm_11_5 = bits(instruction, 25, 31) << 5; // at end so only bitshift
+  uint32_t imm_4_0 = bits(instruction, 7, 11);        // at end so only bitshift
   return imm_11_5 + imm_4_0;
 }
 
-int s_immediate(uint32_t instruction) {
-  int imm_11_5 = instruction >> 26; // at end so only bitshift
-  int imm_4_0 = instruction & 0b111110000000 >> 7; // at end so only bitshift
-  return imm_11_5 + imm_4_0;
+uint32_t b_immediate(uint32_t instruction) {
+  uint32_t imm_12 = bits(instruction, 31, 1) << 12;
+  uint32_t imm_10_5 = bits(instruction, 25, 30) << 5;
+  uint32_t imm_4_1 = bits(instruction, 8, 11) << 1;
+  uint32_t imm_11 = bits(instruction, 7, 7) << 11;
+  return (imm_12 + imm_11 + imm_10_5 + imm_4_1);
 }
 
-int b_immediate(uint32_t instruction) {
-  int imm_12 = instruction >> 31;
-  int imm_10_5 = instruction & 0b01111110000000000000000000000000 >> 25;
-  int imm_4_1 = instruction &                       0b11100000000 >> 8;
-  int imm_11 = instruction &                           0b10000000 >> 7;
-  return (imm_12 + imm_11 + imm_10_5 + imm_4_1) << 1; // bit shift for implicit
-                                                      // zero digit
-}
-
-int u_immediate(uint32_t instruction) {
-  return instruction & 0b1111100000000000000000000;
+uint32_t u_immediate(uint32_t instruction) {
+  uint32_t imm_31_12 = bits(instruction, 31, 12) << 12;
+  return imm_31_12;
 }
 
 int j_immediate(uint32_t instruction) {
-  /* imm_20 = ; // at end so only bitshift */
-  return instruction & 0b1111100000000000000000000 >> 20;
+  uint32_t imm_20 = bits(instruction, 31, 31) << 20; // at end so only bitshift
+  uint32_t imm_10_1 = bits(instruction, 21, 30) << 1;
+  uint32_t imm_11 = bits(instruction, 20, 20) << 11;
+  uint32_t imm_19_12 = bits(instruction, 12, 19) << 12;
+  return imm_20 + imm_10_1 + imm_11 + imm_19_12;
 }
 
 void print_register_values(const uint64_t registers[NUM_REGISTERS]) {
@@ -239,17 +260,6 @@ uint64_t return_address(const uint64_t registers[NUM_REGISTERS]) {
 uint64_t alternate_return_address(const uint64_t registers[NUM_REGISTERS]) {
   return registers[5];
 };
-
-/**
- * @brief gets the bits from a particular 32 bit
- *
- * @param digit index (right to left) to start slicing from
- * @param the length of slice
- * @return uint32_t bit slice
- **/
-static inline int bits(uint32_t instruction, int start, int length) {
-  return (instruction >> start) & ((1u << length) - 1);
-}
 
 int opcode_bits_1_0(uint32_t instruction) {
   return instruction & 0b11;
