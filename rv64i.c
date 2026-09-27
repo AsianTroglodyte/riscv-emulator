@@ -1,102 +1,49 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
-#define NUM_REGISTERS 32
+#include "rv64i.h"
 
-void print_register_values(const uint64_t registers[NUM_REGISTERS]);
-uint64_t stack_pointer(const uint64_t registers[NUM_REGISTERS]);
-uint64_t return_address(const uint64_t registers[NUM_REGISTERS]);
-uint64_t alternate_return_address(const uint64_t registers[NUM_REGISTERS]);
-int opcode_bits_1_0(uint32_t instruction);
-int opcode_bits_4_2(uint32_t instruction);
-int opcode_bits_6_5(uint32_t instruction);
 int get_opcode(uint32_t instruction);
-void run_instructions(uint32_t instruction[]);
-void run_instruction(uint32_t instruction);
-uint64_t stack_pointer(const uint64_t registers[NUM_REGISTERS]) {
-  return registers[2];
+uint32_t get_rs1(uint32_t instruction);
+uint32_t get_rs2(uint32_t instruction);
+uint32_t get_rd(uint32_t instruction);
+uint32_t get_funct3(uint32_t instruction);
+uint32_t get_funct7(uint32_t instruction);
+uint32_t get_i_immediate(uint32_t instruction);
+
+enum status_code {
+  RV64I_OK = 0,
+  RV64I_ERROR_ILLEGAL_INSTRUCTION = 1
 };
-
-uint64_t return_address(const uint64_t registers[NUM_REGISTERS]) {
-  return registers[1];
-};
-
-uint64_t alternate_return_address(const uint64_t registers[NUM_REGISTERS]) {
-  return registers[5];
-};
-
-
-static inline uint32_t bits(uint32_t instruction, int start, int length);
-
-enum Instruction_Enums: uint32_t {
-  LOAD=       0b0000011,
-  LOAD_FP=    0b0000111,
-  CUSTOM_0=   0b0001011,
-  MISC_MEM=   0b0001111,
-  OP_IMM=     0b0010011,
-  AUIPC=      0b0010111,
-  OP_IMM_32=  0b0011011,
-
-  STORE=      0b0100011,
-  STORE_FP=   0b0100111,
-  CUSTOM_1=   0b0101011,
-  AMO=        0b0101111,
-  OP=         0b0110011,
-  LUI=        0b0110111,
-  OP_32=      0b0111011,
-
-  MADD=       0b1000011,
-  MSUB=       0b1000111,
-  NMSUB=      0b1001011,
-  NMADD=      0b1001111,
-  OP_FP=      0b1010011,
-  OP_V=       0b1010111,
-  CUSTOM_2=   0b1011011,
-
-  BRANCH=     0b1100011,
-  JALR=       0b1100111,
-  RESERVED=   0b1101011,
-  JAL=        0b1101111,
-  SYSTEM=     0b1110011,
-  OP_VE=      0b1110111,
-  CUSTOM_3=   0b1111011
-};
-
-int main() {
-  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5};
-  uint64_t program_counter = 0;
-
-  /* print_register_values(registers); */
-
-  uint64_t cur_stack_pointer = stack_pointer(registers);
-  uint64_t cur_return_address = return_address(registers);
-  uint64_t cur_alternate_return_address = alternate_return_address(registers);
-
-  printf("cur_stack_pointer: %" PRIu64 "\n", cur_stack_pointer);
-  printf("cur_return_address: %" PRIu64 "\n", cur_return_address);
-  printf("cur_alternate_return_address: %" PRIu64 "\n", cur_alternate_return_address);
-
-  /* uint32_t instructions[4] = { */
-  /*   LOAD, */
-  /*   STORE, */
-  /*   MADD, */
-  /*   BRANCH */
-  /* }; */
-
-  uint32_t instructions[4] = {
-    LUI,
-  };
-
-  run_instructions(instructions);
-
-  return 0;
-}
 
 
 void run_instruction(uint32_t instruction) {
   switch (get_opcode(instruction)) {
   case LOAD:
+    // I Type
     printf("LOAD\n");
+    int func3 = get_funct3(instruction);
+    switch (func3) {
+    case LB:
+
+      printf("LB\n");
+      break;
+    case LH:
+      printf("LH\n");
+      break;
+    case LW:
+      printf("LW\n");
+      break;
+    case LBU:
+      printf("LBU\n");
+      break;
+    case LHU:
+      printf("LHUp\n");
+      break;
+    default:
+      printf("LOAD invalid func3: %d", func3);
+    }
+
     break;
   case LOAD_FP:
     printf("LOAD_FP\n");
@@ -108,7 +55,18 @@ void run_instruction(uint32_t instruction) {
     printf("MISC_MEM\n");
     break;
   case OP_IMM:
+    // Integer Register-Immediate Instructions
+    // I-Type
     printf("OP_IMM\n");
+    uint32_t i_immediate = get_i_immediate(instruction);
+    uint32_t rs1 = get_rs1(instruction);
+    uint32_t rd =  get_rd(instruction);
+    uint32_t funct3 = get_funct3(instruction);
+
+    /* switch (funct3) { */
+    /*   match */
+    /*   break; */
+    /* } */
     break;
   case AUIPC:
     printf("AUIPC\n");
@@ -200,6 +158,7 @@ static inline uint32_t bits(uint32_t instruction, int start, int end) {
   return (instruction >> start) & ((1u << length) - 1);
 }
 
+
 uint32_t get_rd(uint32_t instruction) {
   return bits(instruction, 7, 11);
 }
@@ -212,26 +171,26 @@ uint32_t get_rs2(uint32_t instruction) {
   return bits(instruction, 20, 24);
 }
 
-uint32_t get_func3(uint32_t instruction) {
+uint32_t get_funct3(uint32_t instruction) {
   return bits(instruction, 12, 14);
 }
 
-uint32_t get_func7(uint32_t instruction) {
+uint32_t get_funct7(uint32_t instruction) {
   return bits(instruction, 25, 31);
 }
 
-uint32_t i_immediate(uint32_t instruction) {
+uint32_t get_i_immediate(uint32_t instruction) {
   uint32_t imm_11_0 = bits(instruction, 20, 31);
   return imm_11_0;
 }
 
-uint32_t s_immediate(uint32_t instruction) {
+uint32_t get_s_immediate(uint32_t instruction) {
   uint32_t imm_11_5 = bits(instruction, 25, 31) << 5;
   uint32_t imm_4_0 = bits(instruction, 7, 11);
   return imm_11_5 + imm_4_0;
 }
 
-uint32_t b_immediate(uint32_t instruction) {
+uint32_t get_b_immediate(uint32_t instruction) {
   uint32_t imm_12 = bits(instruction, 31, 31) << 12;
   uint32_t imm_10_5 = bits(instruction, 25, 30) << 5;
   uint32_t imm_4_1 = bits(instruction, 8, 11) << 1;
@@ -239,7 +198,7 @@ uint32_t b_immediate(uint32_t instruction) {
   return (imm_12 + imm_11 + imm_10_5 + imm_4_1);
 }
 
-uint32_t u_immediate(uint32_t instruction) {
+uint32_t get_u_immediate(uint32_t instruction) {
   uint32_t imm_31_12 = bits(instruction, 12, 31) << 12;
   return imm_31_12;
 }
@@ -277,10 +236,15 @@ int get_opcode(uint32_t instruction) {
 }
 
 
-void run_instructions(uint32_t instructions[]) {
-  for (int i = 0; i < 4; i++) {
 
-    uint32_t current_instruction = instructions[i];
-    run_instruction(current_instruction);
-  }
+uint64_t stack_pointer(const uint64_t registers[NUM_REGISTERS]) {
+  return registers[2];
+}
+
+uint64_t return_address(const uint64_t registers[NUM_REGISTERS]) {
+  return registers[1];
+}
+
+uint64_t alternate_return_address(const uint64_t registers[NUM_REGISTERS]) {
+  return registers[5];
 }
