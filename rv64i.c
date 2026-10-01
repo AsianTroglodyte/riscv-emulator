@@ -19,13 +19,19 @@ enum status_code {
 
 void run_instruction(uint32_t instruction) {
   switch (get_opcode(instruction)) {
+  uint32_t i_immediate = get_i_immediate(instruction);
+  uint32_t rs1 = get_rs1(instruction);
+  uint32_t rd =  get_rd(instruction);
+  uint32_t funct3 = get_funct3(instruction);
   case LOAD:
     // I Type
     printf("LOAD\n");
-    int func3 = get_funct3(instruction);
-    switch (func3) {
+    i_immediate = get_i_immediate(instruction);
+    rs1 = get_rs1(instruction);
+    rd =  get_rd(instruction);
+    funct3 = get_funct3(instruction);
+    switch (funct3) {
     case LB:
-
       printf("LB\n");
       break;
     case LH:
@@ -41,7 +47,7 @@ void run_instruction(uint32_t instruction) {
       printf("LHUp\n");
       break;
     default:
-      printf("LOAD invalid func3: %d", func3);
+      printf("LOAD invalid func3: %d", funct3);
     }
 
     break;
@@ -58,16 +64,17 @@ void run_instruction(uint32_t instruction) {
     // Integer Register-Immediate Instructions
     // I-Type
     printf("OP_IMM\n");
-    uint32_t i_immediate = get_i_immediate(instruction);
-    uint32_t rs1 = get_rs1(instruction);
-    uint32_t rd =  get_rd(instruction);
-    uint32_t funct3 = get_funct3(instruction);
+    i_immediate = get_i_immediate(instruction);
+    rs1 = get_rs1(instruction);
+    rd =  get_rd(instruction);
+    funct3 = get_funct3(instruction);
+
 
     /* switch (funct3) { */
     /*   match */
     /*   break; */
     /* } */
-    break;
+    /* break; */
   case AUIPC:
     printf("AUIPC\n");
     break;
