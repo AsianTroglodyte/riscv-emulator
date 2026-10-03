@@ -1,8 +1,20 @@
 #ifndef RV64I_H
-#define RV64I_H
 #include <stdint.h>
 
-void run_instruction(uint32_t instruction);
+#define RV64I_H
+
+enum {NUM_REGISTERS = 32};
+
+void run_instruction(uint32_t instruction,
+                     uint32_t memory[],
+                     uint64_t registers[NUM_REGISTERS]);
+
+
+enum status_code {
+  RV64I_OK = 0,
+  RV64I_ERROR_ILLEGAL_INSTRUCTION = 1
+};
+
 
 enum major_opcodes: uint32_t {
   LOAD=       0b0000011,
@@ -46,7 +58,16 @@ enum load_funct3_enums: uint32_t {
   LHU=        0b101
 };
 
+enum branch_funct3_enums: uint32_t {
+  BEQ=        0b000,
+  BNE=        0b001,
+  BLT=        0b100,
+  BGE=        0b101,
+  BLTU=       0b110,
+  BGEU=       0b111
+};
 
-enum {NUM_REGISTERS = 32};
 
+void print_register_values(const uint64_t registers[NUM_REGISTERS]);
+void print_memory_values(const uint32_t memory[]);
 #endif

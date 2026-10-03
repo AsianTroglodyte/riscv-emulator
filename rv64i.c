@@ -10,19 +10,17 @@ uint32_t get_rd(uint32_t instruction);
 uint32_t get_funct3(uint32_t instruction);
 uint32_t get_funct7(uint32_t instruction);
 uint32_t get_i_immediate(uint32_t instruction);
+void print_bits(const unsigned int num);
 
-enum status_code {
-  RV64I_OK = 0,
-  RV64I_ERROR_ILLEGAL_INSTRUCTION = 1
-};
+void run_instruction(uint32_t instruction,
+                     uint32_t memory[],
+                     uint64_t registers[]) {
 
-
-void run_instruction(uint32_t instruction) {
   switch (get_opcode(instruction)) {
-  uint32_t i_immediate = get_i_immediate(instruction);
-  uint32_t rs1 = get_rs1(instruction);
-  uint32_t rd =  get_rd(instruction);
-  uint32_t funct3 = get_funct3(instruction);
+    uint32_t i_immediate = get_i_immediate(instruction);
+    uint32_t rs1 = get_rs1(instruction);
+    uint32_t rd =  get_rd(instruction);
+    uint32_t funct3 = get_funct3(instruction);
   case LOAD:
     // I Type
     printf("LOAD\n");
@@ -30,6 +28,8 @@ void run_instruction(uint32_t instruction) {
     rs1 = get_rs1(instruction);
     rd =  get_rd(instruction);
     funct3 = get_funct3(instruction);
+
+    uint32_t address = registers[rs1] + i_immediate;
     switch (funct3) {
     case LB:
       printf("LB\n");
@@ -39,12 +39,29 @@ void run_instruction(uint32_t instruction) {
       break;
     case LW:
       printf("LW\n");
+
+      printf("instruction ");
+      print_bits(instruction);
+
+      printf("immediate ");
+      print_bits(i_immediate);
+
+      printf("rs1 " );
+      print_bits(rs1);
+
+      printf("rd ");
+      print_bits(rd);
+
+      printf("funct3 ");
+      print_bits(funct3);
+
+      registers[rd] = memory[address];
       break;
     case LBU:
       printf("LBU\n");
       break;
     case LHU:
-      printf("LHUp\n");
+      printf("LHU\n");
       break;
     default:
       printf("LOAD invalid func3: %d", funct3);
@@ -148,7 +165,7 @@ void run_instruction(uint32_t instruction) {
     printf("CUSTOM_3\n");
     break;
   default:
-    printf("Couldn't determine instruction\n");
+    printf("Invalid Opcode\n");
     break;
   }
 }
@@ -164,7 +181,6 @@ static inline uint32_t bits(uint32_t instruction, int start, int end) {
   int length = end - start + 1;
   return (instruction >> start) & ((1u << length) - 1);
 }
-
 
 uint32_t get_rd(uint32_t instruction) {
   return bits(instruction, 7, 11);
@@ -220,10 +236,27 @@ int j_immediate(uint32_t instruction) {
 
 void print_register_values(const uint64_t registers[NUM_REGISTERS]) {
   // add bounds check later
-
   for (int i = 0; i < NUM_REGISTERS; i++) {
     printf("register x%d = %" PRIu64 "\n", i, registers[i]);
   }
+}
+
+void print_memory_values(const uint32_t memory[]) {
+  for (int i = 0; i < NUM_REGISTERS; i++) {
+    printf("memory addr %d = %" PRIu32 "\n", i, memory[i]);
+  }
+}
+
+void print_bits(const unsigned int num) {
+  int total_bits = sizeof(num) * 8;
+
+  for (int i = total_bits - 1; i >= 0; i--) {
+    int bit = (num >> i) & 1;
+    printf("%d", bit);
+    if (i % 4 == 0)  printf(" ");
+  }
+
+  printf("\n");
 }
 
 int opcode_bits_1_0(uint32_t instruction) {
