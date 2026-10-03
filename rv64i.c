@@ -3,14 +3,6 @@
 #include <inttypes.h>
 #include "rv64i.h"
 
-int get_opcode(uint32_t instruction);
-uint32_t get_rs1(uint32_t instruction);
-uint32_t get_rs2(uint32_t instruction);
-uint32_t get_rd(uint32_t instruction);
-uint32_t get_funct3(uint32_t instruction);
-uint32_t get_funct7(uint32_t instruction);
-uint32_t get_i_immediate(uint32_t instruction);
-void print_bits(const unsigned int num);
 
 void run_instruction(uint32_t instruction,
                      uint32_t memory[],
@@ -23,7 +15,6 @@ void run_instruction(uint32_t instruction,
     uint32_t funct3 = get_funct3(instruction);
   case LOAD:
     // I Type
-    printf("LOAD\n");
     i_immediate = get_i_immediate(instruction);
     rs1 = get_rs1(instruction);
     rd =  get_rd(instruction);
@@ -38,23 +29,6 @@ void run_instruction(uint32_t instruction,
       printf("LH\n");
       break;
     case LW:
-      printf("LW\n");
-
-      printf("instruction ");
-      print_bits(instruction);
-
-      printf("immediate ");
-      print_bits(i_immediate);
-
-      printf("rs1 " );
-      print_bits(rs1);
-
-      printf("rd ");
-      print_bits(rd);
-
-      printf("funct3 ");
-      print_bits(funct3);
-
       registers[rd] = memory[address];
       break;
     case LBU:
@@ -207,6 +181,7 @@ uint32_t get_i_immediate(uint32_t instruction) {
   return imm_11_0;
 }
 
+
 uint32_t get_s_immediate(uint32_t instruction) {
   uint32_t imm_11_5 = bits(instruction, 25, 31) << 5;
   uint32_t imm_4_0 = bits(instruction, 7, 11);
@@ -234,14 +209,14 @@ int j_immediate(uint32_t instruction) {
   return imm_20 + imm_10_1 + imm_11 + imm_19_12;
 }
 
-void print_register_values(const uint64_t registers[NUM_REGISTERS]) {
+void print_registers(const uint64_t registers[NUM_REGISTERS]) {
   // add bounds check later
   for (int i = 0; i < NUM_REGISTERS; i++) {
     printf("register x%d = %" PRIu64 "\n", i, registers[i]);
   }
 }
 
-void print_memory_values(const uint32_t memory[]) {
+void print_memory(const uint32_t memory[]) {
   for (int i = 0; i < NUM_REGISTERS; i++) {
     printf("memory addr %d = %" PRIu32 "\n", i, memory[i]);
   }
@@ -287,4 +262,19 @@ uint64_t return_address(const uint64_t registers[NUM_REGISTERS]) {
 
 uint64_t alternate_return_address(const uint64_t registers[NUM_REGISTERS]) {
   return registers[5];
+}
+
+
+
+// INSTRUCTION CREATION FILE
+uint32_t create_i_type(uint32_t immediate,
+                       uint32_t rs1,
+                       uint32_t funct3,
+                       uint32_t rd,
+                       uint32_t opcode) {
+  immediate = immediate << 20;
+  rs1 = rs1 << 15;
+  funct3 = funct3 << 12;
+  rd = rd << 7;
+  return immediate | rs1 | funct3 | rd | opcode;
 }

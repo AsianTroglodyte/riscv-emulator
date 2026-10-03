@@ -68,6 +68,31 @@ enum branch_funct3_enums: uint32_t {
 };
 
 
-void print_register_values(const uint64_t registers[NUM_REGISTERS]);
-void print_memory_values(const uint32_t memory[]);
+void print_registers(const uint64_t registers[NUM_REGISTERS]);
+void print_memory(const uint32_t memory[]);
+void print_bits(const unsigned int num);
+
+uint32_t create_i_type(uint32_t immediate,
+                       uint32_t rs1,
+                       uint32_t funct3,
+                       uint32_t rd,
+                       uint32_t opcode);
+
+
+int get_opcode(uint32_t instruction);
+uint32_t get_rs1(uint32_t instruction);
+uint32_t get_rs2(uint32_t instruction);
+uint32_t get_rd(uint32_t instruction);
+uint32_t get_funct3(uint32_t instruction);
+uint32_t get_funct7(uint32_t instruction);
+uint32_t get_i_immediate(uint32_t instruction);
+
+int opcode_bits_1_0(uint32_t instruction);
+int opcode_bits_4_2(uint32_t instruction);
+int opcode_bits_6_5(uint32_t instruction);
+
+uint64_t stack_pointer(const uint64_t registers[NUM_REGISTERS]);
+uint64_t return_address(const uint64_t registers[NUM_REGISTERS]);
+uint64_t alternate_return_address(const uint64_t registers[NUM_REGISTERS]);
+
 #endif
