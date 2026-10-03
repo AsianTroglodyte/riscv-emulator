@@ -13,7 +13,7 @@ int main() {
 
   /* printf("compiled with warning"); */
 
-  uint32_t memory[MEMORY_SIZE] = {};
+  uint8_t memory[MEMORY_SIZE] = {};
 
   for (uint32_t i = 0; i < MEMORY_SIZE; i++) {
     memory[i] = i;

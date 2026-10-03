@@ -6,7 +6,7 @@
 enum {NUM_REGISTERS = 32};
 
 void run_instruction(uint32_t instruction,
-                     uint32_t memory[],
+                     uint8_t memory[],
                      uint64_t registers[NUM_REGISTERS]);
 
 
@@ -69,7 +69,7 @@ enum branch_funct3_enums: uint32_t {
 
 
 void print_registers(const uint64_t registers[NUM_REGISTERS]);
-void print_memory(const uint32_t memory[]);
+void print_memory(const uint8_t memory[]);
 void print_bits(const unsigned int num);
 
 uint32_t create_i_type(uint32_t immediate,
