@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
-
+#define MEMORY_SIZE 32
 
 uint32_t create_i_type(uint32_t immediate, uint32_t rs1, uint32_t funct3, uint32_t rd, uint32_t opcode);
 /* uint32_t get_i_immediate(uint32_t instruction); */
@@ -31,8 +31,8 @@ int main() {
   /*   printf("mem addr %d: %" PRIu32 "\n", i,  memory); */
   /* } */
 
-  print_memory_values(memory);
-  print_register_values(registers);
+  print_memory(memory);
+  print_registers(registers);
 
   return 0;
 }
