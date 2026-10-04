@@ -81,9 +81,8 @@ void test_LBU(void) {
 
   // NEGATIVE NUMBERS
   memory[10] = (int8_t)-4;
-  memory[11] = 255;
   run_instruction(instruction, memory, registers);
-  TEST_ASSERT_EQUAL(-4, registers[10]);
+  TEST_ASSERT_EQUAL(252, registers[10]);
 }
 
 
@@ -94,10 +93,16 @@ void test_LHU(void) {
     memory[i * 2] = i * 2;
   }
 
+  // POSITIVE NUMBERS
   uint32_t instruction = create_i_type(10, 4, LH, 10, LOAD);
-
   run_instruction(instruction, memory, registers);
   TEST_ASSERT_EQUAL(10, registers[10]);
+
+  // NEGATIVE NUMBERS
+  memory[10] = (int8_t)-4;
+  memory[11] = 255;
+  run_instruction(instruction, memory, registers);
+  TEST_ASSERT_EQUAL(65532, registers[10]);
 }
 
 int main(void) {
@@ -106,7 +111,7 @@ int main(void) {
   RUN_TEST(test_LW);
   RUN_TEST(test_LH);
   RUN_TEST(test_LB);
+  RUN_TEST(test_LBU);
   /* RUN_TEST(test_LHU); */
-  /* RUN_TEST(test_LBU); */
   UNITY_END();
 }
