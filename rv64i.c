@@ -23,22 +23,22 @@ void run_instruction(uint32_t instruction,
     uint32_t address = registers[rs1] + i_immediate;
     switch (funct3) {
     case LB:
-      registers[rd] = get_byte(memory, address);
+      registers[rd] = (int8_t)get_byte(memory, address);
       break;
     case LH:
-      registers[rd] = get_half_word(memory, address);
+      registers[rd] = (int16_t)get_half_word(memory, address);
       break;
     case LW:
-      registers[rd] = get_word(memory, address);
+      registers[rd] = (int32_t)get_word(memory, address);
       break;
     case LBU:
-      printf("LBU\n");
+      registers[rd] = get_byte(memory, address);
       break;
     case LHU:
-      printf("LHU\n");
+      registers[rd] = get_half_word(memory, address);
       break;
     default:
-      printf("LOAD invalid func3: %d", funct3);
+      registers[rd] = get_word(memory, address);
     }
 
     break;
@@ -290,36 +290,10 @@ uint32_t get_word(uint8_t const memory[], uint32_t address)
 }
 
 inline uint16_t get_half_word(uint8_t const memory[], uint32_t address) {
-  return ((uint32_t)memory[address]) |
-         ((uint32_t)memory[address + 1]) << 8;
+  return (uint16_t)memory[address] |
+         (uint16_t)memory[address + 1] << 8;
 }
 
 inline uint8_t get_byte(uint8_t const memory[], uint32_t address) {
-  return ((uint32_t)memory[address]);
-}
-
-inline int64_t bits_to_i64(uint64_t value) {
-  return (int64_t) value;
-}
-
-inline uint64_t i64_to_bits(int64_t value) {
-  return (uint64_t) value;
-}
-
-
-
-inline int32_t from_2s_compl_32(uint32_t value) {
-  return ~value + 1;
-}
-
-inline uint32_t to_2s_compl_32(int32_t value) {
-  return ~value + 1;
-}
-
-inline int16_t from_2s_compl_16(uint16_t value) {
-  return ~value + 1;
-}
-
-inline uint16_t to_2s_compl_16(int16_t value) {
-  return ~value + 1;
+  return memory[address];
 }
