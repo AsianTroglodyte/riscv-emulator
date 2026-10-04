@@ -9,10 +9,10 @@ void run_instruction(uint32_t instruction,
                      uint64_t registers[]) {
 
   switch (get_opcode(instruction)) {
-    uint32_t i_immediate = get_i_immediate(instruction);
-    uint32_t rs1 = get_rs1(instruction);
-    uint32_t rd =  get_rd(instruction);
-    uint32_t funct3 = get_funct3(instruction);
+    uint32_t i_immediate;
+    uint32_t rs1;
+    uint32_t rd;
+    uint32_t funct3;
   case LOAD:
     // I Type
     i_immediate = get_i_immediate(instruction);

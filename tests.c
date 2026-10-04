@@ -23,12 +23,12 @@ void test_LW(void) {
 
 void test_LB(void) {
   uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5};
-  /* print_registers(registers); */
   uint8_t memory[MEMORY_BYTES] = {};
 
   for (uint32_t i = 0; i < MEMORY_BYTES; i++) {
     memory[i] = i;
   }
+  print_memory(memory);
 
   uint32_t instruction = create_i_type(10, 4, LB, 10, LOAD);
 
@@ -37,23 +37,24 @@ void test_LB(void) {
   TEST_ASSERT_EQUAL(10, registers[10]);
 }
 
-/* void test_LH(void) { */
-/*   uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5}; */
-/*   uint8_t memory[MEMORY_WORDS] = {}; */
-/*   for (uint32_t i = 0; i < MEMORY_HALF_WORDS; i++) { */
-/*     memory[i] = i; */
-/*   } */
+void test_LH(void) {
+  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5};
+  uint8_t memory[MEMORY_BYTES] = {};
+  for (uint32_t i = 0; i < MEMORY_HALF_WORDS; i++) {
+    memory[i * 2] = i * 2;
+  }
 
-/*   uint32_t instruction = create_i_type(8, 4, LB, 10, LOAD); */
+  uint32_t instruction = create_i_type(10, 4, LH, 10, LOAD);
 
-/*   run_instruction(instruction, memory, registers); */
-/*   TEST_ASSERT_EQUAL(10, registers[10]); */
-/* } */
+  run_instruction(instruction, memory, registers);
+  TEST_ASSERT_EQUAL(10, registers[10]);
+}
 
 int main(void) {
   UNITY_BEGIN();
 
   RUN_TEST(test_LW);
+  RUN_TEST(test_LH);
   RUN_TEST(test_LB);
   /* RUN_TEST(test_LW_fail); */
 
