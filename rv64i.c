@@ -281,8 +281,7 @@ uint32_t create_i_type(uint32_t immediate,
   return (uint32_t) immediate | rs1 | funct3 | rd | opcode;
 }
 
-uint32_t get_word(uint8_t const memory[], uint32_t address)
-{
+uint32_t get_word(uint8_t const memory[], uint32_t address) {
   return ((uint32_t)memory[address]) |
          ((uint32_t)memory[address + 1]) << 8 |
          ((uint32_t)memory[address + 2]) << 16 |
