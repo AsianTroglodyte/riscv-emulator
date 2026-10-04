@@ -2,20 +2,14 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
-#define MEMORY_SIZE 32
-
-uint32_t create_i_type(uint32_t immediate, uint32_t rs1, uint32_t funct3, uint32_t rd, uint32_t opcode);
-/* uint32_t get_i_immediate(uint32_t instruction); */
+#define MEMORY_WORDS 32
+#define MEMORY_BYTES MEMORY_WORD * 4
 
 int main() {
   uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5};
-  /* uint64_t program_counter = 0; */
+  uint8_t memory[MEMORY_WORDS] = {};
 
-  /* printf("compiled with warning"); */
-
-  uint8_t memory[MEMORY_SIZE] = {};
-
-  for (uint32_t i = 0; i < MEMORY_SIZE; i++) {
+  for (uint32_t i = 0; i < MEMORY_WORDS; i++) {
     memory[i] = i;
   }
 
@@ -26,10 +20,6 @@ int main() {
   for (int i = 0; i < 1; i++) {
     run_instruction(instructions[i], memory, registers);
   }
-
-  /* for (int i = 0; i < MEMORY_SIZE; i++) { */
-  /*   printf("mem addr %d: %" PRIu32 "\n", i,  memory); */
-  /* } */
 
   print_memory(memory);
   print_registers(registers);

@@ -4,6 +4,8 @@
 #define RV64I_H
 
 enum {NUM_REGISTERS = 32};
+enum {MEMORY_WORDS = 16};
+enum {MEMORY_BYTES = MEMORY_WORDS * 4};
 
 void run_instruction(uint32_t instruction,
                      uint8_t memory[],
@@ -71,6 +73,7 @@ enum branch_funct3_enums: uint32_t {
 void print_registers(const uint64_t registers[NUM_REGISTERS]);
 void print_memory(const uint8_t memory[]);
 void print_bits(const unsigned int num);
+void print_8_bits(const uint8_t num);
 
 uint32_t create_i_type(uint32_t immediate,
                        uint32_t rs1,
@@ -95,4 +98,5 @@ uint64_t stack_pointer(const uint64_t registers[NUM_REGISTERS]);
 uint64_t return_address(const uint64_t registers[NUM_REGISTERS]);
 uint64_t alternate_return_address(const uint64_t registers[NUM_REGISTERS]);
 
+uint32_t get_word(uint8_t const memory[], uint32_t address);
 #endif

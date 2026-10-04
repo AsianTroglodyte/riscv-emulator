@@ -5,7 +5,7 @@
 
 
 void run_instruction(uint32_t instruction,
-                     uint32_t memory[],
+                     uint8_t memory[],
                      uint64_t registers[]) {
 
   switch (get_opcode(instruction)) {
@@ -21,15 +21,19 @@ void run_instruction(uint32_t instruction,
     funct3 = get_funct3(instruction);
 
     uint32_t address = registers[rs1] + i_immediate;
+    printf("address: %" PRIu32 "\n", address);
     switch (funct3) {
     case LB:
-      printf("LB\n");
+      registers[rd] = ((uint32_t)memory[address]);
       break;
     case LH:
-      printf("LH\n");
+      registers[rd] = ((uint32_t)memory[address]) |
+                      ((uint32_t)memory[address + 1]) << 8;
       break;
     case LW:
-      registers[rd] = memory[address];
+      /* printf("word ", get_word(memory, address)); */
+      printf("word at address %" PRIu32 " : %" PRIu32 "\n", address, get_word(memory, address));
+      registers[rd] = get_word(memory, address);
       break;
     case LBU:
       printf("LBU\n");
@@ -213,12 +217,16 @@ void print_registers(const uint64_t registers[NUM_REGISTERS]) {
   // add bounds check later
   for (int i = 0; i < NUM_REGISTERS; i++) {
     printf("register x%d = %" PRIu64 "\n", i, registers[i]);
+    /* print_bits(registers[i]); */
   }
 }
 
-void print_memory(const uint32_t memory[]) {
-  for (int i = 0; i < NUM_REGISTERS; i++) {
-    printf("memory addr %d = %" PRIu32 "\n", i, memory[i]);
+void print_memory(const uint8_t memory[]) {
+  int byte_address = 0;
+  for (int i = 0; i < MEMORY_WORDS; i++) {
+    byte_address = i * 4;
+    printf("memory addr %d-%d = ", byte_address + 3, byte_address);
+    print_bits(get_word(memory, byte_address));
   }
 }
 
@@ -276,5 +284,13 @@ uint32_t create_i_type(uint32_t immediate,
   rs1 = rs1 << 15;
   funct3 = funct3 << 12;
   rd = rd << 7;
-  return immediate | rs1 | funct3 | rd | opcode;
+  return (uint32_t) immediate | rs1 | funct3 | rd | opcode;
+}
+
+uint32_t get_word(uint8_t const memory[], uint32_t address)
+{
+  return ((uint32_t)memory[address]) |
+         ((uint32_t)memory[address + 1]) << 8 |
+         ((uint32_t)memory[address + 2]) << 16 |
+         ((uint32_t)memory[address + 3]) << 24;
 }
