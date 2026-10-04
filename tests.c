@@ -75,7 +75,7 @@ void test_LBU(void) {
   }
 
   // POSITIVE NUMBERS
-  uint32_t instruction = create_i_type(10, 4, LH, 10, LOAD);
+  uint32_t instruction = create_i_type(10, 4, LBU, 10, LOAD);
   run_instruction(instruction, memory, registers);
   TEST_ASSERT_EQUAL(10, registers[10]);
 
@@ -94,7 +94,7 @@ void test_LHU(void) {
   }
 
   // POSITIVE NUMBERS
-  uint32_t instruction = create_i_type(10, 4, LH, 10, LOAD);
+  uint32_t instruction = create_i_type(10, 4, LHU, 10, LOAD);
   run_instruction(instruction, memory, registers);
   TEST_ASSERT_EQUAL(10, registers[10]);
 
@@ -112,6 +112,6 @@ int main(void) {
   RUN_TEST(test_LH);
   RUN_TEST(test_LB);
   RUN_TEST(test_LBU);
-  /* RUN_TEST(test_LHU); */
+  RUN_TEST(test_LHU);
   UNITY_END();
 }
