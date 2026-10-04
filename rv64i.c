@@ -21,18 +21,14 @@ void run_instruction(uint32_t instruction,
     funct3 = get_funct3(instruction);
 
     uint32_t address = registers[rs1] + i_immediate;
-    printf("address: %" PRIu32 "\n", address);
     switch (funct3) {
     case LB:
-      registers[rd] = ((uint32_t)memory[address]);
+      registers[rd] = get_byte(memory, address);
       break;
     case LH:
-      registers[rd] = ((uint32_t)memory[address]) |
-                      ((uint32_t)memory[address + 1]) << 8;
+      registers[rd] = get_half_word(memory, address);
       break;
     case LW:
-      /* printf("word ", get_word(memory, address)); */
-      printf("word at address %" PRIu32 " : %" PRIu32 "\n", address, get_word(memory, address));
       registers[rd] = get_word(memory, address);
       break;
     case LBU:
@@ -293,4 +289,13 @@ uint32_t get_word(uint8_t const memory[], uint32_t address)
          ((uint32_t)memory[address + 1]) << 8 |
          ((uint32_t)memory[address + 2]) << 16 |
          ((uint32_t)memory[address + 3]) << 24;
+}
+
+inline uint16_t get_half_word(uint8_t const memory[], uint32_t address) {
+  return ((uint32_t)memory[address]) |
+         ((uint32_t)memory[address + 1]) << 8;
+}
+
+inline uint8_t get_byte(uint8_t const memory[], uint32_t address) {
+  return ((uint32_t)memory[address]);
 }

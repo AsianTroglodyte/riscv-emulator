@@ -5,6 +5,7 @@
 
 enum {NUM_REGISTERS = 32};
 enum {MEMORY_WORDS = 16};
+enum {MEMORY_HALF_WORDS = MEMORY_WORDS * 2};
 enum {MEMORY_BYTES = MEMORY_WORDS * 4};
 
 void run_instruction(uint32_t instruction,
@@ -99,4 +100,6 @@ uint64_t return_address(const uint64_t registers[NUM_REGISTERS]);
 uint64_t alternate_return_address(const uint64_t registers[NUM_REGISTERS]);
 
 uint32_t get_word(uint8_t const memory[], uint32_t address);
+uint16_t get_half_word(uint8_t const memory[], uint32_t address);
+uint8_t get_byte(uint8_t const memory[], uint32_t address);
 #endif
