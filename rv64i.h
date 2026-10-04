@@ -102,4 +102,8 @@ uint64_t alternate_return_address(const uint64_t registers[NUM_REGISTERS]);
 uint32_t get_word(uint8_t const memory[], uint32_t address);
 uint16_t get_half_word(uint8_t const memory[], uint32_t address);
 uint8_t get_byte(uint8_t const memory[], uint32_t address);
+
+int64_t bits_to_i64(uint64_t value);
+uint64_t i64_to_bits(int64_t value);
+
 #endif

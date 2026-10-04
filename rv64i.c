@@ -254,8 +254,6 @@ int get_opcode(uint32_t instruction) {
   return instruction & 0b1111111;
 }
 
-
-
 uint64_t stack_pointer(const uint64_t registers[NUM_REGISTERS]) {
   return registers[2];
 }
@@ -298,4 +296,30 @@ inline uint16_t get_half_word(uint8_t const memory[], uint32_t address) {
 
 inline uint8_t get_byte(uint8_t const memory[], uint32_t address) {
   return ((uint32_t)memory[address]);
+}
+
+inline int64_t bits_to_i64(uint64_t value) {
+  return (int64_t) value;
+}
+
+inline uint64_t i64_to_bits(int64_t value) {
+  return (uint64_t) value;
+}
+
+
+
+inline int32_t from_2s_compl_32(uint32_t value) {
+  return ~value + 1;
+}
+
+inline uint32_t to_2s_compl_32(int32_t value) {
+  return ~value + 1;
+}
+
+inline int16_t from_2s_compl_16(uint16_t value) {
+  return ~value + 1;
+}
+
+inline uint16_t to_2s_compl_16(int16_t value) {
+  return ~value + 1;
 }
