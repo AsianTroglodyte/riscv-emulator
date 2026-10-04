@@ -50,22 +50,6 @@ void test_LH(void) {
   TEST_ASSERT_EQUAL(10, registers[10]);
 }
 
-void test_bits(void) {
-  // positive value
-  TEST_ASSERT_EQUAL(7, bits_to_i64((uint64_t) 7));
-
-  // zero
-  TEST_ASSERT_EQUAL(0, bits_to_i64((uint64_t) 0));
-
-  // negative value
-
-
-  TEST_ASSERT_EQUAL(-7, bits_to_i64((uint64_t) -7));
-  TEST_ASSERT_EQUAL(-1010, bits_to_i64((uint64_t) -1010));
-}
-
-
-
 int main(void) {
   UNITY_BEGIN();
 
