@@ -13,6 +13,8 @@ void run_instruction(uint32_t instruction,
     uint32_t rs1;
     uint32_t rd;
     uint32_t funct3;
+
+    uint32_t address;
   case LOAD:
     // I Type
     i_immediate = get_i_immediate(instruction);
@@ -20,7 +22,7 @@ void run_instruction(uint32_t instruction,
     rd =  get_rd(instruction);
     funct3 = get_funct3(instruction);
 
-    uint32_t address = registers[rs1] + i_immediate;
+    address = registers[rs1] + i_immediate;
     switch (funct3) {
     case LB:
       registers[rd] = (int8_t)get_byte(memory, address);
@@ -59,13 +61,6 @@ void run_instruction(uint32_t instruction,
     rs1 = get_rs1(instruction);
     rd =  get_rd(instruction);
     funct3 = get_funct3(instruction);
-
-
-    /* switch (funct3) { */
-    /*   match */
-    /*   break; */
-    /* } */
-    /* break; */
   case AUIPC:
     printf("AUIPC\n");
     break;
@@ -74,7 +69,29 @@ void run_instruction(uint32_t instruction,
     printf("OP_IMM_32\n");
     break;
   case STORE:
-    printf("STORE\n");
+    i_immediate = get_i_immediate(instruction);
+    rs1 = get_rs1(instruction);
+    rd =  get_rd(instruction);
+    funct3 = get_funct3(instruction);
+
+    address = registers[rs1] + i_immediate;
+    printf("SB address: %" PRIu32 "\n", address);
+    switch (funct3) {
+    case SB:
+      write_byte(memory, address, registers[rd]);
+      break;
+    case SH:
+      write_half_word(memory, address, registers[rd]);
+      break;
+    case SW:
+      write_word(memory, address, registers[rd]);
+      break;
+    case SD:
+      write_double_word(memory, address, registers[rd]);
+      break;
+    default:
+      printf("STORE INSTRUCTION NOT RECOGNIZED");
+    }
     break;
   case STORE_FP:
     printf("STORE_FP\n");
@@ -267,20 +284,7 @@ uint64_t alternate_return_address(const uint64_t registers[NUM_REGISTERS]) {
 }
 
 
-
-// INSTRUCTION CREATION FILE
-uint32_t create_i_type(uint32_t immediate,
-                       uint32_t rs1,
-                       uint32_t funct3,
-                       uint32_t rd,
-                       uint32_t opcode) {
-  immediate = immediate << 20;
-  rs1 = rs1 << 15;
-  funct3 = funct3 << 12;
-  rd = rd << 7;
-  return (uint32_t) immediate | rs1 | funct3 | rd | opcode;
-}
-
+// GET DATA FROM MEMORY GIVEN AN ADDRESS
 uint32_t get_word(uint8_t const memory[], uint32_t address) {
   return ((uint32_t)memory[address]) |
          ((uint32_t)memory[address + 1]) << 8 |
@@ -295,4 +299,41 @@ inline uint16_t get_half_word(uint8_t const memory[], uint32_t address) {
 
 inline uint8_t get_byte(uint8_t const memory[], uint32_t address) {
   return memory[address];
+}
+
+// WRITE DATA TO MEMORY GIVEN AN ADDRESS AND VALUE
+void write_double_word(uint8_t memory[], uint32_t address, uint64_t value) {
+  for (unsigned i = 0; i < 8; ++i) {
+    memory[address + i] = (uint8_t)(value >> (i * 8));
+  }
+}
+
+void write_word(uint8_t memory[], uint32_t address, uint64_t value) {
+  for (unsigned i = 0; i < 4; ++i) {
+    memory[address + i] = (uint8_t)(value >> (i * 8));
+  }
+}
+
+void write_half_word(uint8_t memory[], uint32_t address, uint64_t value) {
+  for (unsigned i = 0; i < 2; ++i) {
+    memory[address + i] = (uint8_t)(value >> (i * 8));
+  }
+}
+
+void write_byte(uint8_t memory[], uint32_t address, uint64_t value) {
+  memory[address ] = value;
+}
+
+// INSTRUCTION CREATION FILE
+uint32_t create_i_type(uint32_t immediate,
+                       uint32_t rs1,
+                       uint32_t funct3,
+                       uint32_t rd,
+                       uint32_t opcode) {
+
+  immediate = immediate << 20;
+  rs1 = rs1 << 15;
+  funct3 = funct3 << 12;
+  rd = rd << 7;
+  return (uint32_t) immediate | rs1 | funct3 | rd | opcode;
 }

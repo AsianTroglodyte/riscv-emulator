@@ -61,6 +61,13 @@ enum load_funct3_enums: uint32_t {
   LHU=        0b101
 };
 
+enum store_funct3_enums: uint32_t {
+  SB=         0b000,
+  SH=         0b001,
+  SW=         0b010,
+  SD=         0b011
+};
+
 enum branch_funct3_enums: uint32_t {
   BEQ=        0b000,
   BNE=        0b001,
@@ -103,4 +110,9 @@ uint32_t get_word(uint8_t const memory[], uint32_t address);
 uint16_t get_half_word(uint8_t const memory[], uint32_t address);
 uint8_t get_byte(uint8_t const memory[], uint32_t address);
 
+// WRITE DATA TO MEMORY GIVEN AN ADDRESS AND VALUE
+void write_byte(uint8_t memory[], uint32_t address, uint64_t value);
+void write_double_word(uint8_t memory[], uint32_t address, uint64_t value);
+void write_word(uint8_t memory[], uint32_t address, uint64_t value);
+void write_half_word(uint8_t memory[], uint32_t address, uint64_t value);
 #endif

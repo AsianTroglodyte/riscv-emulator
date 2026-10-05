@@ -105,6 +105,32 @@ void test_LHU(void) {
   TEST_ASSERT_EQUAL(65532, registers[10]);
 }
 
+void test_SB(void) {
+  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5};
+  uint8_t memory[MEMORY_BYTES] = {};
+  for (uint32_t i = 0; i < MEMORY_HALF_WORDS; i++) {
+    memory[i * 2] = i * 2;
+  }
+
+  // TEST WITH ZERO
+  uint32_t instruction = create_i_type(10, 4, SB, 10, STORE);
+  run_instruction(instruction, memory, registers);
+  TEST_ASSERT_EQUAL(0, memory[10]);
+
+  // TEST WITH NEGATIVE
+  registers[10] = -10;
+  /* print_registers(registers); */
+  run_instruction(instruction, memory, registers);
+  print_memory(memory);
+  TEST_ASSERT_EQUAL(246, get_byte(memory, 10));
+
+  // TEST WITH POSITIVE
+  registers[10] = 10;
+  run_instruction(instruction, memory, registers);
+  print_memory(memory);
+  TEST_ASSERT_EQUAL(10, get_byte(memory, 10));
+}
+
 int main(void) {
   UNITY_BEGIN();
 
@@ -113,5 +139,7 @@ int main(void) {
   RUN_TEST(test_LB);
   RUN_TEST(test_LBU);
   RUN_TEST(test_LHU);
+  RUN_TEST(test_SB);
+
   UNITY_END();
 }
