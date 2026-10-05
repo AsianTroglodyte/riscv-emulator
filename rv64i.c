@@ -229,7 +229,6 @@ void print_registers(const uint64_t registers[NUM_REGISTERS]) {
   // add bounds check later
   for (int i = 0; i < NUM_REGISTERS; i++) {
     printf("register x%d = %" PRIu64 "\n", i, registers[i]);
-    /* print_bits(registers[i]); */
   }
 }
 
@@ -284,9 +283,20 @@ uint64_t alternate_return_address(const uint64_t registers[NUM_REGISTERS]) {
 
 
 // GET DATA FROM MEMORY GIVEN AN ADDRESS
+inline uint64_t get_double_word(uint8_t const memory[], uint32_t address) {
+  return ((uint64_t)memory[address]) |
+         ((uint64_t)memory[address + 1]) << 8 |
+         ((uint64_t)memory[address + 2]) << 16 |
+         ((uint64_t)memory[address + 3]) << 24 |
+         ((uint64_t)memory[address + 4]) << 32 |
+         ((uint64_t)memory[address + 5]) << 40 |
+         ((uint64_t)memory[address + 6]) << 48 |
+         ((uint64_t)memory[address + 7]) << 56 ;
+}
+
 inline uint32_t get_word(uint8_t const memory[], uint32_t address) {
   return ((uint32_t)memory[address]) |
-         ((uint32_t)memory[address + 1]) << 8 |
+         ((uint32_t)memory[address + 1]) << 8  |
          ((uint32_t)memory[address + 2]) << 16 |
          ((uint32_t)memory[address + 3]) << 24;
 }

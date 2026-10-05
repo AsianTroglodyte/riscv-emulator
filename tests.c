@@ -174,6 +174,31 @@ void test_SW(void) {
   TEST_ASSERT_EQUAL(10, get_word(memory, 8));
 }
 
+void test_SD(void) {
+  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5};
+  uint8_t memory[MEMORY_BYTES] = {};
+  for (uint32_t i = 0; i < MEMORY_WORDS / 2; i++) {
+    memory[i * 8] = i * 8;
+  }
+
+  // TEST WITH ZERO
+  uint32_t instruction = create_i_type(8, 4, SD, 8, STORE);
+  run_instruction(instruction, memory, registers);
+  TEST_ASSERT_EQUAL(0, get_double_word(memory, 8));
+
+  // TEST WITH NEGATIVE
+  registers[8] = (int64_t)-10;
+  run_instruction(instruction, memory, registers);
+  TEST_ASSERT_EQUAL_UINT64((UINT64_MAX - UINT64_C(9)),
+                           get_double_word(memory, 8));
+  /* TEST_ASSERT_EQUAL(10, get_double_word(memory, 8)); */
+
+  // TEST WITH POSITIVE
+  registers[8] = 10;
+  run_instruction(instruction, memory, registers);
+  TEST_ASSERT_EQUAL((int64_t)10, get_word(memory, 8));
+}
+
 
 int main(void) {
   UNITY_BEGIN();
@@ -186,6 +211,7 @@ int main(void) {
   RUN_TEST(test_SB);
   RUN_TEST(test_SH);
   RUN_TEST(test_SW);
+  RUN_TEST(test_SD);
 
   UNITY_END();
 }

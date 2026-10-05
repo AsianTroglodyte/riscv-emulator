@@ -106,6 +106,7 @@ uint64_t stack_pointer(const uint64_t registers[NUM_REGISTERS]);
 uint64_t return_address(const uint64_t registers[NUM_REGISTERS]);
 uint64_t alternate_return_address(const uint64_t registers[NUM_REGISTERS]);
 
+uint64_t get_double_word(uint8_t const memory[], uint32_t address);
 uint32_t get_word(uint8_t const memory[], uint32_t address);
 uint16_t get_half_word(uint8_t const memory[], uint32_t address);
 uint8_t get_byte(uint8_t const memory[], uint32_t address);
