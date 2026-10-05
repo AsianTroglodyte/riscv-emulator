@@ -26,7 +26,7 @@ void test_LW(void) {
   memory[6] = 255;
   memory[7] = 255;
   run_instruction(instruction, memory, registers);
-  TEST_ASSERT_EQUAL(-4, registers[10]);
+  TEST_ASSERT_EQUAL_UINT64(UINT64_MAX-3, registers[10]);
 }
 
 void test_LB(void) {
@@ -40,12 +40,12 @@ void test_LB(void) {
   uint32_t instruction = create_i_type(10, 4, LB, 10, LOAD);
   // POSITIVE NUMBERS
   run_instruction(instruction, memory, registers);
-  TEST_ASSERT_EQUAL(10, registers[10]);
+  TEST_ASSERT_EQUAL_UINT64(10, registers[10]);
 
   // NEGATIVE NUMBERS
   memory[10] = (int8_t)-4;
   run_instruction(instruction, memory, registers);
-  TEST_ASSERT_EQUAL(-4, registers[10]);
+  TEST_ASSERT_EQUAL_UINT64(UINT64_MAX-3, registers[10]);
 }
 
 void test_LH(void) {
@@ -58,13 +58,13 @@ void test_LH(void) {
   uint32_t instruction = create_i_type(10, 4, LH, 10, LOAD);
   // POSITIVE NUMBERS
   run_instruction(instruction, memory, registers);
-  TEST_ASSERT_EQUAL(10, registers[10]);
+  TEST_ASSERT_EQUAL_UINT64(10, registers[10]);
 
   // NEGATIVE NUMBERS
   memory[10] = (int8_t)-4;
   memory[11] = 255;
   run_instruction(instruction, memory, registers);
-  TEST_ASSERT_EQUAL(-4, registers[10]);
+  TEST_ASSERT_EQUAL_UINT64(UINT64_MAX-3, registers[10]);
 }
 
 void test_LBU(void) {
@@ -77,12 +77,12 @@ void test_LBU(void) {
   // POSITIVE NUMBERS
   uint32_t instruction = create_i_type(10, 4, LBU, 10, LOAD);
   run_instruction(instruction, memory, registers);
-  TEST_ASSERT_EQUAL(10, registers[10]);
+  TEST_ASSERT_EQUAL_UINT64(10, registers[10]);
 
   // NEGATIVE NUMBERS
   memory[10] = (int8_t)-4;
   run_instruction(instruction, memory, registers);
-  TEST_ASSERT_EQUAL(252, registers[10]);
+  TEST_ASSERT_EQUAL_UINT64(UINT8_MAX - 3, registers[10]);
 }
 
 
@@ -96,13 +96,13 @@ void test_LHU(void) {
   // POSITIVE NUMBERS
   uint32_t instruction = create_i_type(10, 4, LHU, 10, LOAD);
   run_instruction(instruction, memory, registers);
-  TEST_ASSERT_EQUAL(10, registers[10]);
+  TEST_ASSERT_EQUAL_UINT64(10, registers[10]);
 
   // NEGATIVE NUMBERS
   memory[10] = (int8_t)-4;
   memory[11] = 255;
   run_instruction(instruction, memory, registers);
-  TEST_ASSERT_EQUAL(65532, registers[10]);
+  TEST_ASSERT_EQUAL_UINT64(UINT16_MAX - 3, registers[10]);
 }
 
 void test_SB(void) {
@@ -120,7 +120,7 @@ void test_SB(void) {
   // TEST WITH NEGATIVE
   registers[10] = -10;
   run_instruction(instruction, memory, registers);
-  TEST_ASSERT_EQUAL(246, get_byte(memory, 10));
+  TEST_ASSERT_EQUAL(UINT8_MAX - 9, get_byte(memory, 10));
 
   // TEST WITH POSITIVE
   registers[10] = 10;
@@ -143,7 +143,7 @@ void test_SH(void) {
   // TEST WITH NEGATIVE
   registers[10] = -10;
   run_instruction(instruction, memory, registers);
-  TEST_ASSERT_EQUAL(0xFFFF - 9, get_half_word(memory, 10));
+  TEST_ASSERT_EQUAL(UINT16_MAX - 9, get_half_word(memory, 10));
 
   // TEST WITH POSITIVE
   registers[10] = 10;
@@ -166,7 +166,7 @@ void test_SW(void) {
   // TEST WITH NEGATIVE
   registers[8] = (int64_t)-10;
   run_instruction(instruction, memory, registers);
-  TEST_ASSERT_EQUAL(0xFFFFFFFF - 9, get_word(memory, 8));
+  TEST_ASSERT_EQUAL(UINT32_MAX - 9, get_word(memory, 8));
 
   // TEST WITH POSITIVE
   registers[8] = 10;
@@ -184,19 +184,18 @@ void test_SD(void) {
   // TEST WITH ZERO
   uint32_t instruction = create_i_type(8, 4, SD, 8, STORE);
   run_instruction(instruction, memory, registers);
-  TEST_ASSERT_EQUAL(0, get_double_word(memory, 8));
+  TEST_ASSERT_EQUAL_UINT64(0, get_double_word(memory, 8));
 
   // TEST WITH NEGATIVE
   registers[8] = (int64_t)-10;
   run_instruction(instruction, memory, registers);
-  TEST_ASSERT_EQUAL_UINT64((UINT64_MAX - UINT64_C(9)),
+  TEST_ASSERT_EQUAL_UINT64(UINT64_MAX - UINT64_C(9),
                            get_double_word(memory, 8));
-  /* TEST_ASSERT_EQUAL(10, get_double_word(memory, 8)); */
 
   // TEST WITH POSITIVE
   registers[8] = 10;
   run_instruction(instruction, memory, registers);
-  TEST_ASSERT_EQUAL((int64_t)10, get_word(memory, 8));
+  TEST_ASSERT_EQUAL_UINT64(10, get_double_word(memory, 8));
 }
 
 
