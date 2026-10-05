@@ -119,15 +119,12 @@ void test_SB(void) {
 
   // TEST WITH NEGATIVE
   registers[10] = -10;
-  /* print_registers(registers); */
   run_instruction(instruction, memory, registers);
-  print_memory(memory);
   TEST_ASSERT_EQUAL(246, get_byte(memory, 10));
 
   // TEST WITH POSITIVE
   registers[10] = 10;
   run_instruction(instruction, memory, registers);
-  print_memory(memory);
   TEST_ASSERT_EQUAL(10, get_byte(memory, 10));
 }
 
@@ -145,16 +142,36 @@ void test_SH(void) {
 
   // TEST WITH NEGATIVE
   registers[10] = -10;
-  /* print_registers(registers); */
   run_instruction(instruction, memory, registers);
-  print_memory(memory);
-  TEST_ASSERT_EQUAL(65526, get_half_word(memory, 10));
+  TEST_ASSERT_EQUAL(0xFFFF - 9, get_half_word(memory, 10));
 
   // TEST WITH POSITIVE
   registers[10] = 10;
   run_instruction(instruction, memory, registers);
-  print_memory(memory);
   TEST_ASSERT_EQUAL(10, get_half_word(memory, 10));
+}
+
+void test_SW(void) {
+  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5};
+  uint8_t memory[MEMORY_BYTES] = {};
+  for (uint32_t i = 0; i < MEMORY_WORDS; i++) {
+    memory[i * 4] = i * 4;
+  }
+
+  // TEST WITH ZERO
+  uint32_t instruction = create_i_type(8, 4, SW, 8, STORE);
+  run_instruction(instruction, memory, registers);
+  TEST_ASSERT_EQUAL(0, get_word(memory, 8));
+
+  // TEST WITH NEGATIVE
+  registers[8] = (int64_t)-10;
+  run_instruction(instruction, memory, registers);
+  TEST_ASSERT_EQUAL(0xFFFFFFFF - 9, get_word(memory, 8));
+
+  // TEST WITH POSITIVE
+  registers[8] = 10;
+  run_instruction(instruction, memory, registers);
+  TEST_ASSERT_EQUAL(10, get_word(memory, 8));
 }
 
 
@@ -168,6 +185,7 @@ int main(void) {
   RUN_TEST(test_LHU);
   RUN_TEST(test_SB);
   RUN_TEST(test_SH);
+  RUN_TEST(test_SW);
 
   UNITY_END();
 }

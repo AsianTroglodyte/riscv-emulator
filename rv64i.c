@@ -75,7 +75,6 @@ void run_instruction(uint32_t instruction,
     funct3 = get_funct3(instruction);
 
     address = registers[rs1] + i_immediate;
-    printf("SB address: %" PRIu32 "\n", address);
     switch (funct3) {
     case SB:
       write_byte(memory, address, registers[rd]);
@@ -285,7 +284,7 @@ uint64_t alternate_return_address(const uint64_t registers[NUM_REGISTERS]) {
 
 
 // GET DATA FROM MEMORY GIVEN AN ADDRESS
-uint32_t get_word(uint8_t const memory[], uint32_t address) {
+inline uint32_t get_word(uint8_t const memory[], uint32_t address) {
   return ((uint32_t)memory[address]) |
          ((uint32_t)memory[address + 1]) << 8 |
          ((uint32_t)memory[address + 2]) << 16 |
