@@ -360,3 +360,18 @@ uint32_t create_i_type(uint32_t immediate,
   rd = rd << 7;
   return (uint32_t) immediate | rs1 | funct3 | rd | opcode;
 }
+
+uint32_t create_s_type(uint32_t immediate,
+                       uint32_t rs2,
+                       uint32_t rs1,
+                       uint32_t funct3,
+                       uint32_t opcode) {
+
+
+  uint32_t immediate_4_0 = bits(immediate, 0, 4) << 7;
+  uint32_t immediate_11_5 = bits(immediate, 5, 11) << 25;
+  rs2 = rs2 << 20;
+  rs1 = rs1 << 15;
+  funct3 = funct3 << 12;
+  return (uint32_t) immediate_11_5 | rs2 | rs1 | funct3 | immediate_4_0 | opcode;
+}
