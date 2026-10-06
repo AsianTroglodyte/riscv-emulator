@@ -2,14 +2,14 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include "rv64i.h"
-
+#include <assert.h>
 
 void run_instruction(uint32_t instruction,
                      uint8_t memory[],
                      uint64_t registers[]) {
 
   switch (get_opcode(instruction)) {
-    uint32_t i_immediate;
+    int32_t i_immediate;
     uint32_t rs1;
     uint32_t rd;
     uint32_t funct3;
@@ -25,13 +25,16 @@ void run_instruction(uint32_t instruction,
     address = registers[rs1] + i_immediate;
     switch (funct3) {
     case LB:
-      registers[rd] = (int8_t)get_byte(memory, address);
+      registers[rd] = (int8_t) get_byte(memory, address);
       break;
     case LH:
-      registers[rd] = (int16_t)get_half_word(memory, address);
+      registers[rd] = (int16_t) get_half_word(memory, address);
       break;
     case LW:
-      registers[rd] = (int32_t)get_word(memory, address);
+      /* printf("registers[rsq]: %" PRIu64 "\n", registers[rs1]); */
+      /* printf("i_immediate: %" PRIi32 "\n", i_immediate); */
+      /* printf("address: %" PRIu32 "\n", address); */
+      registers[rd] = (int32_t) get_word(memory, address);
       break;
     case LBU:
       registers[rd] = get_byte(memory, address);
@@ -40,7 +43,8 @@ void run_instruction(uint32_t instruction,
       registers[rd] = get_half_word(memory, address);
       break;
     default:
-      registers[rd] = get_word(memory, address);
+      printf("funct3 %d does not correspond to any LOAD instruction.", funct3);
+      assert(0);
     }
 
     break;
@@ -57,10 +61,6 @@ void run_instruction(uint32_t instruction,
     // Integer Register-Immediate Instructions
     // I-Type
     printf("OP_IMM\n");
-    i_immediate = get_i_immediate(instruction);
-    rs1 = get_rs1(instruction);
-    rd =  get_rd(instruction);
-    funct3 = get_funct3(instruction);
   case AUIPC:
     printf("AUIPC\n");
     break;
@@ -89,7 +89,8 @@ void run_instruction(uint32_t instruction,
       write_double_word(memory, address, registers[rd]);
       break;
     default:
-      printf("STORE INSTRUCTION NOT RECOGNIZED");
+      printf("funct3 %d does not correspond to any STORE instruction.", funct3);
+      assert(0);
     }
     break;
   case STORE_FP:
@@ -192,11 +193,24 @@ uint32_t get_funct7(uint32_t instruction) {
   return bits(instruction, 25, 31);
 }
 
-uint32_t get_i_immediate(uint32_t instruction) {
-  uint32_t imm_11_0 = bits(instruction, 20, 31);
+int32_t get_i_immediate(uint32_t instruction) {
+  int32_t imm_11_0 = (int32_t) sign_extend_32(bits(instruction, 20, 31), 12);
   return imm_11_0;
 }
 
+int32_t sign_extend_32(uint32_t field, int width) {
+  assert(width >= 1 && width <= 32);
+  uint32_t mask = UINT32_MAX >> (32 - width);
+  uint32_t sign_bit = UINT32_C(1) << (width - 1);
+  field &= mask;
+
+  // check if signage of number is negative
+  if (field & sign_bit) {
+    return (int64_t)field - (INT64_C(1) << width);
+  }
+
+  return field;
+}
 
 uint32_t get_s_immediate(uint32_t instruction) {
   uint32_t imm_11_5 = bits(instruction, 25, 31) << 5;
@@ -311,9 +325,9 @@ inline uint8_t get_byte(uint8_t const memory[], uint32_t address) {
 }
 
 // WRITE DATA TO MEMORY GIVEN AN ADDRESS AND VALUE
-void write_double_word(uint8_t memory[], uint32_t address, uint64_t value) {
+void write_double_word(uint8_t memory[], uint32_t address, uint64_t field) {
   for (unsigned i = 0; i < 8; ++i) {
-    memory[address + i] = (uint8_t)(value >> (i * 8));
+    memory[address + i] = (uint8_t)(field >> (i * 8));
   }
 }
 

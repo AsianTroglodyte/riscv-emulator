@@ -90,22 +90,26 @@ uint32_t create_i_type(uint32_t immediate,
                        uint32_t opcode);
 
 
+// EXTRACT DATA FROM INSTRUCTION
 int get_opcode(uint32_t instruction);
 uint32_t get_rs1(uint32_t instruction);
 uint32_t get_rs2(uint32_t instruction);
 uint32_t get_rd(uint32_t instruction);
 uint32_t get_funct3(uint32_t instruction);
 uint32_t get_funct7(uint32_t instruction);
-uint32_t get_i_immediate(uint32_t instruction);
+int32_t get_i_immediate(uint32_t instruction);
 
+// GET PARTICULAR OPCODES
 int opcode_bits_1_0(uint32_t instruction);
 int opcode_bits_4_2(uint32_t instruction);
 int opcode_bits_6_5(uint32_t instruction);
 
+// GET VALUE STACK POINTER
 uint64_t stack_pointer(const uint64_t registers[NUM_REGISTERS]);
 uint64_t return_address(const uint64_t registers[NUM_REGISTERS]);
 uint64_t alternate_return_address(const uint64_t registers[NUM_REGISTERS]);
 
+// WRITE DATA FROM MEMORY GIVEN AN ADDRESS
 uint64_t get_double_word(uint8_t const memory[], uint32_t address);
 uint32_t get_word(uint8_t const memory[], uint32_t address);
 uint16_t get_half_word(uint8_t const memory[], uint32_t address);
@@ -116,4 +120,7 @@ void write_byte(uint8_t memory[], uint32_t address, uint64_t value);
 void write_double_word(uint8_t memory[], uint32_t address, uint64_t value);
 void write_word(uint8_t memory[], uint32_t address, uint64_t value);
 void write_half_word(uint8_t memory[], uint32_t address, uint64_t value);
+
+int32_t sign_extend_32(uint32_t value, int length);
+
 #endif
