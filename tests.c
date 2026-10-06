@@ -264,10 +264,15 @@ void test_s_create(void) {
   // should be imme_11_5(1111 111)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 1111 1)(010 0011 opcode)
   TEST_ASSERT_EQUAL(0b11111110011000111000111110100011, s_instruction_2);
 
-  /* // NEGATIVE IMMEDIATE BOUNDARY */
-  /* uint32_t s_instruction_3 = create_s_type(-1, 6, 7, SB, STORE); */
-  /* // should be imme_11_5(1111 111)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 1111 1)(010 0011 opcode) */
-  /* TEST_ASSERT_EQUAL(0b11111110011000111000111110100011, s_instruction_2); */
+  // NEGATIVE IMMEDIATE BOUNDARY
+  uint32_t s_instruction_3 = create_s_type(-2048, 6, 7, SB, STORE);
+  // should be imme_11_5(1000 000)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 0000 0)(010 0011 opcode)
+  TEST_ASSERT_EQUAL(0b10000000011000111000000000100011, s_instruction_3);
+
+  // POSITIVE IMMEDIATE BOUNDARY
+  uint32_t s_instruction_4 = create_s_type(2047, 6, 7, SB, STORE);
+  // should be imme_11_5(0111 111)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 1111 1)(010 0011 opcode)
+  TEST_ASSERT_EQUAL(0b01111110011000111000111110100011, s_instruction_4);
 }
 
 
@@ -279,6 +284,16 @@ void test_get_s_immediate(void) {
   // NEGATIVE IMMEDIATE
   uint32_t s_instruction_2 = create_s_type(-1, 6, 7, SB, STORE);
   TEST_ASSERT_EQUAL(-1, get_s_immediate(s_instruction_2));
+
+  // NEGATIVE IMMEDIATE BOUNDARY
+  uint32_t s_instruction_3 = create_s_type(-2048, 6, 7, SB, STORE);
+  // should be imme_11_5(1000 000)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 0000 0)(010 0011 opcode)
+  TEST_ASSERT_EQUAL(-2048, get_s_immediate(s_instruction_3));
+
+  // POSITIVE IMMEDIATE BOUNDARY
+  uint32_t s_instruction_4 = create_s_type(2047, 6, 7, SB, STORE);
+  // should be imme_11_5(0111 111)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 1111 1)(010 0011 opcode)
+  TEST_ASSERT_EQUAL(2047, get_s_immediate(s_instruction_4));
 }
 
 int main(void) {
