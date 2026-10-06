@@ -198,6 +198,14 @@ int32_t get_i_immediate(uint32_t instruction) {
   return imm_11_0;
 }
 
+int32_t get_s_immediate(uint32_t instruction) {
+  uint32_t immediate_4_0 = bits(instruction, 7, 11);
+  uint32_t immediate_11_5 = bits(instruction, 25, 31) << 5;
+  uint32_t immediate_11_0 = immediate_4_0 + immediate_11_5;
+  int32_t imm_11_0 = (int32_t) sign_extend_32(immediate_11_0, 12);
+  return imm_11_0;
+}
+
 int32_t sign_extend_32(uint32_t field, int width) {
   assert(width >= 1 && width <= 32);
   uint32_t mask = UINT32_MAX >> (32 - width);
@@ -210,12 +218,6 @@ int32_t sign_extend_32(uint32_t field, int width) {
   }
 
   return field;
-}
-
-uint32_t get_s_immediate(uint32_t instruction) {
-  uint32_t imm_11_5 = bits(instruction, 25, 31) << 5;
-  uint32_t imm_4_0 = bits(instruction, 7, 11);
-  return imm_11_5 + imm_4_0;
 }
 
 uint32_t get_b_immediate(uint32_t instruction) {

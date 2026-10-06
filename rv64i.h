@@ -102,6 +102,7 @@ uint32_t get_rd(uint32_t instruction);
 uint32_t get_funct3(uint32_t instruction);
 uint32_t get_funct7(uint32_t instruction);
 int32_t get_i_immediate(uint32_t instruction);
+int32_t get_s_immediate(uint32_t instruction);
 
 // GET PARTICULAR OPCODES
 int opcode_bits_1_0(uint32_t instruction);

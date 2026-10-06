@@ -270,7 +270,23 @@ void test_s_create(void) {
   uint32_t s_instruction_2 = create_s_type(-1, 6, 7, SB, STORE);
   // should be imme_11_5(1111 111)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 1111 1)(010 0011 opcode)
   TEST_ASSERT_EQUAL((uint32_t) 0b11111110011000111000111110100011, s_instruction_2);
-  // imm 1011 1011 1000
+}
+
+void test_get_s_immediate(void) {
+  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5};
+  uint8_t memory[MEMORY_BYTES] = {};
+  for (uint32_t i = 0; i < MEMORY_BYTES; i++) {
+    memory[i] = i;
+  }
+
+  // EASY
+  uint32_t s_instruction_1 = create_s_type(1000, 6, 7, SB, STORE);
+  TEST_ASSERT_EQUAL(1000, get_s_immediate(s_instruction_1));
+  /* print_bits(s_instruction_1); */
+
+  // negative immediate
+  uint32_t s_instruction_2 = create_s_type(-1, 6, 7, SB, STORE);
+  TEST_ASSERT_EQUAL(-1, get_s_immediate(s_instruction_2));
 }
 
 int main(void) {
@@ -286,6 +302,7 @@ int main(void) {
   RUN_TEST(test_SW);
   RUN_TEST(test_SD);
   RUN_TEST(test_s_create);
+  RUN_TEST(test_get_s_immediate);
 
   UNITY_END();
 }
