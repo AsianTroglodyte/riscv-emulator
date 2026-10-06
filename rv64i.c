@@ -9,20 +9,21 @@ void run_instruction(uint32_t instruction,
                      uint64_t registers[]) {
 
   switch (get_opcode(instruction)) {
-    int32_t i_immediate;
+    int32_t immediate;
     uint32_t rs1;
+    uint32_t rs2;
     uint32_t rd;
     uint32_t funct3;
 
     uint32_t address;
   case LOAD:
     // I Type
-    i_immediate = get_i_immediate(instruction);
+    immediate = get_i_immediate(instruction);
     rs1 = get_rs1(instruction);
     rd =  get_rd(instruction);
     funct3 = get_funct3(instruction);
 
-    address = registers[rs1] + i_immediate;
+    address = registers[rs1] + immediate;
     switch (funct3) {
     case LB:
       registers[rd] = (int8_t) get_byte(memory, address);
@@ -61,6 +62,7 @@ void run_instruction(uint32_t instruction,
     // Integer Register-Immediate Instructions
     // I-Type
     printf("OP_IMM\n");
+    break;
   case AUIPC:
     printf("AUIPC\n");
     break;
@@ -69,24 +71,24 @@ void run_instruction(uint32_t instruction,
     printf("OP_IMM_32\n");
     break;
   case STORE:
-    i_immediate = get_i_immediate(instruction);
+    immediate = get_s_immediate(instruction);
     rs1 = get_rs1(instruction);
-    rd =  get_rd(instruction);
+    rs2 =  get_rs2(instruction);
     funct3 = get_funct3(instruction);
 
-    address = registers[rs1] + i_immediate;
+    address = registers[rs1] + immediate;
     switch (funct3) {
     case SB:
-      write_byte(memory, address, registers[rd]);
+      write_byte(memory, address, registers[rs2]);
       break;
     case SH:
-      write_half_word(memory, address, registers[rd]);
+      write_half_word(memory, address, registers[rs2]);
       break;
     case SW:
-      write_word(memory, address, registers[rd]);
+      write_word(memory, address, registers[rs2]);
       break;
     case SD:
-      write_double_word(memory, address, registers[rd]);
+      write_double_word(memory, address, registers[rs2]);
       break;
     default:
       printf("funct3 %d does not correspond to any STORE instruction.", funct3);
