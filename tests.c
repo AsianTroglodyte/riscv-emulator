@@ -254,37 +254,29 @@ void test_SD(void) {
 
 
 void test_s_create(void) {
-  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5};
-  uint8_t memory[MEMORY_BYTES] = {};
-  for (uint32_t i = 0; i < MEMORY_BYTES; i++) {
-    memory[i] = i;
-  }
+  // EASY: 1000 is within the signed 12-bit S-immediate range.
+  uint32_t s_instruction_1 = create_s_type(1000, 6, 7, SB, STORE);
+  // imm[11:5]=0011111, rs2=00110, rs1=00111, funct3=000, imm[4:0]=01000
+  TEST_ASSERT_EQUAL(0b00111110011000111000010000100011, s_instruction_1);
 
-  // EASY
-  uint32_t s_instruction_1 = create_s_type(3000, 6, 7, SB, STORE);
-  // should be imme_11_5(1011 101)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 1100 0)(010 0011 opcode)
-  TEST_ASSERT_EQUAL((uint32_t)0b10111010011000111000110000100011, s_instruction_1);
-  /* print_bits(s_instruction_1); */
-
-  // negative immediate
+  // NEGATIVE IMMEDIATE
   uint32_t s_instruction_2 = create_s_type(-1, 6, 7, SB, STORE);
   // should be imme_11_5(1111 111)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 1111 1)(010 0011 opcode)
-  TEST_ASSERT_EQUAL((uint32_t) 0b11111110011000111000111110100011, s_instruction_2);
+  TEST_ASSERT_EQUAL(0b11111110011000111000111110100011, s_instruction_2);
+
+  /* // NEGATIVE IMMEDIATE BOUNDARY */
+  /* uint32_t s_instruction_3 = create_s_type(-1, 6, 7, SB, STORE); */
+  /* // should be imme_11_5(1111 111)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 1111 1)(010 0011 opcode) */
+  /* TEST_ASSERT_EQUAL(0b11111110011000111000111110100011, s_instruction_2); */
 }
 
-void test_get_s_immediate(void) {
-  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5};
-  uint8_t memory[MEMORY_BYTES] = {};
-  for (uint32_t i = 0; i < MEMORY_BYTES; i++) {
-    memory[i] = i;
-  }
 
+void test_get_s_immediate(void) {
   // EASY
   uint32_t s_instruction_1 = create_s_type(1000, 6, 7, SB, STORE);
   TEST_ASSERT_EQUAL(1000, get_s_immediate(s_instruction_1));
-  /* print_bits(s_instruction_1); */
 
-  // negative immediate
+  // NEGATIVE IMMEDIATE
   uint32_t s_instruction_2 = create_s_type(-1, 6, 7, SB, STORE);
   TEST_ASSERT_EQUAL(-1, get_s_immediate(s_instruction_2));
 }
