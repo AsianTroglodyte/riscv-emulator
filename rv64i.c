@@ -64,12 +64,9 @@ void run_instruction(uint32_t instruction,
     rd = get_rd_index(instruction);
     funct3 = get_funct3(instruction);
 
-    value = registers[rs1] + immediate;
-    printf("OP_IMM\n");
     switch (funct3) {
     case ADDI:
-      printf("ADDI\n");
-      registers[rd] = value;
+      registers[rd] = registers[rs1] + immediate;
       break;
     case SLTI:
       printf("SLTI\n");
@@ -81,7 +78,7 @@ void run_instruction(uint32_t instruction,
       printf("ORI\n");
       break;
     case ANDI:
-      printf("ANDI\n");
+      registers[rd] = registers[rs1] & immediate;
       break;
     default:
       printf("funct3 %d does not correspond to any OP_IMM instruction.\b", funct3);
