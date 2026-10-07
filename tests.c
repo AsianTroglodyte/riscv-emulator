@@ -309,6 +309,36 @@ void test_andi(void){
   TEST_ASSERT_EQUAL(0b1000010, registers[0]);
 }
 
+void test_ori(void){
+  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 0, 5};
+  uint8_t memory[MEMORY_BYTES] = {};
+  for (int i = 0; i < NUM_REGISTERS; ++i) {
+    registers[i] = i;
+  }
+
+  // ORI SAME NUMBERS
+  // NOTE: the second argument is still register index (register values = its index)
+  uint32_t instruction_1 = create_i_type(0b1010, 0b1010, ORI, 0, OP_IMM);
+  run_instruction(instruction_1, memory, registers);
+  TEST_ASSERT_EQUAL(0b1010, registers[0]);
+
+  // ORI "filling in the gaps"
+  uint32_t instruction_2 = create_i_type(0b1010, 0b0101, ORI, 0, OP_IMM);
+  run_instruction(instruction_2, memory, registers);
+  TEST_ASSERT_EQUAL(0b1111, registers[0]);
+
+  // ORI WITH NEGATIVE
+  uint32_t instruction_3 = create_i_type(-1, 0, ORI, 0, OP_IMM);;
+  run_instruction(instruction_3, memory, registers);
+  TEST_ASSERT_EQUAL(-1, registers[0]);
+
+  // ORI MIXED
+  registers[1] = 0b1100010;
+  uint32_t instruction_4 = create_i_type(0b1001010, 1, ORI, 0, OP_IMM);;
+  run_instruction(instruction_4, memory, registers);
+  TEST_ASSERT_EQUAL(0b1101010, registers[0]);
+}
+
 void test_s_create(void) {
   // EASY: 1000 is within the signed 12-bit S-immediate range.
   uint32_t s_instruction_1 = create_s_type(1000, 6, 7, SB, STORE);
@@ -369,6 +399,7 @@ int main(void) {
   RUN_TEST(test_get_s_immediate);
   RUN_TEST(test_addi);
   RUN_TEST(test_andi);
+  RUN_TEST(test_ori);
 
   UNITY_END();
 }

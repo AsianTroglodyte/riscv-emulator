@@ -75,7 +75,7 @@ void run_instruction(uint32_t instruction,
       printf("SLTIU\n");
       break;
     case ORI:
-      printf("ORI\n");
+      registers[rd] = registers[rs1] | immediate;
       break;
     case ANDI:
       registers[rd] = registers[rs1] & immediate;
