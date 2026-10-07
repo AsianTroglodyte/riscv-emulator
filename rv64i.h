@@ -61,6 +61,15 @@ enum load_funct3_enums: uint32_t {
   LHU=        0b101
 };
 
+enum op_imm_enums: uint32_t {
+  ADDI=         0b000,
+  SLTI=         0b010,
+  SLTIU=        0b011,
+  XORI=         0b100,
+  ORI=          0b110,
+  ANDI=         0b111
+};
+
 enum store_funct3_enums: uint32_t {
   SB=         0b000,
   SH=         0b001,
@@ -96,9 +105,9 @@ uint32_t create_s_type(uint32_t immediate,
 
 // EXTRACT DATA FROM INSTRUCTION
 int get_opcode(uint32_t instruction);
-uint32_t get_rs1(uint32_t instruction);
-uint32_t get_rs2(uint32_t instruction);
-uint32_t get_rd(uint32_t instruction);
+uint32_t get_rs1_index(uint32_t instruction);
+uint32_t get_rs2_index(uint32_t instruction);
+uint32_t get_rd_index(uint32_t instruction);
 uint32_t get_funct3(uint32_t instruction);
 uint32_t get_funct7(uint32_t instruction);
 int32_t get_i_immediate(uint32_t instruction);

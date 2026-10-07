@@ -14,13 +14,14 @@ void run_instruction(uint32_t instruction,
     uint32_t rs2;
     uint32_t rd;
     uint32_t funct3;
+    uint64_t value;
 
     uint32_t address;
   case LOAD:
     // I Type
     immediate = get_i_immediate(instruction);
-    rs1 = get_rs1(instruction);
-    rd =  get_rd(instruction);
+    rs1 = get_rs1_index(instruction);
+    rd =  get_rd_index(instruction);
     funct3 = get_funct3(instruction);
 
     address = registers[rs1] + immediate;
@@ -32,9 +33,6 @@ void run_instruction(uint32_t instruction,
       registers[rd] = (int16_t) get_half_word(memory, address);
       break;
     case LW:
-      /* printf("registers[rsq]: %" PRIu64 "\n", registers[rs1]); */
-      /* printf("i_immediate: %" PRIi32 "\n", i_immediate); */
-      /* printf("address: %" PRIu32 "\n", address); */
       registers[rd] = (int32_t) get_word(memory, address);
       break;
     case LBU:
@@ -61,19 +59,46 @@ void run_instruction(uint32_t instruction,
   case OP_IMM:
     // Integer Register-Immediate Instructions
     // I-Type
+    immediate = get_i_immediate(instruction);
+    rs1 = get_rs1_index(instruction);
+    rd = get_rd_index(instruction);
+    funct3 = get_funct3(instruction);
+
+    value = registers[rs1] + immediate;
     printf("OP_IMM\n");
+    switch (funct3) {
+    case ADDI:
+      printf("ADDI\n");
+      registers[rd] = value;
+      break;
+    case SLTI:
+      printf("SLTI\n");
+      break;
+    case SLTIU:
+      printf("SLTIU\n");
+      break;
+    case ORI:
+      printf("ORI\n");
+      break;
+    case ANDI:
+      printf("ANDI\n");
+      break;
+    default:
+      printf("funct3 %d does not correspond to any OP_IMM instruction.\b", funct3);
+      assert(0);
+    }
     break;
   case AUIPC:
     printf("AUIPC\n");
     break;
 
   case OP_IMM_32:
-    printf("OP_IMM_32\n");
+    printf("OP_IMM_32");
     break;
   case STORE:
     immediate = get_s_immediate(instruction);
-    rs1 = get_rs1(instruction);
-    rs2 =  get_rs2(instruction);
+    rs1 = get_rs1_index(instruction);
+    rs2 =  get_rs2_index(instruction);
     funct3 = get_funct3(instruction);
 
     address = registers[rs1] + immediate;
@@ -175,15 +200,15 @@ static inline uint32_t bits(uint32_t instruction, int start, int end) {
   return (instruction >> start) & ((1u << length) - 1);
 }
 
-uint32_t get_rd(uint32_t instruction) {
+uint32_t get_rd_index(uint32_t instruction) {
   return bits(instruction, 7, 11);
 }
 
-uint32_t get_rs1(uint32_t instruction) {
+uint32_t get_rs1_index(uint32_t instruction) {
   return bits(instruction, 15, 19);
 }
 
-uint32_t get_rs2(uint32_t instruction) {
+uint32_t get_rs2_index(uint32_t instruction) {
   return bits(instruction, 20, 24);
 }
 

@@ -256,6 +256,30 @@ void test_SD(void) {
   TEST_ASSERT_EQUAL_UINT64(5, get_double_word(memory, 8));
 }
 
+void test_addi(void){
+  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 0, 5};
+  uint8_t memory[MEMORY_BYTES] = {};
+  for (int i = 0; i < NUM_REGISTERS; ++i) {
+    registers[i] = i;
+  }
+
+  // ADD POSITIVE IMMEDIATE
+  uint32_t instruction_1 = create_i_type(10, 10, ADDI, 0, OP_IMM);
+  run_instruction(instruction_1, memory, registers);
+  TEST_ASSERT_EQUAL(20, registers[0]);
+
+  // ADD NEGATIVE IMMEDIATE
+  uint32_t instruction_2 = create_i_type(-10, 10, ADDI, 0, OP_IMM);
+  run_instruction(instruction_2, memory, registers);
+  TEST_ASSERT_EQUAL(0, registers[0]);
+  print_registers(registers);
+
+  // ADD NEGATIVE SUM
+  uint32_t instruction_3 = create_i_type(-100, 10, ADDI, 0, OP_IMM);
+  run_instruction(instruction_3, memory, registers);
+  TEST_ASSERT_EQUAL(-90, registers[0]);
+  print_registers(registers);
+}
 
 void test_s_create(void) {
   // EASY: 1000 is within the signed 12-bit S-immediate range.
@@ -315,6 +339,7 @@ int main(void) {
   RUN_TEST(test_SD);
   RUN_TEST(test_s_create);
   RUN_TEST(test_get_s_immediate);
+  RUN_TEST(test_addi);
 
   UNITY_END();
 }
