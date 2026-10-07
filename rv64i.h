@@ -93,15 +93,15 @@ void print_bits(const unsigned int num);
 void print_8_bits(const uint8_t num);
 
 uint32_t create_i_type(uint32_t immediate,
-                       uint32_t rs1,
-                       uint32_t funct3,
-                       uint32_t rd,
-                       uint32_t opcode);
+                       int32_t rs1,
+                       int32_t funct3,
+                       int32_t rd,
+                       int32_t opcode);
 uint32_t create_s_type(uint32_t immediate,
-                       uint32_t rs1,
-                       uint32_t rs2,
-                       uint32_t funct3,
-                       uint32_t opcode);
+                       int32_t rs1,
+                       int32_t rs2,
+                       int32_t funct3,
+                       int32_t opcode);
 
 // EXTRACT DATA FROM INSTRUCTION
 int get_opcode(uint32_t instruction);

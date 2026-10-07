@@ -379,30 +379,53 @@ void write_byte(uint8_t memory[], uint32_t address, uint64_t value) {
   memory[address ] = value;
 }
 
+
+static void assert_valid_opcode(int32_t opcode) {
+  assert((opcode >= 0 && opcode <= 0b1111111 )
+         && "opcode must be a within 0-127");
+}
+static void assert_valid_register(int32_t rs1_index) {
+  assert((rs1_index >= 0 && rs1_index < NUM_REGISTERS )
+         && "rs1_index must be a valid register index");
+}
+
+static void assert_valid_funct3(int32_t funct3) {
+    assert((funct3 >= 0 && funct3 <= 0b111 )
+         && "funct3 code must be within 0-7");
+}
+
 // INSTRUCTION CREATION FILE
 uint32_t create_i_type(uint32_t immediate,
-                       uint32_t rs1,
-                       uint32_t funct3,
-                       uint32_t rd,
-                       uint32_t opcode) {
+                       int32_t rs1_index,
+                       int32_t funct3,
+                       int32_t rd_index,
+                       int32_t opcode) {
+  assert_valid_register(rs1_index);
+  assert_valid_funct3(funct3);
+  assert_valid_register(rd_index);
+  assert_valid_opcode(opcode);
+
   immediate = immediate << 20;
-  rs1 = rs1 << 15;
+  rs1_index = rs1_index << 15;
   funct3 = funct3 << 12;
-  rd = rd << 7;
-  return (uint32_t) immediate | rs1 | funct3 | rd | opcode;
+  rd_index = rd_index << 7;
+  return (uint32_t) immediate | rs1_index | funct3 | rd_index | opcode;
 }
 
 uint32_t create_s_type(uint32_t immediate,
-                       uint32_t rs2,
-                       uint32_t rs1,
-                       uint32_t funct3,
-                       uint32_t opcode) {
-
+                       int32_t rs2_index,
+                       int32_t rs1_index,
+                       int32_t funct3,
+                       int32_t opcode) {
+  assert_valid_register(rs2_index);
+  assert_valid_register(rs1_index);
+  assert_valid_funct3(funct3);
+  assert_valid_opcode(opcode);
 
   uint32_t immediate_4_0 = bits(immediate, 0, 4) << 7;
   uint32_t immediate_11_5 = bits(immediate, 5, 11) << 25;
-  rs2 = rs2 << 20;
-  rs1 = rs1 << 15;
+  rs2_index = rs2_index << 20;
+  rs1_index = rs1_index << 15;
   funct3 = funct3 << 12;
-  return (uint32_t) immediate_11_5 | rs2 | rs1 | funct3 | immediate_4_0 | opcode;
+  return (uint32_t) immediate_11_5 | rs2_index | rs1_index | funct3 | immediate_4_0 | opcode;
 }
