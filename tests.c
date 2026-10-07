@@ -339,6 +339,36 @@ void test_ori(void){
   TEST_ASSERT_EQUAL(0b1101010, registers[0]);
 }
 
+void test_slti(void){
+  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 0, 5};
+  uint8_t memory[MEMORY_BYTES] = {};
+  for (int i = 0; i < NUM_REGISTERS; ++i) {
+    registers[i] = i;
+  }
+
+  // SLTI 1 < 9 LESS THAN
+  // NOTE: the second argument is still register index (register values = its index)
+  uint32_t instruction_1 = create_i_type(9, 1, SLTI, 0, OP_IMM);
+  run_instruction(instruction_1, memory, registers);
+  TEST_ASSERT_EQUAL(1, registers[0]);
+
+  /* // SLTI 9 < 1 NOT LESS THAN */
+  uint32_t instruction_2 = create_i_type(1, 9, SLTI, 0, OP_IMM);
+  run_instruction(instruction_2, memory, registers);
+  TEST_ASSERT_EQUAL(0, registers[0]);
+
+  /* // SLTI 2 < 2 EQUAL */
+  uint32_t instruction_3 = create_i_type(2, 2, SLTI, 0, OP_IMM);
+  run_instruction(instruction_3, memory, registers);
+  TEST_ASSERT_EQUAL(0, registers[0]);
+
+  // SLTI -10 < -9 NEGATIVE NUMS; LESS THAN
+  registers[4] = -10;
+  uint32_t instruction_4 = create_i_type(-9, 4, SLTI, 0, OP_IMM);
+  run_instruction(instruction_4, memory, registers);
+  TEST_ASSERT_EQUAL(1, registers[0]);
+}
+
 void test_s_create(void) {
   // EASY: 1000 is within the signed 12-bit S-immediate range.
   uint32_t s_instruction_1 = create_s_type(1000, 6, 7, SB, STORE);
@@ -400,6 +430,7 @@ int main(void) {
   RUN_TEST(test_addi);
   RUN_TEST(test_andi);
   RUN_TEST(test_ori);
+  RUN_TEST(test_slti);
 
   UNITY_END();
 }
