@@ -83,25 +83,27 @@ void run_instruction(uint32_t instruction,
       registers[rd] = registers[rs1] & immediate;
       break;
     case SLLI:
-      shamt = bits(immediate, 0, 4);
+      shamt = bits(immediate, 0, 5);
       registers[rd] = registers[rs1] << shamt;
       break;
     case SRLIorSRAI:
-      shamt = bits(immediate, 0, 4);
-      immediate_11_5 = bits(immediate, 5, 11);
+      shamt = bits(immediate, 0, 5);
+      immediate_11_5 = bits(immediate, 6, 11);
       switch (immediate_11_5) {
       case SRLI_IMM:
-        printf("SRLI_IMM");
+        registers[rd] = registers[rs1] >> shamt;
         break;
       case SRAI_IMM:
         printf("SRAI_IMM");
         break;
       default:
-        printf("funct3 %d and imm_11_5 does not correspond to any OP_IMM instruction.\b", funct3);
+        print_bits(instruction);
+        printf("funct3 %d and imm_11_5 %d does not correspond to any OP_IMM instruction.\n",
+               funct3, immediate_11_5);
       }
       break;
     default:
-      printf("funct3 %d does not correspond to any OP_IMM instruction.\b", funct3);
+      printf("funct3 %d does not correspond to any OP_IMM instruction.\n", funct3);
       assert(0);
     }
 

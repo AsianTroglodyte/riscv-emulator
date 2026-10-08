@@ -70,8 +70,8 @@ enum op_imm_enums: uint32_t {
   ANDI=         0b111,
   SLLI=         0b001,
   SRLIorSRAI=   0b101,
-  SRLI_IMM=     0b0000000,
-  SRAI_IMM=     0b0100000,
+  SRLI_IMM=     0b000000,
+  SRAI_IMM=     0b010000,
 };
 
 enum store_funct3_enums: uint32_t {

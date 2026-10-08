@@ -351,8 +351,6 @@ void test_slli(void) {
       {3, 6, 192},                    //  3 * 2^6 = 192
       {-2, 3, -16},                   // -2 * 2 * 2 * 2 = 16
       {1, 31, INT64_C(1) << 31}, // 0 < UINT64_MAX
-      /* {UINT64_MAX, -1, 0},         // UINT64_MAX is not less than itself */
-      /* {UINT64_MAX - 1, -1, 1},     // UINT64_MAX - 1 < UINT64_MAX */
   };
 
   test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLLI, OP_IMM);
@@ -360,12 +358,20 @@ void test_slli(void) {
 
 void test_srli(void) {
   const struct i_instruction_case cases[] = {
-      {1, 9, 1},                  // 1 < 9
-      {9, 1, 0},                  // 9 is not less than 1
-      {2, 2, 0},                  // Equality is false
-      {0, -1, 1},                 // 0 < UINT64_MAX
-      {UINT64_MAX, -1, 0},        // UINT64_MAX is not less than itself
-      {UINT64_MAX - 1, -1, 1},    // UINT64_MAX - 1 < UINT64_MAX
+      // Ordinary right shifts.
+      // {value_shifted, (funct) | shift amount (shamt), result}
+      {18, (SRLI_IMM << 5) | 1, 9},
+      {192, (SRLI_IMM << 5) | 6, 3},
+
+      // Logical shifts fill vacated high bits with zero, even when the
+      // source's most significant bit is set.
+      {UINT64_C(0x8000000000000000), (SRLI_IMM << 5) | 1,
+       UINT64_C(0x4000000000000000)},
+      {UINT64_MAX, (SRLI_IMM << 5) | 31, UINT64_C(0x00000001FFFFFFFF)},
+
+      // Boundary shift amounts and bits shifted entirely out.
+      {UINT64_C(0x8000000000000000), (SRLI_IMM << 5) | 63, 1},
+      {1, (SRLI_IMM << 5) | 1, 0},
   };
 
   test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SRLIorSRAI, OP_IMM);
@@ -448,6 +454,7 @@ int main(void) {
   RUN_TEST(test_slti);
   RUN_TEST(test_sltiu);
   RUN_TEST(test_slli);
+  RUN_TEST(test_srli);
 
   UNITY_END();
 }
