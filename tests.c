@@ -1,6 +1,7 @@
 #include "unity/src/unity.h"
 #include "rv64i.h"
 #include <inttypes.h>
+#include <stddef.h>
 
 void setUp(void) {}
 
@@ -12,23 +13,35 @@ struct i_instruction_case {
   uint64_t expected;
 };
 
-void test_i_instruction(const struct i_instruction_case cases[],
-                        size_t case_count,
-                        uint32_t funct3,
-                        uint32_t opcode) {
+// Each case supplies rs1's value, the immediate, and the expected rd value.
+static void test_i_instruction(const struct i_instruction_case cases[],
+                               size_t case_count,
+                               uint32_t funct3,
+                               uint32_t opcode) {
+  const uint32_t rs1_index = 1;
+  const uint32_t rd_index = 10;
 
   for (size_t i = 0; i < case_count; ++i) {
     uint64_t registers[NUM_REGISTERS] = {0};
     uint8_t memory[MEMORY_BYTES] = {0};
-    const uint32_t rs1_index = 1;
-    const uint32_t rd_index = 10;
-
     registers[rs1_index] = cases[i].rs1_value;
 
-    uint32_t instruction = create_i_type(cases[i].immediate, rs1_index, funct3, rd_index, opcode);
-
+    uint32_t instruction = create_i_type(cases[i].immediate,
+                                         rs1_index,
+                                         funct3,
+                                         rd_index,
+                                         opcode);
     run_instruction(instruction, memory, registers);
     TEST_ASSERT_EQUAL_UINT64(cases[i].expected, registers[rd_index]);
+  }
+}
+
+static void put_test_bytes(uint8_t memory[],
+                           uint32_t address,
+                           uint64_t value,
+                           size_t byte_count) {
+  for (size_t i = 0; i < byte_count; ++i) {
+    memory[address + i] = (uint8_t)(value >> (i * 8));
   }
 }
 
@@ -270,12 +283,12 @@ void test_SD(void) {
   run_instruction(instruction, memory, registers);
   TEST_ASSERT_EQUAL_UINT64(UINT64_MAX - 9, get_double_word(memory, 8));
 
-  /* /\* // TEST WITH POSITIVE *\/ */
+  // TEST WITH POSITIVE
   registers[10] = 5;
   run_instruction(instruction, memory, registers);
   TEST_ASSERT_EQUAL_UINT64(5, get_double_word(memory, 8));
 
-  /* /\* // TEST WITH NEGATIVE IMMEDIATE *\/ */
+  // TEST WITH NEGATIVE IMMEDIATE
   registers[4] = 16;
   registers[10] = 5;
   uint32_t instruction_2 = create_s_type(-8, 10, 4, SD, STORE);
@@ -283,117 +296,64 @@ void test_SD(void) {
   TEST_ASSERT_EQUAL_UINT64(5, get_double_word(memory, 8));
 }
 
-void test_addi(void){
-  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 0, 5};
-  uint8_t memory[MEMORY_BYTES] = {};
-  for (int i = 0; i < NUM_REGISTERS; ++i) {
-    registers[i] = i;
-  }
 
-  // ADD POSITIVE IMMEDIATE
-  uint32_t instruction_1 = create_i_type(10, 10, ADDI, 0, OP_IMM);
-  run_instruction(instruction_1, memory, registers);
-  TEST_ASSERT_EQUAL(20, registers[0]);
+void test_addi(void) {
+  const struct i_instruction_case cases[] = {
+      {10, 10, 20},             // Positive immediate
+      {10, -10, 0},             // Negative immediate cancels rs1
+      {10, -100, (uint64_t)-90}, // Result wraps to a negative 64-bit value
+  };
 
-  // ADD NEGATIVE IMMEDIATE
-  uint32_t instruction_2 = create_i_type(-10, 10, ADDI, 0, OP_IMM);
-  run_instruction(instruction_2, memory, registers);
-  TEST_ASSERT_EQUAL(0, registers[0]);
-
-  // ADD NEGATIVE SUM
-  uint32_t instruction_3 = create_i_type(-100, 10, ADDI, 0, OP_IMM);
-  run_instruction(instruction_3, memory, registers);
-  TEST_ASSERT_EQUAL(-90, registers[0]);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ADDI, OP_IMM);
 }
 
-void test_andi(void){
-  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 0, 5};
-  uint8_t memory[MEMORY_BYTES] = {};
-  for (int i = 0; i < NUM_REGISTERS; ++i) {
-    registers[i] = i;
-  }
+void test_andi(void) {
+  const struct i_instruction_case cases[] = {
+      {0b1010, 0b1010, 0b1010},             // Identical bit patterns
+      {0b0101, 0b1010, 0},                  // No overlapping set bits
+      {0, -1, 0},                            // Zero AND sign-extended -1
+      {0b1100010, 0b1000010, 0b1000010},    // Keep only shared set bits
+  };
 
-  // ANDI SAME NUMBERS
-  // NOTE: the second argument is still register index (register values = its index)
-  uint32_t instruction_1 = create_i_type(0b1010, 0b1010, ANDI, 0, OP_IMM);
-  run_instruction(instruction_1, memory, registers);
-  TEST_ASSERT_EQUAL(10, registers[0]);
-
-  // ANDI = 0
-  uint32_t instruction_2 = create_i_type(0b1010, 0b0101, ANDI, 0, OP_IMM);
-  run_instruction(instruction_2, memory, registers);
-  TEST_ASSERT_EQUAL(0, registers[0]);
-
-  // ANDI WITH NEGATIVE
-  uint32_t instruction_3 = create_i_type(-1, 0, ANDI, 0, OP_IMM);;
-  run_instruction(instruction_3, memory, registers);
-  TEST_ASSERT_EQUAL(0, registers[0]);
-
-  // ANDI MIXED RESULT
-  registers[1] = 0b1100010;
-  uint32_t instruction_4 = create_i_type(0b1000010, 1, ANDI, 0, OP_IMM);;
-  run_instruction(instruction_4, memory, registers);
-  TEST_ASSERT_EQUAL(0b1000010, registers[0]);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ANDI, OP_IMM);
 }
 
-void test_ori(void){
-  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 0, 5};
-  uint8_t memory[MEMORY_BYTES] = {};
-  for (int i = 0; i < NUM_REGISTERS; ++i) {
-    registers[i] = i;
-  }
+void test_ori(void) {
+  const struct i_instruction_case cases[] = {
+      {0b1010, 0b1010, 0b1010},             // Identical bit patterns
+      {0b1010, 0b0101, 0b1111},             // Fill in the unset bits
+      {0, -1, UINT64_MAX},                   // Sign-extended immediate sets all bits
+      {0b1100010, 0b1001010, 0b1101010},     // Combine set bits from both operands
+  };
 
-  // ORI SAME NUMBERS
-  // NOTE: the second argument is still register index (register values = its index)
-  uint32_t instruction_1 = create_i_type(0b1010, 0b1010, ORI, 0, OP_IMM);
-  run_instruction(instruction_1, memory, registers);
-  TEST_ASSERT_EQUAL(0b1010, registers[0]);
-
-  // ORI "filling in the gaps"
-  uint32_t instruction_2 = create_i_type(0b1010, 0b0101, ORI, 0, OP_IMM);
-  run_instruction(instruction_2, memory, registers);
-  TEST_ASSERT_EQUAL(0b1111, registers[0]);
-
-  // ORI WITH NEGATIVE
-  uint32_t instruction_3 = create_i_type(-1, 0, ORI, 0, OP_IMM);;
-  run_instruction(instruction_3, memory, registers);
-  TEST_ASSERT_EQUAL(-1, registers[0]);
-
-  // ORI MIXED
-  registers[1] = 0b1100010;
-  uint32_t instruction_4 = create_i_type(0b1001010, 1, ORI, 0, OP_IMM);;
-  run_instruction(instruction_4, memory, registers);
-  TEST_ASSERT_EQUAL(0b1101010, registers[0]);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ORI, OP_IMM);
 }
 
-void test_slti(void){
-  struct i_instruction_case cases[] = {
-    {1, 9, 1}, // 1 < 9 is true
-    {9, 1, 0}, // 9 < 1 is false
-    {2, 2, 0}, // Equality is false
-    // imme sign extended to UINT64_MAX
-    // 0 < UINT64_MAX true for unsigned comparison
-    {0, -1, 0},
-    {UINT64_MAX, -1, 0}, // UINT64_MAX < UINT64_MAX not less than UINT64_MAX
-    {UINT64_MAX - 1, -1, 1}, // UINT64_MAX - 1 < UINT64_MAX not less than UINT64_MAX
-   };
+void test_slti(void) {
+  const struct i_instruction_case cases[] = {
+      {1, 9, 1},
+      {9, 1, 0},
+      {2, 2, 0},
+      {0, -1, 0},
+      {UINT64_MAX, -1, 0},
+      {UINT64_MAX - 1, -1, 1},
+      {(uint64_t)-10, -9, 1},
+  };
 
-  test_i_instruction(cases, sizeof(cases) /sizeof(cases[0]), SLTI, OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLTI, OP_IMM);
 }
 
-void test_sltiu(void){
-   struct i_instruction_case cases[] = {
-    {1, 9, 1}, // 1 < 9 is true
-    {9, 1, 0}, // 9 < 1 is false
-    {2, 2, 0}, // Equality is false
-    // imme sign extended to UINT64_MAX
-    // 0 < UINT64_MAX true for unsigned comparison
-    {0, -1, 1},
-    {UINT64_MAX, -1, 0}, // UINT64_MAX < UINT64_MAX not less than UINT64_MAX
-    {UINT64_MAX - 1, -1, 1}, // UINT64_MAX - 1 < UINT64_MAX not less than UINT64_MAX
-   };
+void test_sltiu(void) {
+  const struct i_instruction_case cases[] = {
+      {1, 9, 1},                  // 1 < 9
+      {9, 1, 0},                  // 9 is not less than 1
+      {2, 2, 0},                  // Equality is false
+      {0, -1, 1},                 // 0 < UINT64_MAX
+      {UINT64_MAX, -1, 0},        // UINT64_MAX is not less than itself
+      {UINT64_MAX - 1, -1, 1},    // UINT64_MAX - 1 < UINT64_MAX
+  };
 
-   test_i_instruction(cases, sizeof(cases) /sizeof(cases[0]), SLTIU, OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLTIU, OP_IMM);
 }
 
 void test_s_create(void) {
