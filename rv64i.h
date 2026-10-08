@@ -67,7 +67,11 @@ enum op_imm_enums: uint32_t {
   SLTIU=        0b011,
   XORI=         0b100,
   ORI=          0b110,
-  ANDI=         0b111
+  ANDI=         0b111,
+  SLLI=         0b001,
+  SRLIorSRAI=   0b101,
+  SRLI_IMM=     0b0000000,
+  SRAI_IMM=     0b0100000,
 };
 
 enum store_funct3_enums: uint32_t {
@@ -102,6 +106,8 @@ uint32_t create_s_type(uint32_t immediate,
                        int32_t rs2,
                        int32_t funct3,
                        int32_t opcode);
+
+uint32_t bits(uint32_t instruction, int start, int end);
 
 // EXTRACT DATA FROM INSTRUCTION
 int get_opcode(uint32_t instruction);

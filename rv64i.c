@@ -65,6 +65,8 @@ void run_instruction(uint32_t instruction,
     funct3 = get_funct3(instruction);
 
     switch (funct3) {
+      uint32_t shamt;
+      uint32_t immediate_11_5;
     case ADDI:
       registers[rd] = registers[rs1] + immediate;
       break;
@@ -80,9 +82,31 @@ void run_instruction(uint32_t instruction,
     case ANDI:
       registers[rd] = registers[rs1] & immediate;
       break;
+    case SLLI:
+      shamt = bits(immediate, 0, 4);
+      registers[rd] = registers[rs1] << shamt;
+      break;
+    case SRLIorSRAI:
+      shamt = bits(immediate, 0, 4);
+      immediate_11_5 = bits(immediate, 5, 11);
+      switch (immediate_11_5) {
+      case SRLI_IMM:
+        printf("SRLI_IMM");
+        break;
+      case SRAI_IMM:
+        printf("SRAI_IMM");
+        break;
+      default:
+        printf("funct3 %d and imm_11_5 does not correspond to any OP_IMM instruction.\b", funct3);
+      }
+      break;
     default:
       printf("funct3 %d does not correspond to any OP_IMM instruction.\b", funct3);
       assert(0);
+    }
+
+    switch (funct3) {
+
     }
     break;
   case AUIPC:
@@ -192,7 +216,7 @@ void run_instruction(uint32_t instruction,
  * @param the length of slice
  * @return uint32_t bit slice shifted so start is beginning digit.
  **/
-static inline uint32_t bits(uint32_t instruction, int start, int end) {
+inline uint32_t bits(uint32_t instruction, int start, int end) {
   int length = end - start + 1;
   return (instruction >> start) & ((1u << length) - 1);
 }
