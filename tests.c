@@ -6,6 +6,33 @@ void setUp(void) {}
 
 void tearDown(void) {}
 
+struct i_instruction_case {
+  uint64_t rs1_value;
+  int32_t immediate;
+  uint64_t expected;
+};
+
+void test_i_instruction(const struct i_instruction_case cases[],
+                        size_t case_count,
+                        uint32_t funct3,
+                        uint32_t opcode) {
+
+  for (size_t i = 0; i < case_count; ++i) {
+    uint64_t registers[NUM_REGISTERS] = {0};
+    uint8_t memory[MEMORY_BYTES] = {0};
+    const uint32_t rs1_index = 1;
+    const uint32_t rd_index = 10;
+
+    registers[rs1_index] = cases[i].rs1_value;
+
+    uint32_t instruction = create_i_type(cases[i].immediate, rs1_index, funct3, rd_index, opcode);
+
+    run_instruction(instruction, memory, registers);
+    TEST_ASSERT_EQUAL_UINT64(cases[i].expected, registers[rd_index]);
+  }
+}
+
+
 void test_LW(void) {
   uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5};
   uint8_t memory[MEMORY_BYTES] = {};
@@ -340,33 +367,33 @@ void test_ori(void){
 }
 
 void test_slti(void){
-  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 0, 5};
-  uint8_t memory[MEMORY_BYTES] = {};
-  for (int i = 0; i < NUM_REGISTERS; ++i) {
-    registers[i] = i;
-  }
+  struct i_instruction_case cases[] = {
+    {1, 9, 1}, // 1 < 9 is true
+    {9, 1, 0}, // 9 < 1 is false
+    {2, 2, 0}, // Equality is false
+    // imme sign extended to UINT64_MAX
+    // 0 < UINT64_MAX true for unsigned comparison
+    {0, -1, 0},
+    {UINT64_MAX, -1, 0}, // UINT64_MAX < UINT64_MAX not less than UINT64_MAX
+    {UINT64_MAX - 1, -1, 1}, // UINT64_MAX - 1 < UINT64_MAX not less than UINT64_MAX
+   };
 
-  // SLTI 1 < 9 LESS THAN
-  // NOTE: the second argument is still register index (register values = its index)
-  uint32_t instruction_1 = create_i_type(9, 1, SLTI, 0, OP_IMM);
-  run_instruction(instruction_1, memory, registers);
-  TEST_ASSERT_EQUAL(1, registers[0]);
+  test_i_instruction(cases, sizeof(cases) /sizeof(cases[0]), SLTI, OP_IMM);
+}
 
-  /* // SLTI 9 < 1 NOT LESS THAN */
-  uint32_t instruction_2 = create_i_type(1, 9, SLTI, 0, OP_IMM);
-  run_instruction(instruction_2, memory, registers);
-  TEST_ASSERT_EQUAL(0, registers[0]);
+void test_sltiu(void){
+   struct i_instruction_case cases[] = {
+    {1, 9, 1}, // 1 < 9 is true
+    {9, 1, 0}, // 9 < 1 is false
+    {2, 2, 0}, // Equality is false
+    // imme sign extended to UINT64_MAX
+    // 0 < UINT64_MAX true for unsigned comparison
+    {0, -1, 1},
+    {UINT64_MAX, -1, 0}, // UINT64_MAX < UINT64_MAX not less than UINT64_MAX
+    {UINT64_MAX - 1, -1, 1}, // UINT64_MAX - 1 < UINT64_MAX not less than UINT64_MAX
+   };
 
-  /* // SLTI 2 < 2 EQUAL */
-  uint32_t instruction_3 = create_i_type(2, 2, SLTI, 0, OP_IMM);
-  run_instruction(instruction_3, memory, registers);
-  TEST_ASSERT_EQUAL(0, registers[0]);
-
-  // SLTI -10 < -9 NEGATIVE NUMS; LESS THAN
-  registers[4] = -10;
-  uint32_t instruction_4 = create_i_type(-9, 4, SLTI, 0, OP_IMM);
-  run_instruction(instruction_4, memory, registers);
-  TEST_ASSERT_EQUAL(1, registers[0]);
+   test_i_instruction(cases, sizeof(cases) /sizeof(cases[0]), SLTIU, OP_IMM);
 }
 
 void test_s_create(void) {
@@ -431,6 +458,7 @@ int main(void) {
   RUN_TEST(test_andi);
   RUN_TEST(test_ori);
   RUN_TEST(test_slti);
+  RUN_TEST(test_sltiu);
 
   UNITY_END();
 }

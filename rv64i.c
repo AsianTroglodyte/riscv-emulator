@@ -69,16 +69,10 @@ void run_instruction(uint32_t instruction,
       registers[rd] = registers[rs1] + immediate;
       break;
     case SLTI:
-      printf("instruction: ");
-      print_bits(instruction);
-      printf("immediate: ");
-      print_bits(immediate);
-      printf("register: %" PRIi64 "\n", registers[rs1]);
       registers[rd] = (int64_t) registers[rs1] < immediate;
       break;
     case SLTIU:
-      printf("SLTIU\n");
-      /* registers[rd] = registers[rs1] | immediate; */
+      registers[rd] = registers[rs1] < (uint64_t) immediate;
       break;
     case ORI:
       registers[rd] = registers[rs1] | immediate;
