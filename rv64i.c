@@ -160,6 +160,42 @@ void run_instruction(uint32_t instruction,
     printf("AMO\n");
     break;
   case OP:
+    uint32_t funct7_funct3 = (get_funct7(instruction) << 3) | get_funct3(instruction);
+    switch (funct7_funct3) {
+    case ADD:
+      printf("ADD");
+      break;
+    case SUB:
+      printf("SUB");
+      break;
+    case SLL:
+      printf("SLL");
+      break;
+    case SLT:
+      printf("SLT");
+      break;
+    case SLTU:
+      printf("SLTU");
+      break;
+    case XOR:
+      printf("XOR");
+      break;
+    case SRL:
+      printf("SRL");
+      break;
+    case SRA:
+      printf("SRA");
+      break;
+    case OR:
+      printf("OR");
+      break;
+    case AND:
+      printf("AND");
+      break;
+    default:
+      printf("funct7_funct3  %d does not correspond to any OP instruction.", funct7_funct3);
+      assert(0);
+    }
     printf("OP\n");
     break;
   case LUI:
@@ -455,4 +491,22 @@ uint32_t create_s_type(uint32_t immediate,
   rs1_index = rs1_index << 15;
   funct3 = funct3 << 12;
   return (uint32_t) immediate_11_5 | rs2_index | rs1_index | funct3 | immediate_4_0 | opcode;
+}
+
+uint32_t create_r_type(uint32_t funct7_funct3,
+                       int32_t rs2_index,
+                       int32_t rs1_index,
+                       int32_t rd_index,
+                       int32_t opcode) {
+  assert_valid_register(rs2_index);
+  assert_valid_register(rs1_index);
+  assert_valid_opcode(opcode);
+
+  uint32_t funct3 = funct7_funct3 & (UINT32_MAX << 3);
+  assert_valid_funct3(funct3);
+  uint32_t funct7 = funct7_funct3 >> 3;
+  rs2_index = rs2_index << 20;
+  rs1_index = rs1_index << 15;
+  rd_index = rd_index << 7;
+  return (uint32_t) funct7 | rs2_index | rs1_index | funct3 | rd_index | opcode;
 }

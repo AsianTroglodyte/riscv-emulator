@@ -74,6 +74,22 @@ enum op_imm_enums: uint32_t {
   SRAI_IMM=     0b010000,
 };
 
+
+// backing numbers are funct7 + funct3
+// sub_funct7 = 0100000; sub_func3 = 000
+enum op_enums: uint32_t {
+  ADD=         0b0000000000,
+  SUB=         0b0100000000,
+  SLL=         0b0000000001,
+  SLT=         0b0000000010,
+  SLTU=        0b0000000011,
+  XOR=         0b0000000100,
+  SRL=         0b0000000101,
+  SRA=         0b0100000101,
+  OR=          0b0000000110,
+  AND=         0b0000000111,
+};
+
 enum store_funct3_enums: uint32_t {
   SB=         0b000,
   SH=         0b001,
@@ -105,6 +121,11 @@ uint32_t create_s_type(uint32_t immediate,
                        int32_t rs1,
                        int32_t rs2,
                        int32_t funct3,
+                       int32_t opcode);
+uint32_t create_r_type(uint32_t funct7_funct3,
+                       int32_t rs2_index,
+                       int32_t rs1_index,
+                       int32_t rd_index,
                        int32_t opcode);
 
 uint32_t bits(uint32_t instruction, int start, int end);

@@ -389,6 +389,34 @@ void test_srai(void) {
   test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SRLIorSRAI, OP_IMM);
 }
 
+struct r_instruction_case {
+  uint64_t rs1_value;
+  int32_t rs2_value;
+  uint64_t expected;
+};
+
+/* static void test_r_instruction(const struct r_instruction_case cases[], */
+/*                                size_t case_count, */
+/*                                uint32_t funct3, */
+/*                                uint32_t opcode) { */
+/*   const uint32_t rs1_index = 1; */
+/*   const uint32_t rd_index = 10; */
+
+/*   for (size_t i = 0; i < case_count; ++i) { */
+/*     uint64_t registers[NUM_REGISTERS] = {0}; */
+/*     uint8_t memory[MEMORY_BYTES] = {0}; */
+/*     registers[rs1_index] = cases[i].rs1_value; */
+
+/*     uint32_t instruction = create_i_type(cases[i].immediate, */
+/*                                          rs1_index, */
+/*                                          funct3, */
+/*                                          rd_index, */
+/*                                          opcode); */
+/*     run_instruction(instruction, memory, registers); */
+/*     TEST_ASSERT_EQUAL_UINT64(cases[i].expected, registers[rd_index]); */
+/*   } */
+/* } */
+
 void test_s_create(void) {
   // EASY: 1000 is within the signed 12-bit S-immediate range.
   uint32_t s_instruction_1 = create_s_type(1000, 6, 7, SB, STORE);
@@ -409,6 +437,28 @@ void test_s_create(void) {
   uint32_t s_instruction_4 = create_s_type(2047, 6, 7, SB, STORE);
   // should be imme_11_5(0111 111)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 1111 1)(010 0011 opcode)
   TEST_ASSERT_EQUAL(0b01111110011000111000111110100011, s_instruction_4);
+}
+
+void test_r_create(void) {
+  // EASY: 1000 is within the signed 12-bit S-immediate range.
+  uint32_t r_instruction_1 = create_r_type(SUB, 6, 7, 0, OP);
+  // funct7=0b0100000 rs2=00110, rs1=00111, funct3=000, rd=00000, opcode=0110011
+  TEST_ASSERT_EQUAL(0b01000000011000111000000000110011, r_instruction_1);
+
+  /* // NEGATIVE IMMEDIATE */
+  /* uint32_t s_instruction_2 = create_s_type(-1, 6, 7, SB, STORE); */
+  /* // should be imme_11_5(1111 111)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 1111 1)(010 0011 opcode) */
+  /* TEST_ASSERT_EQUAL(0b11111110011000111000111110100011, s_instruction_2); */
+
+  // NEGATIVE IMMEDIATE BOUNDARY
+  /* uint32_t s_instruction_3 = create_s_type(-2048, 6, 7, SB, STORE); */
+  /* // should be imme_11_5(1000 000)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 0000 0)(010 0011 opcode) */
+  /* TEST_ASSERT_EQUAL(0b10000000011000111000000000100011, s_instruction_3); */
+
+  // POSITIVE IMMEDIATE BOUNDARY
+  /* uint32_t s_instruction_4 = create_s_type(2047, 6, 7, SB, STORE); */
+  /* // should be imme_11_5(0111 111)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 1111 1)(010 0011 opcode) */
+  /* TEST_ASSERT_EQUAL(0b01111110011000111000111110100011, s_instruction_4); */
 }
 
 
