@@ -94,7 +94,14 @@ void run_instruction(uint32_t instruction,
         registers[rd] = registers[rs1] >> shamt;
         break;
       case SRAI_IMM:
-        printf("SRAI_IMM");
+        /* print_bits(shamt); */
+        /* print_bits(registers[rs1]); */
+        /* print_bits(UINT64_MAX << (shamt - 1)); */
+        uint64_t result = registers[rs1] >> shamt;
+        if (registers[rs1] & UINT64_C(1) << 63) {
+          result |= (UINT64_MAX << (64 - shamt));
+        }
+        registers[rd] = result;
         break;
       default:
         print_bits(instruction);

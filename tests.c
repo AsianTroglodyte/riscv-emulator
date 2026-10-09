@@ -379,12 +379,11 @@ void test_srli(void) {
 
 void test_srai(void) {
   const struct i_instruction_case cases[] = {
-      {1, 9, 1},                  // 1 < 9
-      {9, 1, 0},                  // 9 is not less than 1
-      {2, 2, 0},                  // Equality is false
-      {0, -1, 1},                 // 0 < UINT64_MAX
-      {UINT64_MAX, -1, 0},        // UINT64_MAX is not less than itself
-      {UINT64_MAX - 1, -1, 1},    // UINT64_MAX - 1 < UINT64_MAX
+    {-8, (SRAI_IMM << 6) | 2, -2},   // ...1111 1000 >> 2 = ...1111 1110
+    {-15, (SRAI_IMM << 6) | 2, -4},  // ...1111 0001 >> 2 = ...1111 1100
+    {100, (SRAI_IMM << 6) | 4, 6},   // ...0110 0100 >> 4 = ...0000 0110
+    {UINT64_MAX, (SRAI_IMM << 6) | 63, UINT64_MAX}, // ...1111 >> 63 = ...1111
+    {100, (SRAI_IMM << 6) | 0, 100}, // ...0110 0100 >> 4 = ...0110 0100
   };
 
   test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SRLIorSRAI, OP_IMM);
@@ -455,6 +454,7 @@ int main(void) {
   RUN_TEST(test_sltiu);
   RUN_TEST(test_slli);
   RUN_TEST(test_srli);
+  RUN_TEST(test_srai);
 
   UNITY_END();
 }
