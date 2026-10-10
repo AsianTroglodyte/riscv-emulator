@@ -390,32 +390,54 @@ void test_srai(void) {
 }
 
 struct r_instruction_case {
-  uint64_t rs1_value;
-  int32_t rs2_value;
+  int64_t rs1_value;
+  int64_t rs2_value;
   uint64_t expected;
 };
 
-/* static void test_r_instruction(const struct r_instruction_case cases[], */
-/*                                size_t case_count, */
-/*                                uint32_t funct3, */
-/*                                uint32_t opcode) { */
-/*   const uint32_t rs1_index = 1; */
-/*   const uint32_t rd_index = 10; */
+static void test_r_instruction(const struct r_instruction_case cases[],
+                               size_t case_count,
+                               uint32_t funct_7_3,
+                               uint32_t opcode) {
+  const uint32_t rs1_index = 1;
+  const uint32_t rs2_index = 2;
+  const uint32_t rd_index = 10;
 
-/*   for (size_t i = 0; i < case_count; ++i) { */
-/*     uint64_t registers[NUM_REGISTERS] = {0}; */
-/*     uint8_t memory[MEMORY_BYTES] = {0}; */
-/*     registers[rs1_index] = cases[i].rs1_value; */
+  for (size_t i = 0; i < case_count; ++i) {
+    uint64_t registers[NUM_REGISTERS] = {0};
+    uint8_t memory[MEMORY_BYTES] = {0};
+    registers[rs1_index] = cases[i].rs1_value;
+    registers[rs2_index] = cases[i].rs2_value;
+    uint32_t instruction = create_r_type(funct_7_3,
+                                         rs2_index,
+                                         rs1_index,
+                                         rd_index,
+                                         opcode);
+    run_instruction(instruction, memory, registers);
+    TEST_ASSERT_EQUAL_UINT64(cases[i].expected, registers[rd_index]);
+  }
+}
 
-/*     uint32_t instruction = create_i_type(cases[i].immediate, */
-/*                                          rs1_index, */
-/*                                          funct3, */
-/*                                          rd_index, */
-/*                                          opcode); */
-/*     run_instruction(instruction, memory, registers); */
-/*     TEST_ASSERT_EQUAL_UINT64(cases[i].expected, registers[rd_index]); */
-/*   } */
-/* } */
+
+void test_ADD(void) {
+  const struct r_instruction_case cases[] = {
+    {1, 1, 2},     // 1 + 1 = 2
+    {10, 4, 14},   // 10 + 4 = 14
+    {-10, 4, -6},  // -10 + 4 = -6
+    {-3, -4, -7},
+    {0, 4, 4},
+    {0, 0, 0},
+    {UINT64_MAX, -1, UINT64_MAX - 1}, // -10 + 4 = -6
+    {INT64_MAX, 1, INT64_C(1) << 63}, // -10 + 4 = -6
+    {INT64_MIN, -1, INT64_MAX}, // -10 + 4 = -6
+    {UINT64_MAX, 1, 0}
+  };
+
+  test_r_instruction(cases, 6, ADD, OP);
+}
+
+
+
 
 void test_s_create(void) {
   // EASY: 1000 is within the signed 12-bit S-immediate range.
@@ -440,25 +462,14 @@ void test_s_create(void) {
 }
 
 void test_r_create(void) {
-  // EASY: 1000 is within the signed 12-bit S-immediate range.
   uint32_t r_instruction_1 = create_r_type(SUB, 6, 7, 0, OP);
   // funct7=0b0100000 rs2=00110, rs1=00111, funct3=000, rd=00000, opcode=0110011
   TEST_ASSERT_EQUAL(0b01000000011000111000000000110011, r_instruction_1);
 
-  /* // NEGATIVE IMMEDIATE */
-  /* uint32_t s_instruction_2 = create_s_type(-1, 6, 7, SB, STORE); */
-  /* // should be imme_11_5(1111 111)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 1111 1)(010 0011 opcode) */
-  /* TEST_ASSERT_EQUAL(0b11111110011000111000111110100011, s_instruction_2); */
-
-  // NEGATIVE IMMEDIATE BOUNDARY
-  /* uint32_t s_instruction_3 = create_s_type(-2048, 6, 7, SB, STORE); */
-  /* // should be imme_11_5(1000 000)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 0000 0)(010 0011 opcode) */
-  /* TEST_ASSERT_EQUAL(0b10000000011000111000000000100011, s_instruction_3); */
-
-  // POSITIVE IMMEDIATE BOUNDARY
-  /* uint32_t s_instruction_4 = create_s_type(2047, 6, 7, SB, STORE); */
-  /* // should be imme_11_5(0111 111)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 1111 1)(010 0011 opcode) */
-  /* TEST_ASSERT_EQUAL(0b01111110011000111000111110100011, s_instruction_4); */
+  // ADD
+  uint32_t s_instruction_2 = create_s_type(ADD, 10, 0, 1, OP);
+  // funct7=0b0000000 rs2=01010, rs1=00000, funct3=001, rd=00001, opcode=0110011
+  TEST_ASSERT_EQUAL(0b00000000101000000001000010110011, s_instruction_2);
 }
 
 
@@ -505,6 +516,7 @@ int main(void) {
   RUN_TEST(test_slli);
   RUN_TEST(test_srli);
   RUN_TEST(test_srai);
+  RUN_TEST(test_ADD);
 
   UNITY_END();
 }

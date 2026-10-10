@@ -10,9 +10,9 @@ void run_instruction(uint32_t instruction,
 
   switch (get_opcode(instruction)) {
     int32_t immediate;
-    uint32_t rs1;
-    uint32_t rs2;
-    uint32_t rd;
+    uint32_t rs1_index;
+    uint32_t rs2_index;
+    uint32_t rd_index;
     uint32_t funct3;
     uint64_t value;
 
@@ -20,26 +20,26 @@ void run_instruction(uint32_t instruction,
   case LOAD:
     // I Type
     immediate = get_i_immediate(instruction);
-    rs1 = get_rs1_index(instruction);
-    rd =  get_rd_index(instruction);
+    rs1_index = get_rs1_index(instruction);
+    rd_index =  get_rd_index(instruction);
     funct3 = get_funct3(instruction);
 
-    address = registers[rs1] + immediate;
+    address = registers[rs1_index] + immediate;
     switch (funct3) {
     case LB:
-      registers[rd] = (int8_t) get_byte(memory, address);
+      registers[rd_index] = (int8_t) get_byte(memory, address);
       break;
     case LH:
-      registers[rd] = (int16_t) get_half_word(memory, address);
+      registers[rd_index] = (int16_t) get_half_word(memory, address);
       break;
     case LW:
-      registers[rd] = (int32_t) get_word(memory, address);
+      registers[rd_index] = (int32_t) get_word(memory, address);
       break;
     case LBU:
-      registers[rd] = get_byte(memory, address);
+      registers[rd_index] = get_byte(memory, address);
       break;
     case LHU:
-      registers[rd] = get_half_word(memory, address);
+      registers[rd_index] = get_half_word(memory, address);
       break;
     default:
       printf("funct3 %d does not correspond to any LOAD instruction.", funct3);
@@ -60,49 +60,47 @@ void run_instruction(uint32_t instruction,
     // Integer Register-Immediate Instructions
     // I-Type
     immediate = get_i_immediate(instruction);
-    rs1 = get_rs1_index(instruction);
-    rd = get_rd_index(instruction);
+    rs1_index = get_rs1_index(instruction);
+    rd_index = get_rd_index(instruction);
     funct3 = get_funct3(instruction);
 
     switch (funct3) {
       uint32_t shamt;
       uint32_t immediate_11_5;
     case ADDI:
-      registers[rd] = registers[rs1] + immediate;
+      registers[rd_index] = registers[rs1_index] + immediate;
       break;
     case SLTI:
-      registers[rd] = (int64_t) registers[rs1] < immediate;
+      registers[rd_index] = (int64_t) registers[rs1_index] < immediate;
       break;
     case SLTIU:
-      registers[rd] = registers[rs1] < (uint64_t) immediate;
+      registers[rd_index] = registers[rs1_index] < (uint64_t) immediate;
       break;
     case ORI:
-      registers[rd] = registers[rs1] | immediate;
+      registers[rd_index] = registers[rs1_index] | immediate;
       break;
     case ANDI:
-      registers[rd] = registers[rs1] & immediate;
+      registers[rd_index] = registers[rs1_index] & immediate;
       break;
     case SLLI:
       shamt = bits(immediate, 0, 5);
-      registers[rd] = registers[rs1] << shamt;
+      registers[rd_index] = registers[rs1_index] << shamt;
       break;
     case SRLIorSRAI:
       shamt = bits(immediate, 0, 5);
       immediate_11_5 = bits(immediate, 6, 11);
       switch (immediate_11_5) {
       case SRLI_IMM:
-        registers[rd] = registers[rs1] >> shamt;
+        registers[rd_index] = registers[rs1_index] >> shamt;
         break;
-      case SRAI_IMM:
-        /* print_bits(shamt); */
-        /* print_bits(registers[rs1]); */
-        /* print_bits(UINT64_MAX << (shamt - 1)); */
-        uint64_t result = registers[rs1] >> shamt;
-        if (registers[rs1] & UINT64_C(1) << 63) {
+      case SRAI_IMM: {
+        uint64_t result = registers[rs1_index] >> shamt;
+        if (registers[rs1_index] & UINT64_C(1) << 63) {
           result |= (UINT64_MAX << (64 - shamt));
         }
-        registers[rd] = result;
+        registers[rd_index] = result;
         break;
+      }
       default:
         print_bits(instruction);
         printf("funct3 %d and imm_11_5 %d does not correspond to any OP_IMM instruction.\n",
@@ -127,23 +125,23 @@ void run_instruction(uint32_t instruction,
     break;
   case STORE:
     immediate = get_s_immediate(instruction);
-    rs1 = get_rs1_index(instruction);
-    rs2 =  get_rs2_index(instruction);
+    rs1_index = get_rs1_index(instruction);
+    rs2_index =  get_rs2_index(instruction);
     funct3 = get_funct3(instruction);
 
-    address = registers[rs1] + immediate;
+    address = registers[rs1_index] + immediate;
     switch (funct3) {
     case SB:
-      write_byte(memory, address, registers[rs2]);
+      write_byte(memory, address, registers[rs2_index]);
       break;
     case SH:
-      write_half_word(memory, address, registers[rs2]);
+      write_half_word(memory, address, registers[rs2_index]);
       break;
     case SW:
-      write_word(memory, address, registers[rs2]);
+      write_word(memory, address, registers[rs2_index]);
       break;
     case SD:
-      write_double_word(memory, address, registers[rs2]);
+      write_double_word(memory, address, registers[rs2_index]);
       break;
     default:
       printf("funct3 %d does not correspond to any STORE instruction.", funct3);
@@ -160,10 +158,13 @@ void run_instruction(uint32_t instruction,
     printf("AMO\n");
     break;
   case OP:
+    rs1_index = get_rs1_index(instruction);
+    rs2_index =  get_rs2_index(instruction);
+    rd_index = get_rd_index(instruction);
     uint32_t funct7_funct3 = (get_funct7(instruction) << 3) | get_funct3(instruction);
     switch (funct7_funct3) {
     case ADD:
-      printf("ADD");
+      registers[rd_index] = registers[rs1_index] + registers[rs2_index];
       break;
     case SUB:
       printf("SUB");
@@ -196,7 +197,6 @@ void run_instruction(uint32_t instruction,
       printf("funct7_funct3  %d does not correspond to any OP instruction.", funct7_funct3);
       assert(0);
     }
-    printf("OP\n");
     break;
   case LUI:
     printf("LUI\n");
