@@ -168,9 +168,9 @@ void run_instruction(uint32_t instruction,
       break;
     case SUB:
       registers[rd_index] = registers[rs1_index] - registers[rs2_index];
-      printf("SUB");
       break;
     case SLL:
+      registers[rd_index] = registers[rs1_index] << registers[rs2_index];
       printf("SLL");
       break;
     case SLT:
