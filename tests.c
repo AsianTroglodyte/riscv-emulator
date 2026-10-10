@@ -549,6 +549,17 @@ void test_OR(void) {
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), OR, OP);
 }
 
+void test_AND(void) {
+  const struct r_instruction_case cases[] = {
+      {0b1010, 0b1010, 0b1010},             // Identical bit patterns
+      {0b0101, 0b1010, 0},                  // No overlapping set bits
+      {0, -1, 0},                            // Zero AND sign-extended -1
+      {0b1100010, 0b1000010, 0b1000010},    // Keep only shared set bits
+  };
+
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), AND, OP);
+}
+
 void test_s_create(void) {
   // EASY: 1000 is within the signed 12-bit S-immediate range.
   uint32_t s_instruction_1 = create_s_type(1000, 6, 7, SB, STORE);
@@ -636,6 +647,7 @@ int main(void) {
   RUN_TEST(test_SRL);
   RUN_TEST(test_SRA);
   RUN_TEST(test_OR);
+  RUN_TEST(test_AND);
 
   UNITY_END();
 }

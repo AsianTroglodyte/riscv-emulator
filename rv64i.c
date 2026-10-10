@@ -189,10 +189,9 @@ void run_instruction(uint32_t instruction,
       break;
     case OR:
       registers[rd_index] = (int64_t) registers[rs1_index] | registers[rs2_index];
-      printf("OR");
       break;
     case AND:
-      printf("AND");
+      registers[rd_index] = (int64_t) registers[rs1_index] & registers[rs2_index];
       break;
     default:
       printf("funct7_funct3  %d does not correspond to any OP instruction.", funct7_funct3);
