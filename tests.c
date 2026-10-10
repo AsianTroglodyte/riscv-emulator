@@ -477,6 +477,20 @@ void test_SLT(void) {
 }
 
 
+void test_SLTU(void) {
+  const struct r_instruction_case cases[] = {
+      {1, 9, 1},                  // 1 < 9
+      {9, 1, 0},                  // 9 is not less than 1
+      {2, 2, 0},                  // Equality is false
+      {0, -1, 1},                 // 0 < UINT64_MAX
+      {UINT64_MAX, -1, 0},        // UINT64_MAX is not less than itself
+      {UINT64_MAX - 1, -1, 1},    // UINT64_MAX - 1 < UINT64_MAX
+  };
+
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SLTU, OP);
+}
+
+
 void test_s_create(void) {
   // EASY: 1000 is within the signed 12-bit S-immediate range.
   uint32_t s_instruction_1 = create_s_type(1000, 6, 7, SB, STORE);
@@ -559,6 +573,7 @@ int main(void) {
   RUN_TEST(test_SUB);
   RUN_TEST(test_SLL);
   RUN_TEST(test_SLT);
+  RUN_TEST(test_SLTU);
 
   UNITY_END();
 }

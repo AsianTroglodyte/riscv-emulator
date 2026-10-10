@@ -174,9 +174,9 @@ void run_instruction(uint32_t instruction,
       break;
     case SLT:
       registers[rd_index] = (int64_t) registers[rs1_index] < (int64_t) registers[rs2_index];
-      printf("SLT");
       break;
     case SLTU:
+      registers[rd_index] = registers[rs1_index] < registers[rs2_index];
       printf("SLTU");
       break;
     case XOR:
