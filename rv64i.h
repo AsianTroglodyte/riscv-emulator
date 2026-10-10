@@ -128,6 +128,9 @@ uint32_t create_r_type(uint32_t funct7_funct3,
                        int32_t rs1_index,
                        int32_t rd_index,
                        int32_t opcode);
+uint32_t create_u_type(uint32_t upper_immediate,
+                       uint32_t rd_index,
+                       uint32_t opcode);
 
 uint32_t bits(uint32_t instruction, int start, int end);
 
@@ -140,6 +143,7 @@ uint32_t get_funct3(uint32_t instruction);
 uint32_t get_funct7(uint32_t instruction);
 int32_t get_i_immediate(uint32_t instruction);
 int32_t get_s_immediate(uint32_t instruction);
+int32_t get_upper_immediate(uint32_t instruction);
 
 // GET PARTICULAR OPCODES
 int opcode_bits_1_0(uint32_t instruction);

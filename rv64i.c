@@ -199,7 +199,12 @@ void run_instruction(uint32_t instruction,
     }
     break;
   case LUI:
-    printf("LUI\n");
+    /* printf("instruction: "); */
+    /* print_bits(instruction); */
+    /* printf("upper_immediate: "); */
+    /* print_bits(get_upper_immediate(instruction)); */
+    rd_index = get_rd_index(instruction);
+    registers[rd_index] = get_upper_immediate(instruction);
     break;
   case OP_32:
     printf("OP_32\n");
@@ -299,6 +304,10 @@ int32_t get_s_immediate(uint32_t instruction) {
   return imm_11_0;
 }
 
+int32_t get_upper_immediate(uint32_t instruction) {
+  return instruction & (UINT32_MAX << 12);
+}
+
 int32_t sign_extend_32(uint32_t field, int width) {
   assert(width >= 1 && width <= 32);
   uint32_t mask = UINT32_MAX >> (32 - width);
@@ -362,31 +371,31 @@ void print_bits(const size_t num) {
   printf("\n");
 }
 
-int opcode_bits_1_0(uint32_t instruction) {
+inline int opcode_bits_1_0(uint32_t instruction) {
   return instruction & 0b11;
 };
 
-int opcode_bits_4_2(uint32_t instruction) {
+inline int opcode_bits_4_2(uint32_t instruction) {
   return instruction & 0b11100 >> 2;
 }
 
-int opcode_bits_6_5(uint32_t instruction) {
+inline int opcode_bits_6_5(uint32_t instruction) {
   return instruction & 0b1100000 >> 5;
 }
 
-int get_opcode(uint32_t instruction) {
+inline int get_opcode(uint32_t instruction) {
   return instruction & 0b1111111;
 }
 
-uint64_t stack_pointer(const uint64_t registers[NUM_REGISTERS]) {
+inline uint64_t stack_pointer(const uint64_t registers[NUM_REGISTERS]) {
   return registers[2];
 }
 
-uint64_t return_address(const uint64_t registers[NUM_REGISTERS]) {
+inline uint64_t return_address(const uint64_t registers[NUM_REGISTERS]) {
   return registers[1];
 }
 
-uint64_t alternate_return_address(const uint64_t registers[NUM_REGISTERS]) {
+inline uint64_t alternate_return_address(const uint64_t registers[NUM_REGISTERS]) {
   return registers[5];
 }
 
@@ -510,4 +519,12 @@ uint32_t create_r_type(uint32_t funct7_funct3,
   rd_index = rd_index << 7;
 
   return (uint32_t) funct7 | rs2_index | rs1_index | funct3 | rd_index | opcode;
+}
+
+uint32_t create_u_type(uint32_t upper_immediate, uint32_t rd_index, uint32_t opcode) {
+  assert_valid_register(rd_index);
+  assert_valid_opcode(opcode);
+  upper_immediate = upper_immediate << 12;
+  rd_index = rd_index << 7;
+  return (uint32_t) upper_immediate | rd_index | opcode;
 }

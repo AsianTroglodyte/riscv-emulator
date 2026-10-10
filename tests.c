@@ -560,6 +560,28 @@ void test_AND(void) {
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), AND, OP);
 }
 
+void test_LUI(void) {
+  uint8_t memory[MEMORY_BYTES] = {0};
+  uint64_t registers[NUM_REGISTERS] = {0};
+  uint32_t instruction_1 = create_u_type(1000, 2, LUI);
+  run_instruction(instruction_1, memory, registers);
+  TEST_ASSERT_EQUAL_UINT64(1000 << 12, registers[2]);
+
+  uint32_t instruction_2 = create_u_type(-1000, 12, LUI);
+  run_instruction(instruction_2, memory, registers);
+  TEST_ASSERT_EQUAL_UINT64(-(UINT64_C(0x003E8000)), registers[12]);
+
+  uint32_t instruction_3 = create_u_type(-1, 12, LUI);
+  run_instruction(instruction_3, memory, registers);
+  TEST_ASSERT_EQUAL_UINT64(-(UINT64_C(0x00001000)), registers[12]);
+
+  // CHECK SIGN EXTENSION
+  uint32_t instruction_4 = create_u_type(0x80000, 12, LUI);
+  run_instruction(instruction_4, memory, registers);
+  print_bits(registers[12]);
+  TEST_ASSERT_EQUAL_UINT64(0xFFFFFFFF80000000, registers[12]);
+}
+
 void test_s_create(void) {
   // EASY: 1000 is within the signed 12-bit S-immediate range.
   uint32_t s_instruction_1 = create_s_type(1000, 6, 7, SB, STORE);
@@ -593,6 +615,16 @@ void test_r_create(void) {
   TEST_ASSERT_EQUAL(0b00000000101000000000000010110011, r_instruction_2);
 }
 
+void test_u_create(void) {
+  // SIMPLE
+  uint32_t u_instruction_1 = create_u_type(0, 0, LUI);
+  // funct7=0b0000000 rs2=01010, rs1=00000, funct3=000, rd=00001, opcode=0110011
+  TEST_ASSERT_EQUAL(UINT32_C(0b0110111), u_instruction_1);
+
+  uint32_t u_instruction_2 = create_u_type(-1, 6, LUI);
+  // funct7=0b0100000 rs2=00110, rs1=00111, funct3=000, rd=00000, opcode=0110011
+  TEST_ASSERT_EQUAL((UINT32_MAX << 12) | (0b110 << 7)  | LUI, u_instruction_2);
+}
 
 void test_get_s_immediate(void) {
   // EASY
@@ -620,6 +652,7 @@ int main(void) {
   RUN_TEST(test_s_create);
   RUN_TEST(test_r_create);
   RUN_TEST(test_get_s_immediate);
+  RUN_TEST(test_u_create);
 
   RUN_TEST(test_LW);
   RUN_TEST(test_LH);
@@ -648,6 +681,8 @@ int main(void) {
   RUN_TEST(test_SRA);
   RUN_TEST(test_OR);
   RUN_TEST(test_AND);
+  RUN_TEST(test_LUI);
+
 
   UNITY_END();
 }
