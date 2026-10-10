@@ -171,7 +171,6 @@ void run_instruction(uint32_t instruction,
       break;
     case SLL:
       registers[rd_index] = registers[rs1_index] << registers[rs2_index];
-      printf("SLL");
       break;
     case SLT:
       printf("SLT");
@@ -502,9 +501,9 @@ uint32_t create_r_type(uint32_t funct7_funct3,
   assert_valid_register(rs2_index);
   assert_valid_register(rs1_index);
   assert_valid_opcode(opcode);
+  assert_valid_funct3(funct7_funct3 & UINT32_C(0b111));
 
-  uint32_t funct3 = (funct7_funct3 & UINT32_C(0b111)) << 7;
-  assert_valid_funct3(funct3);
+  uint32_t funct3 = (funct7_funct3 & UINT32_C(0b111)) << 12;
   uint32_t funct7 = (funct7_funct3 >> 3) << 25;
   rs2_index = rs2_index << 20;
   rs1_index = rs1_index << 15;
