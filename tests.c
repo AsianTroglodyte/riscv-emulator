@@ -526,6 +526,18 @@ void test_SRL(void) {
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SRL, OP);
 }
 
+void test_SRA(void) {
+  const struct r_instruction_case cases[] = {
+    {-8, (SRAI_IMM << 6) | 2, -2},   // ...1111 1000 >> 2 = ...1111 1110
+    {-15, (SRAI_IMM << 6) | 2, -4},  // ...1111 0001 >> 2 = ...1111 1100
+    {100, (SRAI_IMM << 6) | 4, 6},   // ...0110 0100 >> 4 = ...0000 0110
+    {UINT64_MAX, (SRAI_IMM << 6) | 63, UINT64_MAX}, // ...1111 >> 63 = ...1111
+    {100, (SRAI_IMM << 6) | 0, 100}, // ...0110 0100 >> 4 = ...0110 0100
+  };
+
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SRA, OP);
+}
+
 void test_s_create(void) {
   // EASY: 1000 is within the signed 12-bit S-immediate range.
   uint32_t s_instruction_1 = create_s_type(1000, 6, 7, SB, STORE);
@@ -611,6 +623,8 @@ int main(void) {
   RUN_TEST(test_SLTU);
   RUN_TEST(test_XOR);
   RUN_TEST(test_SRL);
+  RUN_TEST(test_SRA);
+
 
   UNITY_END();
 }
