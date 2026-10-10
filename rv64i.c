@@ -167,6 +167,7 @@ void run_instruction(uint32_t instruction,
       registers[rd_index] = registers[rs1_index] + registers[rs2_index];
       break;
     case SUB:
+      registers[rd_index] = registers[rs1_index] - registers[rs2_index];
       printf("SUB");
       break;
     case SLL:
@@ -502,11 +503,12 @@ uint32_t create_r_type(uint32_t funct7_funct3,
   assert_valid_register(rs1_index);
   assert_valid_opcode(opcode);
 
-  uint32_t funct3 = funct7_funct3 & (UINT32_MAX << 3);
+  uint32_t funct3 = (funct7_funct3 & UINT32_C(0b111)) << 7;
   assert_valid_funct3(funct3);
-  uint32_t funct7 = funct7_funct3 >> 3;
+  uint32_t funct7 = (funct7_funct3 >> 3) << 25;
   rs2_index = rs2_index << 20;
   rs1_index = rs1_index << 15;
   rd_index = rd_index << 7;
+
   return (uint32_t) funct7 | rs2_index | rs1_index | funct3 | rd_index | opcode;
 }

@@ -436,7 +436,21 @@ void test_ADD(void) {
   test_r_instruction(cases, 6, ADD, OP);
 }
 
+void test_SUB(void) {
+  const struct r_instruction_case cases[] = {
+    {10, 4, 6},   // 10 + 4 = 14
+    {-10, 4, -14},  // -10 + 4 = -6
+    {-3, -4, 1},
+    {0, 4, -4},
+    {0, 0, 0},
+    {UINT64_MAX, -1, UINT64_MAX - 1}, // -10 + 4 = -6
+    {INT64_MAX, 1, INT64_C(1) << 63}, // -10 + 4 = -6
+    {INT64_MIN, -1, INT64_MAX}, // -10 + 4 = -6
+    {UINT64_MAX, 1, 0}
+  };
 
+  test_r_instruction(cases, 1, SUB, OP);
+}
 
 
 void test_s_create(void) {
@@ -467,9 +481,9 @@ void test_r_create(void) {
   TEST_ASSERT_EQUAL(0b01000000011000111000000000110011, r_instruction_1);
 
   // ADD
-  uint32_t s_instruction_2 = create_s_type(ADD, 10, 0, 1, OP);
-  // funct7=0b0000000 rs2=01010, rs1=00000, funct3=001, rd=00001, opcode=0110011
-  TEST_ASSERT_EQUAL(0b00000000101000000001000010110011, s_instruction_2);
+  uint32_t r_instruction_2 = create_r_type(ADD, 10, 0, 1, OP);
+  // funct7=0b0000000 rs2=01010, rs1=00000, funct3=000, rd=00001, opcode=0110011
+  TEST_ASSERT_EQUAL(0b00000000101000000000000010110011, r_instruction_2);
 }
 
 
@@ -496,6 +510,9 @@ void test_get_s_immediate(void) {
 
 int main(void) {
   UNITY_BEGIN();
+  RUN_TEST(test_s_create);
+  RUN_TEST(test_r_create);
+  RUN_TEST(test_get_s_immediate);
 
   RUN_TEST(test_LW);
   RUN_TEST(test_LH);
@@ -506,8 +523,6 @@ int main(void) {
   RUN_TEST(test_SH);
   RUN_TEST(test_SW);
   RUN_TEST(test_SD);
-  RUN_TEST(test_s_create);
-  RUN_TEST(test_get_s_immediate);
   RUN_TEST(test_addi);
   RUN_TEST(test_andi);
   RUN_TEST(test_ori);
@@ -517,6 +532,8 @@ int main(void) {
   RUN_TEST(test_srli);
   RUN_TEST(test_srai);
   RUN_TEST(test_ADD);
+  RUN_TEST(test_SUB);
+
 
   UNITY_END();
 }
