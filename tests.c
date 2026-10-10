@@ -501,10 +501,30 @@ void test_XOR(void) {
     {0, -1, UINT64_MAX},
     {(UINT64_C(1) << 63) | 1, 1, (UINT64_C(1) << 63)}
   };
-  /* print_bits(UINT64_C(1) << 63); */
+
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), XOR, OP);
 }
 
+void test_SRL(void) {
+  const struct r_instruction_case cases[] = {
+      // Ordinary right shifts.
+      // {value_shifted, (funct) | shift amount (shamt), result}
+      {18, (SRLI_IMM << 5) | 1, 9},
+      {192, (SRLI_IMM << 5) | 6, 3},
+
+      // Logical shifts fill vacated high bits with zero, even when the
+      // source's most significant bit is set.
+      {UINT64_C(0x8000000000000000), (SRLI_IMM << 5) | 1,
+       UINT64_C(0x4000000000000000)},
+      {UINT64_MAX, (SRLI_IMM << 5) | 31, UINT64_C(0x00000001FFFFFFFF)},
+
+      // Boundary shift amounts and bits shifted entirely out.
+      {UINT64_C(0x8000000000000000), (SRLI_IMM << 5) | 63, 1},
+      {1, (SRLI_IMM << 5) | 1, 0},
+  };
+
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SRL, OP);
+}
 
 void test_s_create(void) {
   // EASY: 1000 is within the signed 12-bit S-immediate range.
@@ -590,6 +610,7 @@ int main(void) {
   RUN_TEST(test_SLT);
   RUN_TEST(test_SLTU);
   RUN_TEST(test_XOR);
+  RUN_TEST(test_SRL);
 
   UNITY_END();
 }

@@ -182,7 +182,7 @@ void run_instruction(uint32_t instruction,
       registers[rd_index] = registers[rs1_index] ^ registers[rs2_index];
       break;
     case SRL:
-      printf("SRL");
+      registers[rd_index] = registers[rs1_index] >> registers[rs2_index];
       break;
     case SRA:
       printf("SRA");
