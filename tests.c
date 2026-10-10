@@ -538,6 +538,17 @@ void test_SRA(void) {
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SRA, OP);
 }
 
+void test_OR(void) {
+  const struct r_instruction_case cases[] = {
+      {0b1010, 0b1010, 0b1010},             // Identical bit patterns
+      {0b1010, 0b0101, 0b1111},             // Fill in the unset bits
+      {0, -1, UINT64_MAX},                   // Sign-extended immediate sets all bits
+      {0b1100010, 0b1001010, 0b1101010},     // Combine set bits from both operands
+  };
+
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), OR, OP);
+}
+
 void test_s_create(void) {
   // EASY: 1000 is within the signed 12-bit S-immediate range.
   uint32_t s_instruction_1 = create_s_type(1000, 6, 7, SB, STORE);
@@ -624,7 +635,7 @@ int main(void) {
   RUN_TEST(test_XOR);
   RUN_TEST(test_SRL);
   RUN_TEST(test_SRA);
-
+  RUN_TEST(test_OR);
 
   UNITY_END();
 }
