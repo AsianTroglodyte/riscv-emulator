@@ -462,6 +462,20 @@ void test_SLL(void) {
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SLL, OP);
 }
 
+void test_SLT(void) {
+  const struct r_instruction_case cases[] = {
+      {1, 9, 1},
+      {9, 1, 0},
+      {2, 2, 0},
+      {0, -1, 0},
+      {UINT64_MAX, -1, 0},
+      {UINT64_MAX - 1, -1, 1},
+      {(uint64_t)-10, -9, 1},
+  };
+
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SLT, OP);
+}
+
 
 void test_s_create(void) {
   // EASY: 1000 is within the signed 12-bit S-immediate range.
@@ -544,6 +558,7 @@ int main(void) {
   RUN_TEST(test_ADD);
   RUN_TEST(test_SUB);
   RUN_TEST(test_SLL);
+  RUN_TEST(test_SLT);
 
   UNITY_END();
 }
