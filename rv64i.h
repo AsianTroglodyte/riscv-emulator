@@ -1,6 +1,7 @@
 #ifndef RV64I_H
 #include <stdint.h>
-
+#include <inttypes.h>
+#include <stdio.h> // for size_t
 #define RV64I_H
 
 enum {NUM_REGISTERS = 32};
@@ -109,7 +110,7 @@ enum branch_funct3_enums: uint32_t {
 
 void print_registers(const uint64_t registers[NUM_REGISTERS]);
 void print_memory(const uint8_t memory[]);
-void print_bits(const unsigned int num);
+void print_bits(const size_t num);
 void print_8_bits(const uint8_t num);
 
 uint32_t create_i_type(uint32_t immediate,

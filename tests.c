@@ -476,7 +476,6 @@ void test_SLT(void) {
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SLT, OP);
 }
 
-
 void test_SLTU(void) {
   const struct r_instruction_case cases[] = {
       {1, 9, 1},                  // 1 < 9
@@ -488,6 +487,22 @@ void test_SLTU(void) {
   };
 
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SLTU, OP);
+}
+
+void test_XOR(void) {
+  const struct r_instruction_case cases[] = {
+    {0b0101, 0b1010, 0b1111},
+    {0b0101, 0b0101, 0b0000},
+    {0b1100, 0b1000, 0b0100},
+    {0, 0, 0}, // zero identity
+    // the following aren't the best but whatever
+    {UINT64_MAX, 0, UINT64_MAX},
+    {UINT64_C(1) << 63, 0, UINT64_C(1) << 63},
+    {0, -1, UINT64_MAX},
+    {(UINT64_C(1) << 63) | 1, 1, (UINT64_C(1) << 63)}
+  };
+  /* print_bits(UINT64_C(1) << 63); */
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), XOR, OP);
 }
 
 
@@ -574,6 +589,7 @@ int main(void) {
   RUN_TEST(test_SLL);
   RUN_TEST(test_SLT);
   RUN_TEST(test_SLTU);
+  RUN_TEST(test_XOR);
 
   UNITY_END();
 }

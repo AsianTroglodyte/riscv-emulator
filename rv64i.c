@@ -177,10 +177,9 @@ void run_instruction(uint32_t instruction,
       break;
     case SLTU:
       registers[rd_index] = registers[rs1_index] < registers[rs2_index];
-      printf("SLTU");
       break;
     case XOR:
-      printf("XOR");
+      registers[rd_index] = registers[rs1_index] ^ registers[rs2_index];
       break;
     case SRL:
       printf("SRL");
@@ -351,7 +350,7 @@ void print_memory(const uint8_t memory[]) {
   }
 }
 
-void print_bits(const unsigned int num) {
+void print_bits(const size_t num) {
   int total_bits = sizeof(num) * 8;
 
   for (int i = total_bits - 1; i >= 0; i--) {
