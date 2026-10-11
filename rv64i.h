@@ -11,7 +11,8 @@ enum {MEMORY_BYTES = MEMORY_WORDS * 4};
 
 void run_instruction(uint32_t instruction,
                      uint8_t memory[],
-                     uint64_t registers[NUM_REGISTERS]);
+                     uint64_t registers[NUM_REGISTERS],
+                     uint64_t pc);
 
 
 enum status_code {

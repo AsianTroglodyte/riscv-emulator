@@ -6,7 +6,8 @@
 
 void run_instruction(uint32_t instruction,
                      uint8_t memory[],
-                     uint64_t registers[]) {
+                     uint64_t registers[],
+                     uint64_t pc) {
 
   switch (get_opcode(instruction)) {
     int32_t immediate;
