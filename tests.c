@@ -603,9 +603,13 @@ void test_LUI(void) {
 void test_AUIPC(void) {
   struct machine_state state = {0};
 
-  uint32_t instruction_1 = create_u_type(1000, 2, LUI);
-  run_instruction(instruction_1, &state);
-  /* TEST_ASSERT_EQUAL_UINT64(program_counter, registers[2]); */
+  state.program_counter = 0x1000;
+  run_instruction(create_u_type(1, 2, AUIPC), &state);
+  TEST_ASSERT_EQUAL_UINT64(0x2000, state.registers[2]);
+
+  /* state.program_counter = 10; */
+  /* run_instruction(create_u_type(-1, 2, AUIPC), &state); */
+  /* TEST_ASSERT_EQUAL_UINT64((-1 << 12) + 10, state.registers[2]); */
 }
 
 
@@ -709,7 +713,7 @@ int main(void) {
   RUN_TEST(test_OR);
   RUN_TEST(test_AND);
   RUN_TEST(test_LUI);
-
+  RUN_TEST(test_AUIPC);
 
   UNITY_END();
 }
