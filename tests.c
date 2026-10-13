@@ -8,262 +8,270 @@ void setUp(void) {}
 void tearDown(void) {}
 
 void test_LW(void) {
-  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5};
-  uint8_t memory[MEMORY_BYTES] = {};
+  struct machine_state state = {
+    .registers = {0, 1, 2, 0, 0, 5},
+    .memory = {0}
+  };
   for (uint32_t i = 0; i < MEMORY_WORDS; i++) {
-    memory[i * 4] = i * 4;
+    state.memory[i * 4] = i * 4;
   }
-  const uint32_t program_counter = 0;
 
   // POSITIVE NUMBERS
   uint32_t instruction = create_i_type(4, 4, LW, 10, LOAD);
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL(4, registers[10]);
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL(4, state.registers[10]);
 
   // NEGATIVE IMMEDIATE
-  registers[4] = 8;
+  state.registers[4] = 8;
   uint32_t instruction1 = create_i_type(-4, 4, LW, 10, LOAD);
-  run_instruction(instruction1, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL_UINT64(4, registers[10]);
+  run_instruction(instruction1, &state);
+  TEST_ASSERT_EQUAL_UINT64(4, state.registers[10]);
 
   // NEGATIVE NUMBERS
-  registers[4] = 0;
-  memory[4] = (int8_t)-4;
-  memory[5] = 255;
-  memory[6] = 255;
-  memory[7] = 255;
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL_UINT64(UINT64_MAX-3, registers[10]);
+  state.registers[4] = 0;
+  state.memory[4] = (int8_t)-4;
+  state.memory[5] = 255;
+  state.memory[6] = 255;
+  state.memory[7] = 255;
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL_UINT64(UINT64_MAX-3, state.registers[10]);
 }
 
 void test_LB(void) {
-  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5};
-  uint8_t memory[MEMORY_BYTES] = {};
-
+  struct machine_state state = {
+    .registers = {0, 1, 2, 0, 0, 5},
+    .memory = {0}
+  };
   for (uint32_t i = 0; i < MEMORY_BYTES; i++) {
-    memory[i] = i;
+    state.memory[i] = i;
   }
-  const uint32_t program_counter = 0;
 
-  uint32_t instruction = create_i_type(10, 4, LB, 10, LOAD);
   // POSITIVE NUMBERS
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL_UINT64(10, registers[10]);
+  uint32_t instruction = create_i_type(10, 4, LB, 10, LOAD);
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL_UINT64(10, state.registers[10]);
 
   // NEGATIVE NUMBERS
-  memory[10] = (int8_t)-4;
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL_UINT64(UINT64_MAX-3, registers[10]);
+  state.memory[10] = (int8_t)-4;
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL_UINT64(UINT64_MAX-3, state.registers[10]);
 
   // NEGATIVE IMMEDIATE
-  registers[4] = 8;
+  state.registers[4] = 8;
   uint32_t instruction1 = create_i_type(-4, 4, LB, 10, LOAD);
-  run_instruction(instruction1, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL_UINT64(4, registers[10]);
+  run_instruction(instruction1, &state);
+  TEST_ASSERT_EQUAL_UINT64(4, state.registers[10]);
 }
 
 void test_LH(void) {
-  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5};
-  uint8_t memory[MEMORY_BYTES] = {};
+  struct machine_state state = {
+    .registers = {0, 1, 2, 0, 0, 5},
+    .memory = {0}
+  };
   for (uint32_t i = 0; i < MEMORY_HALF_WORDS; i++) {
-    memory[i * 2] = i * 2;
+    state.memory[i * 2] = i * 2;
   }
-  const uint32_t program_counter = 0;
 
   uint32_t instruction = create_i_type(10, 4, LH, 10, LOAD);
   // POSITIVE NUMBERS
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL_UINT64(10, registers[10]);
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL_UINT64(10, state.registers[10]);
 
   // NEGATIVE NUMBERS
-  memory[10] = (int8_t)-4;
-  memory[11] = 255;
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL_UINT64(UINT64_MAX-3, registers[10]);
+  state.memory[10] = (int8_t)-4;
+  state.memory[11] = 255;
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL_UINT64(UINT64_MAX-3, state.registers[10]);
 
   // NEGATIVE IMMEDIATE
-  registers[4] = 8;
+  state.registers[4] = 8;
   uint32_t instruction1 = create_i_type(-4, 4, LH, 10, LOAD);
-  run_instruction(instruction1, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL_UINT64(4, registers[10]);
+  run_instruction(instruction1, &state);
+  TEST_ASSERT_EQUAL_UINT64(4, state.registers[10]);
 }
 
 void test_LBU(void) {
-  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5};
-  uint8_t memory[MEMORY_BYTES] = {};
+  struct machine_state state = {
+    .registers = {0, 1, 2, 0, 0, 5},
+    .memory = {0}
+  };
   for (uint32_t i = 0; i < MEMORY_BYTES; i++) {
-    memory[i] = i ;
+    state.memory[i] = i ;
   }
-  const uint32_t program_counter = 0;
 
   // POSITIVE NUMBERS IN MEMORY
   uint32_t instruction = create_i_type(10, 4, LBU, 10, LOAD);
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL_UINT64(10, registers[10]);
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL_UINT64(10, state.registers[10]);
 
   // NEGATIVE NUMBERS IN MEMORY
-  memory[10] = (int8_t)-4;
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL_UINT64(UINT8_MAX - 3, registers[10]);
+  state.memory[10] = (int8_t)-4;
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL_UINT64(UINT8_MAX - 3, state.registers[10]);
 
   // NEGATIVE IMMEDIATE
-  registers[4] = 8;
+  state.registers[4] = 8;
   uint32_t instruction1 = create_i_type(-4, 4, LBU, 10, LOAD);
-  run_instruction(instruction1, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL_UINT64(4, registers[10]);
+  run_instruction(instruction1, &state);
+  TEST_ASSERT_EQUAL_UINT64(4, state.registers[10]);
 }
 
 void test_LHU(void) {
-  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5};
-  uint8_t memory[MEMORY_BYTES] = {};
+  struct machine_state state = {
+    .registers = {0, 1, 2, 0, 0, 5},
+    .memory = {0}
+  };
   for (uint32_t i = 0; i < MEMORY_HALF_WORDS; i++) {
-    memory[i * 2] = i * 2;
+    state.memory[i * 2] = i * 2;
   }
-  const uint32_t program_counter = 0;
 
   // POSITIVE NUMBERS
   uint32_t instruction = create_i_type(10, 4, LHU, 10, LOAD);
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL_UINT64(10, registers[10]);
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL_UINT64(10, state.registers[10]);
 
   // NEGATIVE NUMBERS
-  memory[10] = (int8_t)-4;
-  memory[11] = 255;
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL_UINT64(UINT16_MAX - 3, registers[10]);
+  state.memory[10] = (int8_t)-4;
+  state.memory[11] = 255;
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL_UINT64(UINT16_MAX - 3, state.registers[10]);
 
   // NEGATIVE IMMEDIATE
-  registers[4] = 8;
-  memory[4] = 4;
+  state.registers[4] = 8;
+  state.memory[4] = 4;
   uint32_t instruction1 = create_i_type(-4, 4, LHU, 10, LOAD);
-  run_instruction(instruction1, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL_UINT64(4, registers[10]);
+  run_instruction(instruction1, &state);
+  TEST_ASSERT_EQUAL_UINT64(4, state.registers[10]);
 }
 
 void test_SB(void) {
-  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5};
-  uint8_t memory[MEMORY_BYTES] = {};
+  struct machine_state state = {
+    .registers = {0, 1, 2, 0, 0, 5},
+    .memory = {0}
+  };
   for (uint32_t i = 0; i < MEMORY_BYTES; i++) {
-    memory[i] = i;
+    state.memory[i] = i;
   }
-  const uint32_t program_counter = 0;
 
   // TEST WITH ZERO
-  registers[10] = 0;
+  state.registers[10] = 0;
   uint32_t instruction = create_s_type(10, 10, 4, SB, STORE);
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL(0, memory[10]);
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL(0, get_byte(state.memory, 10));
 
   // TEST WITH STORING NEGATIVE VALUE
-  registers[10] = -10;
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL(UINT8_MAX - 9, get_byte(memory, 10));
+  state.registers[10] = -10;
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL(UINT8_MAX - 9, get_byte(state.memory, 10));
 
   /* // TEST WITH POSITIVE */
-  registers[10] = 5;
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL(5, get_byte(memory, 10));
+  state.registers[10] = 5;
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL(5, get_byte(state.memory, 10));
 
   /* // TEST WITH NEGATIVE IMMEDIATE */
-  registers[4] = 20;
-  registers[10] = 5;
+  state.registers[4] = 20;
+  state.registers[10] = 5;
   uint32_t instruction_2 = create_s_type(-10, 10, 4, SB, STORE);
-  run_instruction(instruction_2, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL(5, get_byte(memory, 10));
+  run_instruction(instruction_2, &state);
+  TEST_ASSERT_EQUAL(5, get_byte(state.memory, 10));
 }
 
 void test_SH(void) {
-  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5};
-  uint8_t memory[MEMORY_BYTES] = {};
+  struct machine_state state = {
+    .registers = {0, 1, 2, 0, 0, 5},
+    .memory = {0}
+  };
   for (uint32_t i = 0; i < MEMORY_HALF_WORDS; i++) {
-    memory[i * 2] = i * 2;
+    state.memory[i * 2] = i * 2;
   }
-  const uint32_t program_counter = 0;
   // TEST WITH ZERO
-  registers[10] = 0;
+  state.registers[10] = 0;
   uint32_t instruction = create_s_type(10, 10, 4, SH, STORE);
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL(0, get_half_word(memory, 10));
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL(0, get_half_word(state.memory, 10));
 
   // TEST WITH STORING NEGATIVE VALUE
-  registers[10] = -10;
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL(UINT16_MAX - 9, get_half_word(memory, 10));
+  state.registers[10] = -10;
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL(UINT16_MAX - 9, get_half_word(state.memory, 10));
 
   /* // TEST WITH POSITIVE */
-  registers[10] = 5;
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL(5, get_half_word(memory, 10));
+  state.registers[10] = 5;
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL(5, get_half_word(state.memory, 10));
 
   /* // TEST WITH NEGATIVE IMMEDIATE */
-  registers[4] = 20;
-  registers[10] = 5;
+  state.registers[4] = 20;
+  state.registers[10] = 5;
   uint32_t instruction_2 = create_s_type(-10, 10, 4, SH, STORE);
-  run_instruction(instruction_2, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL(5, get_half_word(memory, 10));
+  run_instruction(instruction_2, &state);
+  TEST_ASSERT_EQUAL(5, get_half_word(state.memory, 10));
 }
 
 void test_SW(void) {
-  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5};
-  uint8_t memory[MEMORY_BYTES] = {};
+  struct machine_state state = {
+    .registers = {0, 1, 2, 0, 0, 5},
+    .memory = {0}
+  };
   for (uint32_t i = 0; i < MEMORY_WORDS; i++) {
-    memory[i * 4] = i * 4;
+    state.memory[i * 4] = i * 4;
   }
-  uint64_t program_counter = 0;
 
   // TEST WITH ZERO
-  registers[8] = 0;
+  state.registers[8] = 0;
   uint32_t instruction = create_s_type(8, 10, 4, SW, STORE);
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL(0, get_word(memory, 8));
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL(0, get_word(state.memory, 8));
 
   // TEST WITH STORING NEGATIVE VALUE
-  registers[10] = -10;
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL(UINT32_MAX - 9, get_word(memory, 8));
+  state.registers[10] = -10;
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL(UINT32_MAX - 9, get_word(state.memory, 8));
 
   /* // TEST WITH POSITIVE */
-  registers[10] = 5;
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL(5, get_word(memory, 8));
+  state.registers[10] = 5;
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL(5, get_word(state.memory, 8));
 
   /* // TEST WITH NEGATIVE IMMEDIATE */
-  registers[4] = 16;
-  registers[10] = 5;
+  state.registers[4] = 16;
+  state.registers[10] = 5;
   uint32_t instruction_2 = create_s_type(-8, 10, 4, SW, STORE);
-  run_instruction(instruction_2, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL(5, get_word(memory, 8));
+  run_instruction(instruction_2, &state);
+  TEST_ASSERT_EQUAL(5, get_word(state.memory, 8));
 }
 
 void test_SD(void) {
-  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5};
-  uint8_t memory[MEMORY_BYTES] = {};
-  for (uint32_t i = 0; i < MEMORY_WORDS / 2; i++) {
-    memory[i * 8] = i * 8;
+  struct machine_state state = {
+    .registers = {0, 1, 2, 0, 0, 5},
+    .memory = {0}
+  };
+  for (uint32_t i = 0; i < (MEMORY_WORDS / 2); i++) {
+    state.memory[i * 8] = i * 8;
   }
-  uint64_t program_counter = 0;
 
   // TEST WITH ZERO
   uint32_t instruction = create_s_type(8, 10, 4, SD, STORE);
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL(0, get_double_word(memory, 8));
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL(0, get_double_word(state.memory, 8));
 
   // TEST WITH STORING NEGATIVE VALUE
-  registers[10] = -10;
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL_UINT64(UINT64_MAX - 9, get_double_word(memory, 8));
+  state.registers[10] = -10;
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL_UINT64(UINT64_MAX - 9, get_double_word(state.memory, 8));
 
   // TEST WITH POSITIVE
-  registers[10] = 5;
-  run_instruction(instruction, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL_UINT64(5, get_double_word(memory, 8));
+  state.registers[10] = 5;
+  run_instruction(instruction, &state);
+  TEST_ASSERT_EQUAL_UINT64(5, get_double_word(state.memory, 8));
 
   // TEST WITH NEGATIVE IMMEDIATE
-  registers[4] = 16;
-  registers[10] = 5;
+  state.registers[4] = 16;
+  state.registers[10] = 5;
   uint32_t instruction_2 = create_s_type(-8, 10, 4, SD, STORE);
-  run_instruction(instruction_2, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL_UINT64(5, get_double_word(memory, 8));
+  run_instruction(instruction_2, &state);
+  TEST_ASSERT_EQUAL_UINT64(5, get_double_word(state.memory, 8));
 }
 
 struct i_instruction_case {
@@ -279,20 +287,17 @@ static void test_i_instruction(const struct i_instruction_case cases[],
                                uint32_t opcode) {
   const uint32_t rs1_index = 1;
   const uint32_t rd_index = 10;
-  const uint64_t pc = 0;
 
   for (size_t i = 0; i < case_count; ++i) {
-    uint64_t registers[NUM_REGISTERS] = {0};
-    uint8_t memory[MEMORY_BYTES] = {0};
-    registers[rs1_index] = cases[i].rs1_value;
-
+    struct machine_state state = {0};
+    state.registers[rs1_index] = cases[i].rs1_value;
     uint32_t instruction = create_i_type(cases[i].immediate,
                                          rs1_index,
                                          funct3,
                                          rd_index,
                                          opcode);
-    run_instruction(instruction, memory, registers, pc);
-    TEST_ASSERT_EQUAL_UINT64(cases[i].expected, registers[rd_index]);
+    run_instruction(instruction, &state);
+    TEST_ASSERT_EQUAL_UINT64(cases[i].expected, state.registers[rd_index]);
   }
 }
 
@@ -409,23 +414,25 @@ static void test_r_instruction(const struct r_instruction_case cases[],
                                size_t case_count,
                                uint32_t funct_7_3,
                                uint32_t opcode) {
+
   const uint32_t rs1_index = 1;
   const uint32_t rs2_index = 2;
   const uint32_t rd_index = 10;
   const uint32_t program_counter = 0;
-
+  /* uint8_t memory[MEMORY_BYTES]; */
+  /* uint64_t registers[NUM_REGISTERS]; */
+  /* uint64_t program_counter; */
   for (size_t i = 0; i < case_count; ++i) {
-    uint64_t registers[NUM_REGISTERS] = {0};
-    uint8_t memory[MEMORY_BYTES] = {0};
-    registers[rs1_index] = cases[i].rs1_value;
-    registers[rs2_index] = cases[i].rs2_value;
+    struct machine_state state = {0};
+    state.registers[rs1_index] = cases[i].rs1_value;
+    state.registers[rs2_index] = cases[i].rs2_value;
     uint32_t instruction = create_r_type(funct_7_3,
                                          rs2_index,
                                          rs1_index,
                                          rd_index,
                                          opcode);
-    run_instruction(instruction, memory, registers, program_counter);
-    TEST_ASSERT_EQUAL_UINT64(cases[i].expected, registers[rd_index]);
+    run_instruction(instruction, &state);
+    TEST_ASSERT_EQUAL_UINT64(cases[i].expected, state.registers[rd_index]);
   }
 }
 
@@ -572,27 +579,35 @@ void test_AND(void) {
 }
 
 void test_LUI(void) {
-  uint8_t memory[MEMORY_BYTES] = {0};
-  uint64_t registers[NUM_REGISTERS] = {0};
+  struct machine_state state = {0};
+
   uint32_t instruction_1 = create_u_type(1000, 2, LUI);
-  uint64_t program_counter = 0;
-  run_instruction(instruction_1, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL_UINT64(1000 << 12, registers[2]);
+  run_instruction(instruction_1, &state);
+  TEST_ASSERT_EQUAL_UINT64(1000 << 12, state.registers[2]);
 
   uint32_t instruction_2 = create_u_type(-1000, 12, LUI);
-  run_instruction(instruction_2, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL_UINT64(-(UINT64_C(0x003E8000)), registers[12]);
+  run_instruction(instruction_2, &state);
+  TEST_ASSERT_EQUAL_UINT64(-(UINT64_C(0x003E8000)), state.registers[12]);
 
   uint32_t instruction_3 = create_u_type(-1, 12, LUI);
-  run_instruction(instruction_3, memory, registers, program_counter);
-  TEST_ASSERT_EQUAL_UINT64(-(UINT64_C(0x00001000)), registers[12]);
+  run_instruction(instruction_3, &state);
+  TEST_ASSERT_EQUAL_UINT64(-(UINT64_C(0x00001000)), state.registers[12]);
 
   // CHECK SIGN EXTENSION
   uint32_t instruction_4 = create_u_type(0x80000, 12, LUI);
-  run_instruction(instruction_4, memory, registers, program_counter);
-  print_bits(registers[12]);
-  TEST_ASSERT_EQUAL_UINT64(0xFFFFFFFF80000000, registers[12]);
+  run_instruction(instruction_4, &state);
+  TEST_ASSERT_EQUAL_UINT64(0xFFFFFFFF80000000, state.registers[12]);
 }
+
+
+void test_AUIPC(void) {
+  struct machine_state state = {0};
+
+  uint32_t instruction_1 = create_u_type(1000, 2, LUI);
+  run_instruction(instruction_1, &state);
+  /* TEST_ASSERT_EQUAL_UINT64(program_counter, registers[2]); */
+}
+
 
 void test_s_create(void) {
   // EASY: 1000 is within the signed 12-bit S-immediate range.

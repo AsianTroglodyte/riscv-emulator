@@ -9,10 +9,16 @@ enum {MEMORY_WORDS = 16};
 enum {MEMORY_HALF_WORDS = MEMORY_WORDS * 2};
 enum {MEMORY_BYTES = MEMORY_WORDS * 4};
 
+
+struct machine_state {
+  uint8_t memory[MEMORY_BYTES];
+  uint64_t registers[NUM_REGISTERS];
+  uint64_t program_counter;
+};
+
+
 void run_instruction(uint32_t instruction,
-                     uint8_t memory[],
-                     uint64_t registers[NUM_REGISTERS],
-                     uint64_t pc);
+                     struct machine_state* machine_state);
 
 
 enum status_code {

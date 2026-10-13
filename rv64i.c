@@ -5,9 +5,10 @@
 #include <assert.h>
 
 void run_instruction(uint32_t instruction,
-                     uint8_t memory[],
-                     uint64_t registers[],
-                     uint64_t pc) {
+                    struct machine_state *machine_state) {
+  uint8_t *memory = machine_state->memory;
+  uint64_t *registers = machine_state->registers;
+  uint64_t *program_counter = &machine_state->program_counter;
 
   switch (get_opcode(instruction)) {
     int32_t immediate;
@@ -119,8 +120,8 @@ void run_instruction(uint32_t instruction,
     break;
   case AUIPC:
     printf("AUIPC\n");
+    /* program_counter = get_upper_immediate(instruction); */
     break;
-
   case OP_IMM_32:
     printf("OP_IMM_32");
     break;
@@ -200,10 +201,6 @@ void run_instruction(uint32_t instruction,
     }
     break;
   case LUI:
-    /* printf("instruction: "); */
-    /* print_bits(instruction); */
-    /* printf("upper_immediate: "); */
-    /* print_bits(get_upper_immediate(instruction)); */
     rd_index = get_rd_index(instruction);
     registers[rd_index] = get_upper_immediate(instruction);
     break;
