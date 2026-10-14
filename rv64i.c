@@ -47,7 +47,6 @@ void run_instruction(uint32_t instruction,
       printf("funct3 %d does not correspond to any LOAD instruction.", funct3);
       assert(0);
     }
-
     break;
   case LOAD_FP:
     printf("LOAD_FP\n");
@@ -234,12 +233,19 @@ void run_instruction(uint32_t instruction,
     printf("BRANCH\n");
     break;
   case JALR:
+
     printf("JALR\n");
     break;
   case RESERVED:
     printf("RESERVED\n");
     break;
   case JAL:
+    immediate = get_j_immediate(instruction);
+    rd_index = get_rd_index(instruction);
+    /* print_bits(program_counter); */
+    /* bits((uint64_t)(int64_t)get_upper_immediate(instruction)); */
+    registers[rd_index] = (uint64_t)(int64_t)get_upper_immediate(instruction) + program_counter;
+    /* print_bits(registers[rd_index]); */
     printf("JAL\n");
     break;
   case SYSTEM:
@@ -265,8 +271,7 @@ void run_instruction(uint32_t instruction,
  * @return uint32_t bit slice shifted so start is beginning digit.
  **/
 inline uint32_t bits(uint32_t instruction, int start, int end) {
-  int length = end - start + 1;
-  return (instruction >> start) & ((1u << length) - 1);
+  return (instruction >> start) & ((1u << (end - start + 1)) - 1);
 }
 
 uint32_t get_rd_index(uint32_t instruction) {
@@ -302,6 +307,14 @@ int32_t get_s_immediate(uint32_t instruction) {
   return imm_11_0;
 }
 
+int get_j_immediate(uint32_t instruction) {
+  uint32_t imm_20 = bits(instruction, 31, 31) << 20;
+  uint32_t imm_10_1 = bits(instruction, 21, 30) << 1;
+  uint32_t imm_11 = bits(instruction, 20, 20) << 11;
+  uint32_t imm_19_12 = bits(instruction, 12, 19) << 12;
+  return imm_20 + imm_10_1 + imm_11 + imm_19_12;
+}
+
 int32_t get_upper_immediate(uint32_t instruction) {
   return instruction & (UINT32_MAX << 12);
 }
@@ -333,14 +346,6 @@ uint32_t get_u_immediate(uint32_t instruction) {
   return imm_31_12;
 }
 
-int j_immediate(uint32_t instruction) {
-  uint32_t imm_20 = bits(instruction, 31, 31) << 20;
-  uint32_t imm_10_1 = bits(instruction, 21, 30) << 1;
-  uint32_t imm_11 = bits(instruction, 20, 20) << 11;
-  uint32_t imm_19_12 = bits(instruction, 12, 19) << 12;
-  return imm_20 + imm_10_1 + imm_11 + imm_19_12;
-}
-
 void print_registers(const uint64_t registers[NUM_REGISTERS]) {
   // add bounds check later
   for (int i = 0; i < NUM_REGISTERS; i++) {
@@ -357,16 +362,13 @@ void print_memory(const uint8_t memory[]) {
   }
 }
 
-void print_bits(const size_t num) {
-  int total_bits = sizeof(num) * 8;
-
-  for (int i = total_bits - 1; i >= 0; i--) {
-    int bit = (num >> i) & 1;
-    printf("%d", bit);
-    if (i % 4 == 0)  printf(" ");
+void print_bits_impl(uint64_t value, unsigned width) {
+  for (unsigned i = width; i > 0; --i) {
+    putchar('0' + ((value >> (i - 1)) & UINT64_C(1)));
+    /* printf("%" PRIu64, (UINT64_MAX - 1) & value); */
+    if (((i - 1) % 4) == 0) putchar(' ');
   }
-
-  printf("\n");
+  putchar('\n');
 }
 
 inline int opcode_bits_1_0(uint32_t instruction) {
@@ -525,4 +527,15 @@ uint32_t create_u_type(uint32_t upper_immediate, uint32_t rd_index, uint32_t opc
   upper_immediate = upper_immediate << 12;
   rd_index = rd_index << 7;
   return (uint32_t) upper_immediate | rd_index | opcode;
+}
+
+uint32_t create_j_type(uint32_t immediate, uint32_t rd_index, uint32_t opcode) {
+  assert_valid_register(rd_index);
+  assert_valid_opcode(opcode);
+  uint32_t imm_20 = (0b1 << 19);
+  uint32_t imm_19_12 = ((0b11111111 << 11) & immediate) >> 11;
+  uint32_t imm_11 = ((0b1 << 10) & immediate) >> 2;
+  uint32_t imm_10_1 = (0b1111111111 & immediate) << 9;
+  immediate = imm_20 + imm_10_1 + imm_11 + imm_19_12;
+  return (uint32_t) immediate | rd_index | opcode;
 }

@@ -117,28 +117,14 @@ enum branch_funct3_enums: uint32_t {
 
 void print_registers(const uint64_t registers[NUM_REGISTERS]);
 void print_memory(const uint8_t memory[]);
-void print_bits(const size_t num);
-void print_8_bits(const uint8_t num);
+void print_bits_impl(uint64_t value, unsigned width);
+#define print_bits(x) print_bits_impl((uint64_t)(x), sizeof(x) * 8)
 
-uint32_t create_i_type(uint32_t immediate,
-                       int32_t rs1,
-                       int32_t funct3,
-                       int32_t rd,
-                       int32_t opcode);
-uint32_t create_s_type(uint32_t immediate,
-                       int32_t rs1,
-                       int32_t rs2,
-                       int32_t funct3,
-                       int32_t opcode);
-uint32_t create_r_type(uint32_t funct7_funct3,
-                       int32_t rs2_index,
-                       int32_t rs1_index,
-                       int32_t rd_index,
-                       int32_t opcode);
-uint32_t create_u_type(uint32_t upper_immediate,
-                       uint32_t rd_index,
-                       uint32_t opcode);
-
+uint32_t create_i_type(uint32_t immediate, int32_t rs1, int32_t funct3, int32_t rd, int32_t opcode);
+uint32_t create_s_type(uint32_t immediate, int32_t rs1, int32_t rs2, int32_t funct3, int32_t opcode);
+uint32_t create_r_type(uint32_t funct7_funct3, int32_t rs2_index, int32_t rs1_index, int32_t rd_index, int32_t opcode);
+uint32_t create_u_type(uint32_t upper_immediate, uint32_t rd_index, uint32_t opcode);
+uint32_t create_j_type(uint32_t immediate, uint32_t rd_index, uint32_t opcode);
 uint32_t bits(uint32_t instruction, int start, int end);
 
 // EXTRACT DATA FROM INSTRUCTION
@@ -150,6 +136,7 @@ uint32_t get_funct3(uint32_t instruction);
 uint32_t get_funct7(uint32_t instruction);
 int32_t get_i_immediate(uint32_t instruction);
 int32_t get_s_immediate(uint32_t instruction);
+int32_t get_j_immediate(uint32_t instruction);
 int32_t get_upper_immediate(uint32_t instruction);
 
 // GET PARTICULAR OPCODES

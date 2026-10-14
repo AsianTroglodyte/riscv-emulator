@@ -6,11 +6,12 @@
 #define MEMORY_BYTES MEMORY_WORD * 4
 
 int main() {
-  uint64_t registers[NUM_REGISTERS] = {0, 1, 2, 0, 0, 5};
-  uint8_t memory[MEMORY_WORDS] = {};
+  struct machine_state state = {
+    .registers = {0, 1, 2, 0, 0, 5},
+  };
 
   for (uint32_t i = 0; i < MEMORY_WORDS; i++) {
-    memory[i] = i;
+    state.memory[i] = i;
   }
 
   uint32_t instructions[1] = {
@@ -18,11 +19,11 @@ int main() {
   };
 
   for (int i = 0; i < 1; i++) {
-    run_instruction(instructions[i], memory, registers);
+    run_instruction(instructions[i], &state);
   }
 
-  print_memory(memory);
-  print_registers(registers);
+  print_memory(state.memory);
+  print_registers(state.registers);
 
   return 0;
 }
@@ -30,7 +31,7 @@ int main() {
 /**
  * @brief creates an i-type instruction
  *
- * @param immediate - the immediate value
+ * @asdfasdf asdfsfd- the immediate value
  * @param rs1 - register source 1
  * @param funct3 - code that determines specific instruction from opcode
  * @return
