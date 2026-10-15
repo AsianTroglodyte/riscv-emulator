@@ -616,8 +616,8 @@ void test_JAL(void) {
 
   state.program_counter = 10;
   run_instruction(create_j_type(10, 10, JAL), &state);
-  printf("rd: ");
-  print_bits((uint8_t ) 0b1101);
+  /* printf("rd: "); */
+  print_bits(state.registers[10]);
   /* TEST_ASSERT_EQUAL_UINT64(0x2000, state.registers[2]); */
 
   /* state.program_counter = 10; */
@@ -670,25 +670,27 @@ void test_u_create(void) {
 }
 
 void test_j_create(void) {
-  // SIMPLE
-  uint32_t imm_20 = 0b1;
-  uint32_t imm_19_12 = 0;
-  uint32_t imm_11 = 0b1;
-  uint32_t imm_10_1 = 0;
-  uint32_t immediate_1 = 10;
-  uint32_t u_instruction_1 = create_j_type(immediate_1, 10, JAL);
-  // funct7=0b0000000 rs2=01010, rs1=00000, funct3=000, rd=00001, opcode=0110011
-  TEST_ASSERT_EQUAL(0b10000000000000000000 | 0b00000 | JAL, u_instruction_1);
+  // Zero offset: only rd and opcode are encoded.
+  uint32_t instruction = create_j_type(0, 1, JAL);
+  TEST_ASSERT_EQUAL(UINT32_C(0x000000ef), instruction);
 
-  imm_20 = 0b1;
-  imm_19_12 = 0;
-  imm_11 = 0b1;
-  imm_10_1 = 0;
-  immediate_1 = imm_20 << 19 | imm_19_12 << 11 | imm_11 << 10 | imm_10_1;
+  // Distinct bits exercise imm[19:12], imm[11], and imm[10:1].
+  // immediate = 0x54320; encoded immediate fields are 0xA8643 in bits [31:12].
+  instruction = create_j_type(UINT32_C(0x54320), 10, JAL);
+  uint32_t expected = (UINT32_C(0x54320) & UINT32_C(0x00100000)) << 11 |
+                      (UINT32_C(0x54320) & UINT32_C(0x000007fe)) << 20 |
+                      (UINT32_C(0x54320) & UINT32_C(0x00000800)) << 9 |
+                      (UINT32_C(0x54320) & UINT32_C(0x000ff000)) |
+                      (UINT32_C(10) << 7) | JAL;
+  TEST_ASSERT_EQUAL(expected, instruction);
 
-  /* uint32_t u_instruction_2 = create_j_type(0b00000000000000000000, 0, JAL); */
-  /* // funct7=0b0000000 rs2=01010, rs1=00000, funct3=000, rd=00001, opcode=0110011 */
-  /* TEST_ASSERT_EQUAL(0b10000000000000000000 | 0b00000 | JAL, u_instruction_2); */
+  // Largest positive even offset (2^20 - 2).
+  instruction = create_j_type(INT32_C(1048574), 31, JAL);
+  TEST_ASSERT_EQUAL(UINT32_C(0x7fffffef), instruction);
+
+  // Smallest negative offset (-2^20), whose encoded immediate is 0x80000.
+  instruction = create_j_type((uint32_t) -INT32_C(1048576), 0, JAL);
+  TEST_ASSERT_EQUAL(UINT32_C(0x8000006f), instruction);
 }
 
 
@@ -718,8 +720,9 @@ int main(void) {
   UNITY_BEGIN();
   RUN_TEST(test_s_create);
   RUN_TEST(test_r_create);
-  RUN_TEST(test_get_s_immediate);
+  RUN_TEST(test_j_create);
   RUN_TEST(test_u_create);
+  RUN_TEST(test_get_s_immediate);
 
   RUN_TEST(test_LW);
   RUN_TEST(test_LH);

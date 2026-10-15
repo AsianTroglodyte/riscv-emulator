@@ -245,7 +245,9 @@ void run_instruction(uint32_t instruction,
     /* print_bits(program_counter); */
     /* bits((uint64_t)(int64_t)get_upper_immediate(instruction)); */
     registers[rd_index] = (uint64_t)(int64_t)get_upper_immediate(instruction) + program_counter;
+    /* print_bits(rd_index); */
     /* print_bits(registers[rd_index]); */
+    /* print_bits(machine_state->registers[rd_index]); */
     printf("JAL\n");
     break;
   case SYSTEM:
@@ -532,10 +534,12 @@ uint32_t create_u_type(uint32_t upper_immediate, uint32_t rd_index, uint32_t opc
 uint32_t create_j_type(uint32_t immediate, uint32_t rd_index, uint32_t opcode) {
   assert_valid_register(rd_index);
   assert_valid_opcode(opcode);
-  uint32_t imm_20 = (0b1 << 19);
+  uint32_t imm_20 = (immediate & UINT32_C(1) << 19) << 12;
+  /* printf("imm_20: "); */
+  /* print_bits(imm_20); */
   uint32_t imm_19_12 = ((0b11111111 << 11) & immediate) >> 11;
   uint32_t imm_11 = ((0b1 << 10) & immediate) >> 2;
   uint32_t imm_10_1 = (0b1111111111 & immediate) << 9;
-  immediate = imm_20 + imm_10_1 + imm_11 + imm_19_12;
-  return (uint32_t) immediate | rd_index | opcode;
+  immediate = (imm_20 | imm_10_1 | imm_11 | imm_19_12) << 12;
+  return (uint32_t) immediate | (rd_index << 7) | opcode;
 }
