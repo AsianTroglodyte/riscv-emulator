@@ -539,20 +539,10 @@ uint32_t create_u_type(uint32_t upper_immediate, uint32_t rd_index, uint32_t opc
 uint32_t create_j_type(uint32_t immediate, uint32_t rd_index, uint32_t opcode) {
   assert_valid_register(rd_index);
   assert_valid_opcode(opcode);
-  printf("immediate: ");
-  print_bits(immediate);
   uint32_t imm_20 = (immediate & UINT32_C(1) << 19);
-  printf("imm_20: ");
-  print_bits(imm_20);
   uint32_t imm_19_12 = (immediate >> 11) & 0b11111111;
-  printf("imm_19_12: ");
-  print_bits(imm_19_12);
   uint32_t imm_11 = ((0b1 << 10) & immediate) >> 2;
-  printf("imm_11: ");
-  print_bits(imm_11);
   uint32_t imm_10_1 = (0b1111111111 & immediate) << 9;
-  printf("imm_10_1: ");
-  print_bits(imm_10_1);
   immediate = (imm_20 | imm_10_1 | imm_11 | imm_19_12) << 12;
   return (uint32_t) immediate | (rd_index << 7) | opcode;
 }

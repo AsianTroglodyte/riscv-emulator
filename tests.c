@@ -769,7 +769,7 @@ int main(void) {
   RUN_TEST(test_AND);
   /* RUN_TEST(test_LUI); */
   RUN_TEST(test_AUIPC);
-  /* RUN_TEST(test_JAL); */
+  RUN_TEST(test_JAL);
 
   UNITY_END();
 }
