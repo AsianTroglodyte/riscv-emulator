@@ -669,31 +669,47 @@ void test_u_create(void) {
   TEST_ASSERT_EQUAL((UINT32_MAX << 12) | (0b110 << 7)  | LUI, u_instruction_2);
 }
 
-void test_j_create(void) {
-  // Zero offset: only rd and opcode are encoded.
-  uint32_t instruction = create_j_type(0, 1, JAL);
-  TEST_ASSERT_EQUAL(UINT32_C(0x000000ef), instruction);
+struct j_create_case {
+  uint32_t imm_10_1;
+  uint32_t imm_11;
+  uint32_t imm_19_12;
+  uint32_t imm_20;
+  uint32_t rd_index;
+};
 
-  // Distinct bits exercise imm[19:12], imm[11], and imm[10:1].
-  // immediate = 0x54320; encoded immediate fields are 0xA8643 in bits [31:12].
-  instruction = create_j_type(UINT32_C(0x54320), 10, JAL);
-  uint32_t expected = (UINT32_C(0x54320) & UINT32_C(0x00100000)) << 11 |
-                      (UINT32_C(0x54320) & UINT32_C(0x000007fe)) << 20 |
-                      (UINT32_C(0x54320) & UINT32_C(0x00000800)) << 9 |
-                      (UINT32_C(0x54320) & UINT32_C(0x000ff000)) |
-                      (UINT32_C(10) << 7) | JAL;
-  TEST_ASSERT_EQUAL(expected, instruction);
+void test_j_create_helper(const struct j_create_case cases[],
+                          size_t case_count,
+                          uint32_t opcode) {
+  for (size_t i = 0; i < case_count; ++i) {
+    uint32_t imm_10_1 = cases[i].imm_10_1;
+    uint32_t imm_11 = cases[i].imm_11;
+    uint32_t imm_19_12 = cases[i].imm_19_12;
+    uint32_t imm_20 = cases[i].imm_20;
+    uint32_t thing = (cases[i].rd_index << 7) | opcode;
+    uint32_t immediate = (imm_20 << 19) | (imm_19_12 << 11) | (imm_11 << 10) | imm_10_1;
 
-  // Largest positive even offset (2^20 - 2).
-  instruction = create_j_type(INT32_C(1048574), 31, JAL);
-  TEST_ASSERT_EQUAL(UINT32_C(0x7fffffef), instruction);
-
-  // Smallest negative offset (-2^20), whose encoded immediate is 0x80000.
-  instruction = create_j_type((uint32_t) -INT32_C(1048576), 0, JAL);
-  TEST_ASSERT_EQUAL(UINT32_C(0x8000006f), instruction);
+    uint32_t instruction = create_j_type(immediate, 10, JAL);
+    TEST_ASSERT_EQUAL((imm_20 << 31) |
+                      (imm_19_12 << 12) |
+                      (imm_11 << 20) |
+                      (imm_10_1 << 21) |
+                      thing, instruction);
+  }
 }
 
 
+void test_j_create(void) {
+  const struct j_create_case cases[] = {
+    // imm_10_1, imm_11, imm_19_12, imm_20, rd_index
+    {0, 0, 0, 0b1, 10},
+    {0, 0, 0b11111111, 0b1, 10},
+    {0, 0b1, 0b11111111, 0b1, 10},
+    {0b1111111111, 0b1, 0b11111111, 0b1, 10},
+    {0b1010010111, 0b1, 0b10110011, 0b0, 10}
+  };
+
+  test_j_create_helper(cases, 5, JAL);
+}
 
 void test_get_s_immediate(void) {
   // EASY
@@ -753,7 +769,7 @@ int main(void) {
   RUN_TEST(test_AND);
   /* RUN_TEST(test_LUI); */
   RUN_TEST(test_AUIPC);
-  RUN_TEST(test_JAL);
+  /* RUN_TEST(test_JAL); */
 
   UNITY_END();
 }

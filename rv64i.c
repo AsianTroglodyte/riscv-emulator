@@ -4,6 +4,7 @@
 #include "rv64i.h"
 #include <assert.h>
 
+
 void run_instruction(uint32_t instruction,
                     struct machine_state *machine_state) {
   uint8_t *memory = machine_state->memory;
@@ -240,11 +241,13 @@ void run_instruction(uint32_t instruction,
     printf("RESERVED\n");
     break;
   case JAL:
-    immediate = get_j_immediate(instruction);
     rd_index = get_rd_index(instruction);
     /* print_bits(program_counter); */
     /* bits((uint64_t)(int64_t)get_upper_immediate(instruction)); */
-    registers[rd_index] = (uint64_t)(int64_t)get_upper_immediate(instruction) + program_counter;
+    // save address of next instruction
+    registers[rd_index] = program_counter + 4;
+    // jump to target address
+    program_counter = (uint64_t)(int64_t) get_j_immediate(instruction) + program_counter;
     /* print_bits(rd_index); */
     /* print_bits(registers[rd_index]); */
     /* print_bits(machine_state->registers[rd_index]); */
@@ -317,8 +320,10 @@ int get_j_immediate(uint32_t instruction) {
   return imm_20 + imm_10_1 + imm_11 + imm_19_12;
 }
 
-int32_t get_upper_immediate(uint32_t instruction) {
-  return instruction & (UINT32_MAX << 12);
+
+// function works on U-Type (u for upper-immediate) AND regular immediate values.
+int32_t get_upper_immediate(uint32_t instruction_or_immediate) {
+  return instruction_or_immediate & (UINT32_MAX << 12);
 }
 
 int32_t sign_extend_32(uint32_t field, int width) {
@@ -534,12 +539,20 @@ uint32_t create_u_type(uint32_t upper_immediate, uint32_t rd_index, uint32_t opc
 uint32_t create_j_type(uint32_t immediate, uint32_t rd_index, uint32_t opcode) {
   assert_valid_register(rd_index);
   assert_valid_opcode(opcode);
-  uint32_t imm_20 = (immediate & UINT32_C(1) << 19) << 12;
-  /* printf("imm_20: "); */
-  /* print_bits(imm_20); */
-  uint32_t imm_19_12 = ((0b11111111 << 11) & immediate) >> 11;
+  printf("immediate: ");
+  print_bits(immediate);
+  uint32_t imm_20 = (immediate & UINT32_C(1) << 19);
+  printf("imm_20: ");
+  print_bits(imm_20);
+  uint32_t imm_19_12 = (immediate >> 11) & 0b11111111;
+  printf("imm_19_12: ");
+  print_bits(imm_19_12);
   uint32_t imm_11 = ((0b1 << 10) & immediate) >> 2;
+  printf("imm_11: ");
+  print_bits(imm_11);
   uint32_t imm_10_1 = (0b1111111111 & immediate) << 9;
+  printf("imm_10_1: ");
+  print_bits(imm_10_1);
   immediate = (imm_20 | imm_10_1 | imm_11 | imm_19_12) << 12;
   return (uint32_t) immediate | (rd_index << 7) | opcode;
 }
