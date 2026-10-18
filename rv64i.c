@@ -245,9 +245,6 @@ void run_instruction(uint32_t instruction,
     // save address of next instruction
     registers[rd_index] = *program_counter + 4;
     // jump to target address
-    printf("immediate: %d\n", get_j_immediate(instruction));
-    printf("program counter: %" PRIu64" \n", (int64_t)*program_counter);
-    /* printf("immediate: %" PRIu64" \n", (int64_t) get_j_immediate(instruction)); */
     *program_counter = (int64_t) *program_counter + (int64_t) get_j_immediate(instruction);
 
     break;

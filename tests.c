@@ -616,7 +616,6 @@ void test_JAL(void) {
 
   state.program_counter = 12;
   run_instruction(create_j_type(10, 10, JAL), &state);
-  /* printf("rd: "); */
   TEST_ASSERT_EQUAL_UINT64(12 + 4, state.registers[10]);
   TEST_ASSERT_EQUAL_UINT64(10 + 12, state.program_counter);
 
@@ -624,9 +623,6 @@ void test_JAL(void) {
   run_instruction(create_j_type(-8, 11, JAL), &state);
   TEST_ASSERT_EQUAL_UINT64(12 + 4, state.registers[11]);
   TEST_ASSERT_EQUAL_UINT64(4, state.program_counter);
-  /* state.program_counter = 10; */
-  /* run_instruction(create_u_type(-1, 2, AUIPC), &state); */
-  /* TEST_ASSERT_EQUAL_UINT64((-1 << 12) + 10, state.registers[2]); */
 }
 
 void test_s_create(void) {
