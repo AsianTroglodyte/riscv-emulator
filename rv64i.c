@@ -234,8 +234,12 @@ void run_instruction(uint32_t instruction,
     printf("BRANCH\n");
     break;
   case JALR:
-
-    printf("JALR\n");
+    rd_index = get_rd_index(instruction);
+    rs1_index = get_rs1_index(instruction);
+    // save address of next instruction
+    registers[rd_index] = *program_counter + 4;
+    // jump to target address
+    *program_counter = (int64_t) get_i_immediate(instruction) + registers[rs1_index];
     break;
   case RESERVED:
     printf("RESERVED\n");

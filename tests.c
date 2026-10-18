@@ -625,6 +625,22 @@ void test_JAL(void) {
   TEST_ASSERT_EQUAL_UINT64(4, state.program_counter);
 }
 
+void test_JALR(void) {
+  struct machine_state state = {0};
+
+  // POSITIVE IMMEDIATES
+  state.program_counter = 12;
+  state.registers[10] = 12;
+  run_instruction(create_i_type(12, 10, JALR_OPCODE, 20, JALR), &state);
+  TEST_ASSERT_EQUAL_UINT64(24, state.program_counter);
+
+  // NEGATIVE IMMEDIATE
+  state.program_counter = 12;
+  state.registers[10] = 12;
+  run_instruction(create_i_type(-4, 10, JALR_OPCODE, 20, JALR), &state);
+  TEST_ASSERT_EQUAL_UINT64(8, state.program_counter);
+}
+
 void test_s_create(void) {
   // EASY: 1000 is within the signed 12-bit S-immediate range.
   uint32_t s_instruction_1 = create_s_type(1000, 6, 7, SB, STORE);
@@ -770,6 +786,7 @@ int main(void) {
   /* RUN_TEST(test_LUI); */
   RUN_TEST(test_AUIPC);
   RUN_TEST(test_JAL);
+  RUN_TEST(test_JALR);
 
   UNITY_END();
 }

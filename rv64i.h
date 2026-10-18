@@ -61,6 +61,10 @@ enum major_opcodes: uint32_t {
   CUSTOM_3=   0b1111011
 };
 
+enum JALR_funct3_enum: uint32_t {
+  JALR_OPCODE = 000,
+};
+
 enum load_funct3_enums: uint32_t {
   LB=         0b000,
   LH=         0b001,
