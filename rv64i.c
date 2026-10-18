@@ -9,7 +9,7 @@ void run_instruction(uint32_t instruction,
                     struct machine_state *machine_state) {
   uint8_t *memory = machine_state->memory;
   uint64_t *registers = machine_state->registers;
-  uint64_t program_counter = machine_state->program_counter;
+  uint64_t *program_counter = &machine_state->program_counter;
 
   switch (get_opcode(instruction)) {
     int32_t immediate;
@@ -120,7 +120,7 @@ void run_instruction(uint32_t instruction,
     break;
   case AUIPC:
     rd_index = get_rd_index(instruction);
-    registers[rd_index] = (uint64_t)(int64_t)get_upper_immediate(instruction) + program_counter;
+    registers[rd_index] = (uint64_t)(int64_t)get_upper_immediate(instruction) + *program_counter;
     break;
   case OP_IMM_32:
     printf("OP_IMM_32");
@@ -242,16 +242,14 @@ void run_instruction(uint32_t instruction,
     break;
   case JAL:
     rd_index = get_rd_index(instruction);
-    /* print_bits(program_counter); */
-    /* bits((uint64_t)(int64_t)get_upper_immediate(instruction)); */
     // save address of next instruction
-    registers[rd_index] = program_counter + 4;
+    registers[rd_index] = *program_counter + 4;
     // jump to target address
-    program_counter = (uint64_t)(int64_t) get_j_immediate(instruction) + program_counter;
-    /* print_bits(rd_index); */
-    /* print_bits(registers[rd_index]); */
-    /* print_bits(machine_state->registers[rd_index]); */
-    printf("JAL\n");
+    printf("immediate: %d\n", get_j_immediate(instruction));
+    printf("program counter: %" PRIu64" \n", (int64_t)*program_counter);
+    /* printf("immediate: %" PRIu64" \n", (int64_t) get_j_immediate(instruction)); */
+    *program_counter = (int64_t) *program_counter + (int64_t) get_j_immediate(instruction);
+
     break;
   case SYSTEM:
     printf("SYSTEM\n");
@@ -312,12 +310,13 @@ int32_t get_s_immediate(uint32_t instruction) {
   return imm_11_0;
 }
 
-int get_j_immediate(uint32_t instruction) {
-  uint32_t imm_20 = bits(instruction, 31, 31) << 20;
-  uint32_t imm_10_1 = bits(instruction, 21, 30) << 1;
-  uint32_t imm_11 = bits(instruction, 20, 20) << 11;
-  uint32_t imm_19_12 = bits(instruction, 12, 19) << 12;
-  return imm_20 + imm_10_1 + imm_11 + imm_19_12;
+int32_t get_j_immediate(uint32_t instruction) {
+  uint32_t imm_20 = bits(instruction, 31, 31) << 19;
+  uint32_t imm_10_1 = bits(instruction, 21, 30);
+  uint32_t imm_11 = bits(instruction, 20, 20) << 10;
+  uint32_t imm_19_12 = bits(instruction, 12, 19) << 11;
+  uint32_t immediate = sign_extend_32(imm_20 + imm_10_1 + imm_11 + imm_19_12, 20);
+  return immediate;
 }
 
 
