@@ -685,6 +685,25 @@ void test_u_create(void) {
   TEST_ASSERT_EQUAL((UINT32_MAX << 12) | (0b110 << 7)  | LUI, u_instruction_2);
 }
 
+void test_b_create(void) {
+  // TEST IMMEDIATE
+  // 1 = 0b1; 11 = 0b1; 10-5 = 0b111011; 4-1 = 0b1001;
+  uint32_t instruction = create_b_type(0b111110111001, 0, 0, 0, 0);
+  /* print_bits(instruction); */
+  /* print_bits((0b1 << 31) | (0b1  << 7) | (0b111011 << 25) | (0b1001 << 8)); */
+  TEST_ASSERT_EQUAL_UINT32((0b1 << 31) | (0b1  << 7) | (0b111011 << 25) | (0b1001 << 8), instruction);
+
+  // TEST OPCODE AND FUNCT 3
+  instruction = create_b_type(0, 0, 0, BGEU, BRANCH);
+  TEST_ASSERT_EQUAL_UINT32((BGEU << 12) | BRANCH, instruction);
+
+  // TEST rs1_index AND rs2_index
+  instruction = create_b_type(0, 0b10001, 0b10001, 0, 0);
+  TEST_ASSERT_EQUAL_UINT32((0b10001 << 20) | (0b10001 << 15), instruction);
+}
+
+
+
 struct j_create_case {
   uint32_t imm_10_1;
   uint32_t imm_11;
@@ -787,6 +806,6 @@ int main(void) {
   RUN_TEST(test_AUIPC);
   RUN_TEST(test_JAL);
   RUN_TEST(test_JALR);
-
+  RUN_TEST(test_b_create);
   UNITY_END();
 }

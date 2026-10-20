@@ -320,6 +320,18 @@ int32_t get_j_immediate(uint32_t instruction) {
   return immediate;
 }
 
+uint32_t get_u_immediate(uint32_t instruction) {
+  uint32_t imm_31_12 = bits(instruction, 12, 31) << 12;
+  return imm_31_12;
+}
+
+uint32_t get_b_immediate(uint32_t instruction) {
+  uint32_t imm_12 = bits(instruction, 31, 31) << 12;
+  uint32_t imm_10_5 = bits(instruction, 25, 30) << 5;
+  uint32_t imm_4_1 = bits(instruction, 8, 11) << 1;
+  uint32_t imm_11 = bits(instruction, 7, 7) << 11;
+  return (imm_12 + imm_11 + imm_10_5 + imm_4_1);
+}
 
 // function works on U-Type (u for upper-immediate) AND regular immediate values.
 int32_t get_upper_immediate(uint32_t instruction_or_immediate) {
@@ -340,18 +352,6 @@ int32_t sign_extend_32(uint32_t field, int width) {
   return field;
 }
 
-uint32_t get_b_immediate(uint32_t instruction) {
-  uint32_t imm_12 = bits(instruction, 31, 31) << 12;
-  uint32_t imm_10_5 = bits(instruction, 25, 30) << 5;
-  uint32_t imm_4_1 = bits(instruction, 8, 11) << 1;
-  uint32_t imm_11 = bits(instruction, 7, 7) << 11;
-  return (imm_12 + imm_11 + imm_10_5 + imm_4_1);
-}
-
-uint32_t get_u_immediate(uint32_t instruction) {
-  uint32_t imm_31_12 = bits(instruction, 12, 31) << 12;
-  return imm_31_12;
-}
 
 void print_registers(const uint64_t registers[NUM_REGISTERS]) {
   // add bounds check later
@@ -545,4 +545,50 @@ uint32_t create_j_type(uint32_t immediate, uint32_t rd_index, uint32_t opcode) {
   uint32_t imm_10_1 = (0b1111111111 & immediate) << 9;
   immediate = (imm_20 | imm_10_1 | imm_11 | imm_19_12) << 12;
   return (uint32_t) immediate | (rd_index << 7) | opcode;
+}
+
+uint32_t create_b_type(uint32_t immediate,
+                       uint32_t rs2_index,
+                       uint32_t rs1_index,
+                       uint32_t funct3,
+                       uint32_t opcode) {
+  assert_valid_register(rs2_index);
+  assert_valid_register(rs1_index);
+  assert_valid_funct3(funct3);
+  assert_valid_opcode(opcode);
+
+  // extract bits then move them into place
+  uint32_t imm_12 = ((0b1 << 11) & immediate) << 20;
+  uint32_t imm_11 = ((0b1 << 10) & immediate) >> 3;
+  uint32_t imm_10_5 = ((0b111111 << 4) & immediate) << 21;
+  uint32_t imm_4_1 = (0b1111 & immediate) << 8;
+
+  /* printf("immediate: "); */
+  /* print_bits(immediate); */
+  /* printf("imm_12: "); */
+  /* print_bits(imm_12); */
+  /* printf("imm_11: "); */
+  /* print_bits(imm_11); */
+  /* printf("imm_10_5: "); */
+  /* print_bits(imm_10_5); */
+  /* printf("imm_4_1: "); */
+  /* print_bits(imm_4_1); */
+
+  rs2_index = rs2_index << 20;
+  rs1_index = rs1_index << 15;
+  /* printf("rs2: "); */
+  /* print_bits(rs2); */
+  /* printf("rs1: "); */
+  /* print_bits(rs1); */
+
+  funct3 = funct3 << 12;
+  opcode = opcode;
+  /* printf("funct3: "); */
+  /* print_bits(funct3); */
+  /* printf("opcode: "); */
+  /* print_bits(opcode); */
+
+  immediate = (imm_12 | imm_11 | imm_10_5 | imm_4_1);
+
+  return (imm_12 | imm_11 | imm_10_5 | imm_4_1) | rs2_index | rs1_index | funct3 | opcode;
 }
