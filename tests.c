@@ -641,6 +641,23 @@ void test_JALR(void) {
   TEST_ASSERT_EQUAL_UINT64(8, state.program_counter);
 }
 
+void test_BEQ(void) {
+  struct machine_state state = {0};
+
+  // POSITIVE IMMEDIATES. TAKEN
+  state.program_counter = 12;
+  state.registers[8] = 0;
+  state.registers[12] = 0;
+  run_instruction(create_b_type(12, 8, 12, BEQ, BRANCH), &state);
+  TEST_ASSERT_EQUAL_UINT64(24, state.program_counter);
+
+  // NEGATIVE IMMEDIATE
+  /* state.program_counter = 12; */
+  /* state.registers[10] = 12; */
+  /* run_instruction(create_i_type(-4, 10, JALR_OPCODE, 20, JALR), &state); */
+  /* TEST_ASSERT_EQUAL_UINT64(8, state.program_counter); */
+}
+
 void test_s_create(void) {
   // EASY: 1000 is within the signed 12-bit S-immediate range.
   uint32_t s_instruction_1 = create_s_type(1000, 6, 7, SB, STORE);
@@ -687,11 +704,12 @@ void test_u_create(void) {
 
 void test_b_create(void) {
   // TEST IMMEDIATE
-  // 1 = 0b1; 11 = 0b1; 10-5 = 0b111011; 4-1 = 0b1001;
-  uint32_t instruction = create_b_type(0b111110111001, 0, 0, 0, 0);
+  // 1 = 0b1; 11 = 0b1; 10-5 = 0b111011; 4-1 = 0b1000;
+  uint32_t instruction = create_b_type(0b1111101110000, 0, 0, 0, 0);
   /* print_bits(instruction); */
-  /* print_bits((0b1 << 31) | (0b1  << 7) | (0b111011 << 25) | (0b1001 << 8)); */
-  TEST_ASSERT_EQUAL_UINT32((0b1 << 31) | (0b1  << 7) | (0b111011 << 25) | (0b1001 << 8), instruction);
+  /* print_bits((0b1 << 31) | (0b1  << 7) | (0b111011 << 25) | (0b1000 << 8)); */
+  // NOTE: 1st bit not encoded as immediate must be multiple of two for instruction alignment hence: 0b1000 << 8
+  TEST_ASSERT_EQUAL_UINT32((0b1 << 31) | (0b1  << 7) | (0b111011 << 25) | (0b1000 << 8), instruction);
 
   // TEST OPCODE AND FUNCT 3
   instruction = create_b_type(0, 0, 0, BGEU, BRANCH);
@@ -773,7 +791,9 @@ int main(void) {
   RUN_TEST(test_r_create);
   RUN_TEST(test_j_create);
   RUN_TEST(test_u_create);
+  RUN_TEST(test_b_create);
   RUN_TEST(test_get_s_immediate);
+
 
   RUN_TEST(test_LW);
   RUN_TEST(test_LH);
@@ -806,6 +826,7 @@ int main(void) {
   RUN_TEST(test_AUIPC);
   RUN_TEST(test_JAL);
   RUN_TEST(test_JALR);
-  RUN_TEST(test_b_create);
+  RUN_TEST(test_BEQ);
+
   UNITY_END();
 }

@@ -10,6 +10,11 @@ void run_instruction(uint32_t instruction,
   uint8_t *memory = machine_state->memory;
   uint64_t *registers = machine_state->registers;
   uint64_t *program_counter = &machine_state->program_counter;
+  assert((*program_counter % 4) == 0);
+
+  // program_counter set to next_pc at end
+  // default value here overrided by JUMP and BRANCH instructions if needed.
+  uint64_t next_pc = *program_counter + 4;
 
   switch (get_opcode(instruction)) {
     int32_t immediate;
@@ -17,7 +22,6 @@ void run_instruction(uint32_t instruction,
     uint32_t rs2_index;
     uint32_t rd_index;
     uint32_t funct3;
-    uint64_t value;
 
     uint32_t address;
   case LOAD:
@@ -231,15 +235,42 @@ void run_instruction(uint32_t instruction,
     break;
 
   case BRANCH:
-    printf("BRANCH\n");
+    rs2_index = get_rs2_index(instruction);
+    rs1_index = get_rs1_index(instruction);
+    immediate = get_b_immediate(instruction);
+    funct3 = get_funct3(instruction);
+    switch(funct3){
+    case BEQ:
+      if (registers[rs2_index] == registers[rs1_index]) {
+        next_pc = *program_counter + immediate;
+        break;
+      }
+      printf("BEQ\n");
+      break;
+    case BNE:
+      printf("BNE\n");
+      break;
+    case BLT:
+      printf("BLT\n");
+      break;
+    case BGE:
+      printf("BGE\n");
+      break;
+    case BLTU:
+      printf("BLTU\n");
+      break;
+    case BGEU:
+      printf("BGEU\n");
+      break;
+    }
     break;
   case JALR:
     rd_index = get_rd_index(instruction);
     rs1_index = get_rs1_index(instruction);
     // save address of next instruction
-    registers[rd_index] = *program_counter + 4;
+    registers[rd_index] = next_pc;
     // jump to target address
-    *program_counter = (int64_t) get_i_immediate(instruction) + registers[rs1_index];
+    next_pc = (int64_t) get_i_immediate(instruction) + registers[rs1_index];
     break;
   case RESERVED:
     printf("RESERVED\n");
@@ -247,10 +278,9 @@ void run_instruction(uint32_t instruction,
   case JAL:
     rd_index = get_rd_index(instruction);
     // save address of next instruction
-    registers[rd_index] = *program_counter + 4;
+    registers[rd_index] = next_pc;
     // jump to target address
-    *program_counter = (int64_t) *program_counter + (int64_t) get_j_immediate(instruction);
-
+    next_pc = (int64_t) *program_counter + (int64_t) get_j_immediate(instruction);
     break;
   case SYSTEM:
     printf("SYSTEM\n");
@@ -265,6 +295,8 @@ void run_instruction(uint32_t instruction,
     printf("Invalid Opcode\n");
     break;
   }
+
+  *program_counter = next_pc;
 }
 
 /**
@@ -556,6 +588,10 @@ uint32_t create_b_type(uint32_t immediate,
   assert_valid_register(rs1_index);
   assert_valid_funct3(funct3);
   assert_valid_opcode(opcode);
+  assert(((immediate % 2) == 0) && "Immediate must be factor of 2 to align with 16 bit and 32 bit instruction");
+
+  // Immediate is expected to 12-1 NOT 12-0
+  immediate = immediate >> 1;
 
   // extract bits then move them into place
   uint32_t imm_12 = ((0b1 << 11) & immediate) << 20;

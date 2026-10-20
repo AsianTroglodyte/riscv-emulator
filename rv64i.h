@@ -142,6 +142,7 @@ uint32_t get_funct7(uint32_t instruction);
 int32_t get_i_immediate(uint32_t instruction);
 int32_t get_s_immediate(uint32_t instruction);
 int32_t get_j_immediate(uint32_t instruction);
+uint32_t get_b_immediate(uint32_t instruction);
 int32_t get_upper_immediate(uint32_t instruction);
 
 // GET PARTICULAR OPCODES
