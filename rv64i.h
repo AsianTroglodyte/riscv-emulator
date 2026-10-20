@@ -168,5 +168,6 @@ void write_word(uint8_t memory[], uint32_t address, uint64_t value);
 void write_half_word(uint8_t memory[], uint32_t address, uint64_t value);
 
 int32_t sign_extend_32(uint32_t value, int length);
+int64_t sign_extend_64(uint64_t field, int width);
 
 #endif

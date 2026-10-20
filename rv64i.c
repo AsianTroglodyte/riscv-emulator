@@ -14,7 +14,7 @@ void run_instruction(uint32_t instruction,
 
   // program_counter set to next_pc at end
   // default value here overrided by JUMP and BRANCH instructions if needed.
-  uint64_t next_pc = *program_counter + 4;
+  int64_t next_pc = *program_counter + 4;
 
   switch (get_opcode(instruction)) {
     int32_t immediate;
@@ -239,13 +239,14 @@ void run_instruction(uint32_t instruction,
     rs1_index = get_rs1_index(instruction);
     immediate = get_b_immediate(instruction);
     funct3 = get_funct3(instruction);
-    switch(funct3){
+    switch(funct3) {
     case BEQ:
       if (registers[rs2_index] == registers[rs1_index]) {
+        /* print_bits(immediate); */
+        /* print_bits(*program_counter); */
         next_pc = *program_counter + immediate;
         break;
       }
-      printf("BEQ\n");
       break;
     case BNE:
       printf("BNE\n");
@@ -362,7 +363,8 @@ uint32_t get_b_immediate(uint32_t instruction) {
   uint32_t imm_10_5 = bits(instruction, 25, 30) << 5;
   uint32_t imm_4_1 = bits(instruction, 8, 11) << 1;
   uint32_t imm_11 = bits(instruction, 7, 7) << 11;
-  return (imm_12 + imm_11 + imm_10_5 + imm_4_1);
+
+  return sign_extend_64((imm_12 + imm_11 + imm_10_5 + imm_4_1), 12);
 }
 
 // function works on U-Type (u for upper-immediate) AND regular immediate values.
@@ -374,6 +376,20 @@ int32_t sign_extend_32(uint32_t field, int width) {
   assert(width >= 1 && width <= 32);
   uint32_t mask = UINT32_MAX >> (32 - width);
   uint32_t sign_bit = UINT32_C(1) << (width - 1);
+  field &= mask;
+
+  // check if signage of number is negative
+  if (field & sign_bit) {
+    return (int64_t)field - (INT64_C(1) << width);
+  }
+
+  return field;
+}
+
+int64_t sign_extend_64(uint64_t field, int width) {
+  assert(width >= 1 && width <= 64);
+  uint32_t mask = UINT64_MAX >> (64 - width);
+  uint32_t sign_bit = UINT64_C(1) << (width - 1);
   field &= mask;
 
   // check if signage of number is negative
@@ -591,7 +607,9 @@ uint32_t create_b_type(uint32_t immediate,
   assert(((immediate % 2) == 0) && "Immediate must be factor of 2 to align with 16 bit and 32 bit instruction");
 
   // Immediate is expected to 12-1 NOT 12-0
-  immediate = immediate >> 1;
+  immediate = (immediate >> 1) | (1 << 31);
+  /* printf("create_b_type - immediate:"); */
+  /* print_bits(immediate); */
 
   // extract bits then move them into place
   uint32_t imm_12 = ((0b1 << 11) & immediate) << 20;

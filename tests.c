@@ -418,10 +418,6 @@ static void test_r_instruction(const struct r_instruction_case cases[],
   const uint32_t rs1_index = 1;
   const uint32_t rs2_index = 2;
   const uint32_t rd_index = 10;
-  const uint32_t program_counter = 0;
-  /* uint8_t memory[MEMORY_BYTES]; */
-  /* uint64_t registers[NUM_REGISTERS]; */
-  /* uint64_t program_counter; */
   for (size_t i = 0; i < case_count; ++i) {
     struct machine_state state = {0};
     state.registers[rs1_index] = cases[i].rs1_value;
@@ -641,21 +637,39 @@ void test_JALR(void) {
   TEST_ASSERT_EQUAL_UINT64(8, state.program_counter);
 }
 
+struct branch_test_case {
+  uint64_t rs1_value;
+  uint64_t rs2_value;
+  uint32_t pc;
+  int32_t immediate;
+  uint32_t expected_pc_val;
+};
+
+void test_branch_instructions(const struct branch_test_case cases[],
+                             size_t case_count,
+                             uint32_t funct3) {
+  for (size_t i = 0; i < case_count; ++i) {
+    struct machine_state state = {0};
+    state.program_counter = cases[i].pc;
+    state.registers[10] = cases[i].rs2_value;
+    state.registers[11] = cases[i].rs1_value;
+    run_instruction(create_b_type(cases[i].immediate, 10, 11, funct3, BRANCH), &state);
+    TEST_ASSERT_EQUAL(state.program_counter, cases[i].expected_pc_val);
+  }
+}
+
 void test_BEQ(void) {
-  struct machine_state state = {0};
+  /* struct machine_state state = {0}; */
 
-  // POSITIVE IMMEDIATES. TAKEN
-  state.program_counter = 12;
-  state.registers[8] = 0;
-  state.registers[12] = 0;
-  run_instruction(create_b_type(12, 8, 12, BEQ, BRANCH), &state);
-  TEST_ASSERT_EQUAL_UINT64(24, state.program_counter);
+  struct branch_test_case cases[] = {
+    {0, 0, 12, 12, 24}, // positive immediate
+    {0, 0, 12, -4, 8},  // negative immediate
+    {0, 1, 12, 12, 16}, // branch not taken
+    {-1, -1, 12, 12, 24}, // negative register values; branch taken
+    {-1, 1, 12, 12, 16}, // negative and positive register values; branch not tkane
+  };
 
-  // NEGATIVE IMMEDIATE
-  /* state.program_counter = 12; */
-  /* state.registers[10] = 12; */
-  /* run_instruction(create_i_type(-4, 10, JALR_OPCODE, 20, JALR), &state); */
-  /* TEST_ASSERT_EQUAL_UINT64(8, state.program_counter); */
+  test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BEQ);
 }
 
 void test_s_create(void) {
