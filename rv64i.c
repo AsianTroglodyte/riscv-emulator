@@ -206,7 +206,11 @@ void run_instruction(uint32_t instruction,
     break;
   case LUI:
     rd_index = get_rd_index(instruction);
+    // NOTE: upper immediate is ONLY understood as a
     registers[rd_index] = get_upper_immediate(instruction);
+    printf("upper_immediate %" PRIu64" \n", (uint64_t) get_upper_immediate(instruction));
+    print_bits((uint64_t) get_upper_immediate(instruction));
+    printf("register[rd_index] %" PRIu64" \n", registers[rd_index]);
     break;
   case OP_32:
     printf("OP_32\n");

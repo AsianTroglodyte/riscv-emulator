@@ -583,16 +583,16 @@ void test_LUI(void) {
   TEST_ASSERT_EQUAL_UINT64(UINT64_C(0x0000000000001000), state.registers[5]);
 
   // Positive value with several bits set.
-  run_instruction(create_u_type(0xABCDE, 6, LUI), &state);
-  TEST_ASSERT_EQUAL_UINT64(UINT64_C(0x00000000ABCDE000), state.registers[6]);
+  run_instruction(create_u_type(0xABCDE, 5, LUI), &state);
+  TEST_ASSERT_EQUAL_UINT64(UINT64_C(0xFFFFFFFFABCDE000), state.registers[5]);
 
-  // Bit 31 is set: the 32-bit result is sign-extended on RV64.
-  run_instruction(create_u_type(0x80000, 7, LUI), &state);
-  TEST_ASSERT_EQUAL_UINT64(UINT64_C(0xFFFFFFFF80000000), state.registers[7]);
+  /* // Bit 31 is set: the 32-bit result is sign-extended on RV64. */
+  run_instruction(create_u_type(0x80000, 5, LUI), &state);
+  TEST_ASSERT_EQUAL_UINT64(UINT64_C(0xFFFFFFFF80000000), state.registers[5]);
 
-  // All 20 immediate bits set: sign-extended result is -4096.
-  run_instruction(create_u_type(0xFFFFF, 8, LUI), &state);
-  TEST_ASSERT_EQUAL_UINT64(UINT64_C(0xFFFFFFFFFFFFF000), state.registers[8]);
+  /* // All 20 immediate bits set: sign-extended result is -4096. */
+  run_instruction(create_u_type(0xFFFFF, 5, LUI), &state);
+  TEST_ASSERT_EQUAL_UINT64(UINT64_C(0xFFFFFFFFFFFFF000), state.registers[5]);
 }
 
 void test_AUIPC(void) {
@@ -912,7 +912,7 @@ int main(void) {
   RUN_TEST(test_SRA);
   RUN_TEST(test_OR);
   RUN_TEST(test_AND);
-  /* RUN_TEST(test_LUI); */
+  RUN_TEST(test_LUI);
   RUN_TEST(test_AUIPC);
   RUN_TEST(test_JAL);
   RUN_TEST(test_JALR);
