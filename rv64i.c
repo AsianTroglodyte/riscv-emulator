@@ -242,14 +242,15 @@ void run_instruction(uint32_t instruction,
     switch(funct3) {
     case BEQ:
       if (registers[rs2_index] == registers[rs1_index]) {
-        /* print_bits(immediate); */
-        /* print_bits(*program_counter); */
         next_pc = *program_counter + immediate;
         break;
       }
       break;
     case BNE:
-      printf("BNE\n");
+      if (registers[rs2_index] != registers[rs1_index]) {
+        next_pc = *program_counter + immediate;
+        break;
+      }
       break;
     case BLT:
       printf("BLT\n");

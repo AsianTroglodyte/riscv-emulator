@@ -662,14 +662,27 @@ void test_BEQ(void) {
   /* struct machine_state state = {0}; */
 
   struct branch_test_case cases[] = {
-    {0, 0, 12, 12, 24}, // positive immediate
-    {0, 0, 12, -4, 8},  // negative immediate
-    {0, 1, 12, 12, 16}, // branch not taken
-    {-1, -1, 12, 12, 24}, // negative register values; branch taken
-    {-1, 1, 12, 12, 16}, // negative and positive register values; branch not tkane
+    {0, 0, 12, 12, 24}, // equal; positive immediate
+    {0, 0, 12, -4, 8},  // equal; negative immediate
+    {0, 1, 12, 12, 16}, // noteq; branch not taken
+    {-1, -1, 12, 12, 24}, // equal; negative register values; branch taken
+    {-1, 1, 12, 12, 16}, // noteq; negative and positive register values; branch not tkane
   };
 
   test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BEQ);
+}
+
+void test_BNE() {
+  struct branch_test_case cases[] = {
+    {0, 1, 12, 12, 24}, // noteq; positive immediate
+    {0, 1, 12, -4, 8},  // noteq; negative immediate
+    {0, 0, 12, 12, 16}, // equal; branch not taken
+    {-1, -1, 12, 12, 16}, // equal; negative register values; not branched
+    {-1, -2, 12, 12, 24}, // notequal; negative register values; branched
+    {-1, 1, 12, 12, 24}, // noteq; negative and positive register values; branched
+  };
+
+  test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BNE);
 }
 
 void test_s_create(void) {
@@ -841,6 +854,7 @@ int main(void) {
   RUN_TEST(test_JAL);
   RUN_TEST(test_JALR);
   RUN_TEST(test_BEQ);
+  RUN_TEST(test_BNE);
 
   UNITY_END();
 }
