@@ -254,13 +254,13 @@ void run_instruction(uint32_t instruction,
       }
       break;
     case BLT:
-      if (registers[rs1_index] < registers[rs2_index]) {
+      if ((int64_t)registers[rs1_index] < (int64_t)registers[rs2_index]) {
         next_pc = *program_counter + immediate;
         break;
       }
       break;
     case BGE:
-      if (registers[rs1_index] >= registers[rs2_index]) {
+      if ((int64_t)registers[rs1_index] >= (int64_t)registers[rs2_index]) {
         next_pc = *program_counter + immediate;
         break;
       }

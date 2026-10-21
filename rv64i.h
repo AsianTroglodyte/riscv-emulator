@@ -61,6 +61,17 @@ enum major_opcodes: uint32_t {
   CUSTOM_3=   0b1111011
 };
 
+enum MISC_MEM_enum: uint32_t {
+  FENCE = 0b000,
+  FENCE_TSO = 0b1000001100110000000000000, // includes all FENCE_TSO fields. best way to guarantee ID
+  PAUSE =     0b0000000100000000000000000,
+};
+
+enum SYSTEM_enum: uint32_t {
+  ECALL =  0b0000000000000000000000000,  // includes all FENCE_TSO fields. best way to guarantee ID
+  EBREAK = 0b0000000000010000000000000,  // includes all FENCE_TSO fields. best way to guarantee ID
+};
+
 enum JALR_funct3_enum: uint32_t {
   JALR_OPCODE = 000,
 };

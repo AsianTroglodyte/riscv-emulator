@@ -646,9 +646,9 @@ void test_JALR(void) {
 struct branch_test_case {
   uint64_t rs1_value;
   uint64_t rs2_value;
-  uint32_t pc;
+  uint64_t pc;
   int32_t immediate;
-  uint32_t expected_pc_val;
+  uint64_t expected_pc_val;
 };
 
 void test_branch_instructions(const struct branch_test_case cases[],
@@ -660,7 +660,7 @@ void test_branch_instructions(const struct branch_test_case cases[],
     state.registers[10] = cases[i].rs2_value;
     state.registers[11] = cases[i].rs1_value;
     run_instruction(create_b_type(cases[i].immediate, 10, 11, funct3, BRANCH), &state);
-    TEST_ASSERT_EQUAL(cases[i].expected_pc_val, state.program_counter);
+    TEST_ASSERT_EQUAL_UINT64(cases[i].expected_pc_val, state.program_counter);
   }
 }
 
@@ -672,7 +672,11 @@ void test_BEQ(void) {
     {0, 0, 12, -4, 8},  // equal; negative immediate
     {0, 1, 12, 12, 16}, // noteq; branch not taken
     {-1, -1, 12, 12, 24}, // equal; negative register values; branch taken
-    {-1, 1, 12, 12, 16}, // noteq; negative and positive register values; branch not tkane
+    {-1, 1, 12, 12, 16}, // noteq; negative and positive register values; branch not taken
+    {0, 0, 12, 0, 12}, // 0 displacement
+    // 64 bits. get truncation errors
+    {(uint64_t) 2 << 40, (uint64_t) 1 << 40, 12, 12, 16}, // noteq; branch not taken
+    {(uint64_t) 1 << 40, (uint64_t) 1 << 40, 12, 12, 24}, // equal; branch taken
   };
 
   test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BEQ);
@@ -686,6 +690,10 @@ void test_BNE() {
     {-1, -1, 12, 12, 16}, // equal; negative register values; not branched
     {-1, -2, 12, 12, 24}, // notequal; negative register values; branched
     {-1, 1, 12, 12, 24}, // noteq; negative and positive register values; branched
+    {0, 1, 12, 0, 12}, // 0 displacement
+    // 64 bits. get truncation errors
+    {(uint64_t) 1 << 40, (uint64_t) 2 << 40, 12, 12, 24}, // noteq; branch taken
+    {(uint64_t) 1 << 40, (uint64_t) 1 << 40, 12, 12, 16}, // equal; branch not taken
   };
 
   test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BNE);
@@ -697,11 +705,15 @@ void test_BLT() {
     {0, 1, 12, -4, 8},  // less than; negative immediate
     {0, 0, 12, 12, 16}, // equal; NOT less than; not branched
     {-1, -1, 12, 12, 16}, // equal; NOT less than; negative register values; not branched
-    {-1, -2, 12, 12, 24}, // NOT less than; negative register values; not branched
+    {-1, -2, 12, 12, 16}, // NOT less than; negative register values; not branched
     {-1, 1, 12, 12, 24}, // less than; negative and positive register values; branched
+    {0, 1, 12, 0, 12}, // 0 displacement
+    // 64 bits. get truncation errors
+    {(uint64_t) 1 << 40, (uint64_t) 2 << 40, 12, 12, 24}, // lt; branch taken
+    {(uint64_t) 2 << 40, (uint64_t) 1 << 40, 12, 12, 16}, // NOT lt; branch not taken
   };
 
-  test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BNE);
+  test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BLT);
 }
 
 void test_BGE() {
@@ -711,10 +723,14 @@ void test_BGE() {
     {0, 0, 12, 12, 24}, // geq;
     {0, 1, 12, 12, 16}, // not geq;
     {-1, -1, 12, 12, 24}, // geq; negative register values;
-    {-1, -2, 12, 12, 24}, // geq; less than; negative register values; not branched
-    {-2, -1, 12, 12, 16}, // geq; less than; negative register values; branched
-    {-1, 1, 12, 12, 24}, // less than; neg and pos register values; not
-    {1, -1, 12, 12, 16}, // less than; neg and pos register values; branched
+    {-1, -2, 12, 12, 24}, // geq; negative register values; branch taken
+    {-2, -1, 12, 12, 16}, // NOT geq; negative register values; no branch
+    {-1, 1, 12, 12, 16}, // NOT geq than; neg and pos register values; not
+    {1, -1, 12, 12, 24}, // geq; neg and pos register values; branched
+    {1, 0, 12, 0, 12}, // 0 displacement
+    // 64 bits. get truncation errors
+    {(uint64_t) 2 << 40, (uint64_t) 1 << 40, 12, 12, 24}, // geq; branch taken
+    {(uint64_t) 1 << 40, (uint64_t) 2 << 40, 12, 12, 16}, // NOT geq; branch not taken
   };
 
   test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BGE);
@@ -731,7 +747,11 @@ void test_BLTU() {
     {-2, -1, 12, 12, 24}, // ltu; larger negs = larger unsigned
     {-1, 0xFFFFFFFFFFFFFFFF, 12, 12, 16}, // equal so NOT ltu;
     {-2, 0xFFFFFFFFFFFFFFFE, 12, 12, 16}, // equal so NOT ltu;
-    {-2, 0xFFFFFFFFFFFFFFFF, 12, 12, 24}, // equal so NOT ltu;
+    {-2, 0xFFFFFFFFFFFFFFFF, 12, 12, 24}, // Unequal; unsigned less-than; taken
+    {0, 1, 12, 0, 12}, // 0 displacement
+    // 64 bits. get truncation errors
+    {(uint64_t) 1 << 40, (uint64_t) 2 << 40, 12, 12, 24}, // lt; branch taken
+    {(uint64_t) 2 << 40, (uint64_t) 1 << 40, 12, 12, 16}, // NOT lt; branch not taken
   };
 
   test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BLTU);
@@ -739,16 +759,20 @@ void test_BLTU() {
 
 void test_BGEU() {
   struct branch_test_case cases[] = {
-    {1, 0, 12, 12, 24}, // ltu; positive immediate
-    {1, 0, 12, -4, 8},  // ltu; negative immediate
-    {0, 0, 12, 12, 24}, // not ltu
-    {-1, 1, 12, 12, 24}, // NOT ltu; -1 unsigned is higher
-    {1, -1, 12, 12, 16}, // ltu; -1 unsigned is higher
-    {-1, -2, 12, 12, 24}, // NOT ltu; larger negs = larger unsigned
-    {-2, -1, 12, 12, 16}, // ltu; larger negs = larger unsigned
-    {-1, 0xFFFFFFFFFFFFFFFF, 12, 12, 24}, // equal so NOT ltu;
-    {-2, 0xFFFFFFFFFFFFFFFE, 12, 12, 24}, // equal so NOT ltu;
-    {-2, 0xFFFFFFFFFFFFFFFF, 12, 12, 16}, // equal so NOT ltu;
+    {1, 0, 12, 12, 24}, // geq; positive immediate
+    {1, 0, 12, -4, 8},  // geq; negative immediate
+    {0, 0, 12, 12, 24}, // geq
+    {-1, 1, 12, 12, 24}, // Unsigned greater-than-or-equal; taken
+    {1, -1, 12, 12, 16}, // Not unsigned greater-than-or-equal; not taken
+    {-1, -2, 12, 12, 24}, // geq; larger negs = larger unsigned
+    {-2, -1, 12, 12, 16}, // NOT geq; larger negs = larger unsigned
+    {-1, 0xFFFFFFFFFFFFFFFF, 12, 12, 24}, // eq;
+    {-2, 0xFFFFFFFFFFFFFFFE, 12, 12, 24}, // neq;
+    {-2, 0xFFFFFFFFFFFFFFFF, 12, 12, 16}, // Unequal; unsigned less-than; not taken
+    {1, 0, 12, 0, 12}, // 0 displacement
+    // 64 bits. get truncation errors
+    {(uint64_t) 2 << 40, (uint64_t) 1 << 40, 12, 12, 24}, // geq; branch taken
+    {(uint64_t) 1 << 40, (uint64_t) 2 << 40, 12, 12, 16}, // NOT geq; branch not taken
   };
   /* printf("Cases: %d \n", sizeof(cases)/sizeof(cases[0])); */
   test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BGEU);
