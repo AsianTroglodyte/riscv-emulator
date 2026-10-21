@@ -714,6 +714,22 @@ void test_BGE() {
   test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BGE);
 }
 
+void test_BLTU() {
+  struct branch_test_case cases[] = {
+    {0, 1, 12, 12, 24}, // ltu; positive immediate
+    {0, 1, 12, -4, 8},  // ltu; negative immediate
+    {0, 0, 12, 12, 16}, // not ltu
+    {-1, 1, 12, 12, 16}, // NOT ltu; -1 unsigned is higher
+    {1, -1, 12, 12, 24}, // ltu; -1 unsigned is higher
+    {-1, -2, 12, 12, 16}, // NOT ltu; larger negs = larger unsigned
+    {-2, -1, 12, 12, 24}, // ltu; larger negs = larger unsigned
+    {-1, 0xFFFFFFFFFFFFFFFF, 12, 12, 16}, // equal so NOT ltu;
+    {-2, 0xFFFFFFFFFFFFFFFE, 12, 12, 16}, // equal so NOT ltu;
+  };
+
+  test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BLTU);
+}
+
 void test_s_create(void) {
   // EASY: 1000 is within the signed 12-bit S-immediate range.
   uint32_t s_instruction_1 = create_s_type(1000, 6, 7, SB, STORE);
@@ -886,6 +902,6 @@ int main(void) {
   RUN_TEST(test_BNE);
   RUN_TEST(test_BLT);
   RUN_TEST(test_BGE);
-
+  RUN_TEST(test_BLTU);
   UNITY_END();
 }
