@@ -654,7 +654,7 @@ void test_branch_instructions(const struct branch_test_case cases[],
     state.registers[10] = cases[i].rs2_value;
     state.registers[11] = cases[i].rs1_value;
     run_instruction(create_b_type(cases[i].immediate, 10, 11, funct3, BRANCH), &state);
-    TEST_ASSERT_EQUAL(state.program_counter, cases[i].expected_pc_val);
+    TEST_ASSERT_EQUAL(cases[i].expected_pc_val, state.program_counter);
   }
 }
 
@@ -725,9 +725,27 @@ void test_BLTU() {
     {-2, -1, 12, 12, 24}, // ltu; larger negs = larger unsigned
     {-1, 0xFFFFFFFFFFFFFFFF, 12, 12, 16}, // equal so NOT ltu;
     {-2, 0xFFFFFFFFFFFFFFFE, 12, 12, 16}, // equal so NOT ltu;
+    {-2, 0xFFFFFFFFFFFFFFFF, 12, 12, 24}, // equal so NOT ltu;
   };
 
   test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BLTU);
+}
+
+void test_BGEU() {
+  struct branch_test_case cases[] = {
+    {1, 0, 12, 12, 24}, // ltu; positive immediate
+    {1, 0, 12, -4, 8},  // ltu; negative immediate
+    {0, 0, 12, 12, 24}, // not ltu
+    {-1, 1, 12, 12, 24}, // NOT ltu; -1 unsigned is higher
+    {1, -1, 12, 12, 16}, // ltu; -1 unsigned is higher
+    {-1, -2, 12, 12, 24}, // NOT ltu; larger negs = larger unsigned
+    {-2, -1, 12, 12, 16}, // ltu; larger negs = larger unsigned
+    {-1, 0xFFFFFFFFFFFFFFFF, 12, 12, 24}, // equal so NOT ltu;
+    {-2, 0xFFFFFFFFFFFFFFFE, 12, 12, 24}, // equal so NOT ltu;
+    {-2, 0xFFFFFFFFFFFFFFFF, 12, 12, 16}, // equal so NOT ltu;
+  };
+  /* printf("Cases: %d \n", sizeof(cases)/sizeof(cases[0])); */
+  test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BGEU);
 }
 
 void test_s_create(void) {
@@ -903,5 +921,7 @@ int main(void) {
   RUN_TEST(test_BLT);
   RUN_TEST(test_BGE);
   RUN_TEST(test_BLTU);
+  RUN_TEST(test_BGEU);
+
   UNITY_END();
 }
