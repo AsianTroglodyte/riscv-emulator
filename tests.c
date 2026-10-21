@@ -685,6 +685,19 @@ void test_BNE() {
   test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BNE);
 }
 
+void test_BLT() {
+  struct branch_test_case cases[] = {
+    {0, 1, 12, 12, 24}, // less than; positive immediate
+    {0, 1, 12, -4, 8},  // less than; negative immediate
+    {0, 0, 12, 12, 16}, // equal; NOT less than; not branched
+    {-1, -1, 12, 12, 16}, // equal; NOT less than; negative register values; not branched
+    {-1, -2, 12, 12, 24}, // NOT less than; negative register values; not branched
+    {-1, 1, 12, 12, 24}, // less than; negative and positive register values; branched
+  };
+
+  test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BNE);
+}
+
 void test_s_create(void) {
   // EASY: 1000 is within the signed 12-bit S-immediate range.
   uint32_t s_instruction_1 = create_s_type(1000, 6, 7, SB, STORE);
@@ -855,6 +868,7 @@ int main(void) {
   RUN_TEST(test_JALR);
   RUN_TEST(test_BEQ);
   RUN_TEST(test_BNE);
+  RUN_TEST(test_BLT);
 
   UNITY_END();
 }

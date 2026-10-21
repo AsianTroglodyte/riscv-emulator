@@ -253,16 +253,28 @@ void run_instruction(uint32_t instruction,
       }
       break;
     case BLT:
-      printf("BLT\n");
+      if (registers[rs1_index] < registers[rs2_index]) {
+        next_pc = *program_counter + immediate;
+        break;
+      }
       break;
     case BGE:
-      printf("BGE\n");
+      if (registers[rs1_index] >= registers[rs2_index]) {
+        next_pc = *program_counter + immediate;
+        break;
+      }
       break;
     case BLTU:
-      printf("BLTU\n");
+      if ((uint64_t)registers[rs1_index] < (uint64_t)registers[rs2_index]) {
+        next_pc = *program_counter + immediate;
+        break;
+      }
       break;
     case BGEU:
-      printf("BGEU\n");
+      if ((uint64_t)registers[rs1_index] >= (uint64_t)registers[rs2_index]) {
+        next_pc = *program_counter + immediate;
+        break;
+      }
       break;
     }
     break;
