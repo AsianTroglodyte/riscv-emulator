@@ -598,13 +598,19 @@ void test_LUI(void) {
 void test_AUIPC(void) {
   struct machine_state state = {0};
 
-  state.program_counter = 0x1000;
-  run_instruction(create_u_type(1, 2, AUIPC), &state);
-  TEST_ASSERT_EQUAL_UINT64(0x2000, state.registers[2]);
+  // positive immediates
+  state.program_counter = 12;
+  run_instruction(create_u_type(12, 2, AUIPC), &state);
+  TEST_ASSERT_EQUAL_UINT64(((12 << 12) + 12) , state.registers[2]);
 
-  /* state.program_counter = 10; */
-  /* run_instruction(create_u_type(-1, 2, AUIPC), &state); */
-  /* TEST_ASSERT_EQUAL_UINT64((-1 << 12) + 10, state.registers[2]); */
+  // negative immediates
+  state.program_counter = 12;
+  run_instruction(create_u_type(-1, 2, AUIPC), &state);
+  TEST_ASSERT_EQUAL_UINT64(((uint64_t)-1 << 12) + 12, state.registers[2]); // satisfy warning with (uin64_t)
+
+  state.program_counter = 12;
+  run_instruction(create_u_type(-123424, 2, AUIPC), &state);
+  TEST_ASSERT_EQUAL_UINT64(((uint64_t)-123424 << 12) + 12, state.registers[2]); // satisfy warning with (uin64_t)
 }
 
 void test_JAL(void) {
