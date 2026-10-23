@@ -81,7 +81,10 @@ enum load_funct3_enums: uint32_t {
   LH=         0b001,
   LW=         0b010,
   LBU=        0b100,
-  LHU=        0b101
+  LHU=        0b101,
+  // RV64I stuff
+  LWU=        0b110,
+  LD=         0b011,
 };
 
 enum op_imm_enums: uint32_t {
@@ -174,9 +177,9 @@ uint8_t get_byte(uint8_t const memory[], uint32_t address);
 
 // WRITE DATA TO MEMORY GIVEN AN ADDRESS AND VALUE
 void write_byte(uint8_t memory[], uint32_t address, uint64_t value);
-void write_double_word(uint8_t memory[], uint32_t address, uint64_t value);
-void write_word(uint8_t memory[], uint32_t address, uint64_t value);
 void write_half_word(uint8_t memory[], uint32_t address, uint64_t value);
+void write_word(uint8_t memory[], uint32_t address, uint64_t value);
+void write_double_word(uint8_t memory[], uint32_t address, uint64_t value);
 
 int32_t sign_extend_32(uint32_t value, int length);
 int64_t sign_extend_64(uint64_t field, int width);

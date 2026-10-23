@@ -7,6 +7,37 @@ void setUp(void) {}
 
 void tearDown(void) {}
 
+struct load_test_case {
+  int32_t  immediate;
+  uint64_t rs1_val;
+  uint64_t memory_value;
+  uint64_t expected;
+};
+
+void test_load_instruction(const struct load_test_case cases[],
+                           size_t case_count,
+                           uint32_t funct3,
+                           int width_in_bytes) {
+
+  for (size_t i = 0; i < case_count; ++i) {
+    uint64_t memory_address  = (uint64_t) (int64_t) cases[i].immediate + cases[i].rs1_val;
+    struct machine_state state = {0};
+    if (width_in_bytes == 1) {
+      write_byte(state.memory, memory_address, cases[i].memory_value);
+    } else if (width_in_bytes == 2) {
+      write_half_word(state.memory, memory_address, cases[i].memory_value);
+    } else if (width_in_bytes == 4) {
+      write_word(state.memory, memory_address, cases[i].memory_value);
+    } else if (width_in_bytes == 8) {
+      write_double_word(state.memory, memory_address, cases[i].memory_value);
+    }
+
+    state.registers[10] = cases[i].rs1_val;
+    run_instruction(create_i_type(cases[i].immediate, 10, funct3, 11, LOAD), &state);
+    TEST_ASSERT_EQUAL_UINT64(cases[i].expected, state.registers[11]);
+  }
+}
+
 void test_LW(void) {
   struct machine_state state = {
     .registers = {0, 1, 2, 0, 0, 5},
@@ -274,6 +305,21 @@ void test_SD(void) {
   TEST_ASSERT_EQUAL_UINT64(5, get_double_word(state.memory, 8));
 }
 
+void test_LWU() {
+
+  struct load_test_case cases[] = {
+    {.immediate = 1, .rs1_val = 4, .memory_value = 1, .expected = 1},
+    {.immediate = 0, .rs1_val = 10,.memory_value = 1020343, .expected = 1020343},
+    {.immediate = 0, .rs1_val = 10,.memory_value = -1, .expected = UINT32_MAX},
+    {1, 10, UINT32_MAX, UINT32_MAX},
+    {.immediate = -1, .rs1_val = 10,.memory_value = 10, .expected = 10},
+    {.immediate = 10, .rs1_val = -1,.memory_value = 10, .expected = 10},
+    //
+  };
+
+  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LWU, 4);
+}
+
 struct i_instruction_case {
   uint64_t rs1_value;
   int32_t immediate;
@@ -302,10 +348,13 @@ static void test_i_instruction(const struct i_instruction_case cases[],
 }
 
 void test_addi(void) {
+  /* rs1_value; */
+  /* immediate; */
+  /* expected; */
   const struct i_instruction_case cases[] = {
-      {10, 10, 20},             // Positive immediate
-      {10, -10, 0},             // Negative immediate cancels rs1
-      {10, -100, (uint64_t)-90}, // Result wraps to a negative 64-bit value
+      {.rs1_value = 10, .immediate =  10, .expected =  20},             // Positive immediate
+      {.rs1_value = 10, .immediate =  -10, .expected =  0},             // Negative immediate cancels rs1
+      {.rs1_value = 10, .immediate =  -100, .expected =  (uint64_t)-90}, // Result wraps to a negative 64-bit value
   };
 
   test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ADDI, OP_IMM);
@@ -313,10 +362,10 @@ void test_addi(void) {
 
 void test_andi(void) {
   const struct i_instruction_case cases[] = {
-      {0b1010, 0b1010, 0b1010},             // Identical bit patterns
-      {0b0101, 0b1010, 0},                  // No overlapping set bits
-      {0, -1, 0},                            // Zero AND sign-extended -1
-      {0b1100010, 0b1000010, 0b1000010},    // Keep only shared set bits
+      {.rs1_value = 0b1010, .immediate =  0b1010, .expected =  0b1010},             // Identical bit patterns
+      {.rs1_value = 0b0101, .immediate =  0b1010, .expected =  0},                  // No overlapping set bits
+      {.rs1_value = 0, .immediate =  -1, .expected =  0},                            // Zero AND sign-extended -1
+      {.rs1_value = 0b1100010, .immediate =  0b1000010, .expected =  0b1000010},    // Keep only shared set bits
   };
 
   test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ANDI, OP_IMM);
@@ -324,10 +373,10 @@ void test_andi(void) {
 
 void test_ori(void) {
   const struct i_instruction_case cases[] = {
-      {0b1010, 0b1010, 0b1010},             // Identical bit patterns
-      {0b1010, 0b0101, 0b1111},             // Fill in the unset bits
-      {0, -1, UINT64_MAX},                   // Sign-extended immediate sets all bits
-      {0b1100010, 0b1001010, 0b1101010},     // Combine set bits from both operands
+      {.rs1_value = 0b1010, .immediate =  0b1010, .expected =  0b1010},             // Identical bit patterns
+      {.rs1_value = 0b1010, .immediate =  0b0101, .expected =  0b1111},             // Fill in the unset bits
+      {.rs1_value = 0, .immediate =  -1, .expected =  UINT64_MAX},                   // Sign-extended immediate sets all bits
+      {.rs1_value = 0b1100010, .immediate =  0b1001010, .expected =  0b1101010},     // Combine set bits from both operands
   };
 
   test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ORI, OP_IMM);
@@ -335,13 +384,13 @@ void test_ori(void) {
 
 void test_slti(void) {
   const struct i_instruction_case cases[] = {
-      {1, 9, 1},
-      {9, 1, 0},
-      {2, 2, 0},
-      {0, -1, 0},
-      {UINT64_MAX, -1, 0},
-      {UINT64_MAX - 1, -1, 1},
-      {(uint64_t)-10, -9, 1},
+      {.rs1_value = 1, .immediate =  9, .expected =  1},
+      {.rs1_value = 9, .immediate =  1, .expected =  0},
+      {.rs1_value = 2, .immediate =  2, .expected =  0},
+      {.rs1_value = 0, .immediate =  -1, .expected =  0},
+      {.rs1_value = UINT64_MAX, .immediate =  -1, .expected =  0},
+      {.rs1_value = UINT64_MAX - 1, .immediate =  -1, .expected =  1},
+      {.rs1_value = (uint64_t)-10, .immediate =  -9, .expected =  1},
   };
 
   test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLTI, OP_IMM);
@@ -349,12 +398,12 @@ void test_slti(void) {
 
 void test_sltiu(void) {
   const struct i_instruction_case cases[] = {
-      {1, 9, 1},                  // 1 < 9
-      {9, 1, 0},                  // 9 is not less than 1
-      {2, 2, 0},                  // Equality is false
-      {0, -1, 1},                 // 0 < UINT64_MAX
-      {UINT64_MAX, -1, 0},        // UINT64_MAX is not less than itself
-      {UINT64_MAX - 1, -1, 1},    // UINT64_MAX - 1 < UINT64_MAX
+      {.rs1_value = 1, .immediate =  9, .expected =  1},                  // 1 < 9
+      {.rs1_value = 9, .immediate =  1, .expected =  0},                  // 9 is not less than 1
+      {.rs1_value = 2, .immediate =  2, .expected =  0},                  // Equality is false
+      {.rs1_value = 0, .immediate =  -1, .expected =  1},                 // 0 < UINT64_MAX
+      {.rs1_value = UINT64_MAX, .immediate =  -1, .expected =  0},        // UINT64_MAX is not less than itself
+      {.rs1_value = UINT64_MAX - 1, .immediate =  -1, .expected =  1},    // UINT64_MAX - 1 < UINT64_MAX
   };
 
   test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLTIU, OP_IMM);
@@ -362,10 +411,10 @@ void test_sltiu(void) {
 
 void test_slli(void) {
   const struct i_instruction_case cases[] = {
-      {9, 1, 18},                     // basically
-      {3, 6, 192},                    //  3 * 2^6 = 192
-      {-2, 3, -16},                   // -2 * 2 * 2 * 2 = 16
-      {1, 31, INT64_C(1) << 31}, // 0 < UINT64_MAX
+      {.rs1_value = 9, .immediate =  1, .expected =  18},                     // basically
+      {.rs1_value = 3, .immediate =  6, .expected =  192},                    //  3 * 2^6 = 192
+      {.rs1_value = -2, .immediate =  3, .expected =  -16},                   // -2 * 2 * 2 * 2 = 16
+      {.rs1_value = 1, .immediate =  31, .expected =  INT64_C(1) << 31}, // 0 < UINT64_MAX
   };
 
   test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLLI, OP_IMM);
@@ -375,18 +424,18 @@ void test_srli(void) {
   const struct i_instruction_case cases[] = {
       // Ordinary right shifts.
       // {value_shifted, (funct) | shift amount (shamt), result}
-      {18, (SRLI_IMM << 5) | 1, 9},
-      {192, (SRLI_IMM << 5) | 6, 3},
+      {.rs1_value = 18, .immediate =  (SRLI_IMM << 5) | 1, .expected =  9},
+      {.rs1_value = 192, .immediate =  (SRLI_IMM << 5) | 6, .expected =  3},
 
       // Logical shifts fill vacated high bits with zero, even when the
       // source's most significant bit is set.
-      {UINT64_C(0x8000000000000000), (SRLI_IMM << 5) | 1,
+      {.rs1_value = UINT64_C(0x8000000000000000), .immediate =  (SRLI_IMM << 5) | 1, .expected =
        UINT64_C(0x4000000000000000)},
-      {UINT64_MAX, (SRLI_IMM << 5) | 31, UINT64_C(0x00000001FFFFFFFF)},
+      {.rs1_value = UINT64_MAX, .immediate =  (SRLI_IMM << 5) | 31, .expected =  UINT64_C(0x00000001FFFFFFFF)},
 
       // Boundary shift amounts and bits shifted entirely out.
-      {UINT64_C(0x8000000000000000), (SRLI_IMM << 5) | 63, 1},
-      {1, (SRLI_IMM << 5) | 1, 0},
+      {.rs1_value = UINT64_C(0x8000000000000000), .immediate =  (SRLI_IMM << 5) | 63, .expected =  1},
+      {.rs1_value = 1, .immediate =  (SRLI_IMM << 5) | 1, .expected =  0},
   };
 
   test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SRLIorSRAI, OP_IMM);
@@ -394,11 +443,11 @@ void test_srli(void) {
 
 void test_srai(void) {
   const struct i_instruction_case cases[] = {
-    {-8, (SRAI_IMM << 6) | 2, -2},   // ...1111 1000 >> 2 = ...1111 1110
-    {-15, (SRAI_IMM << 6) | 2, -4},  // ...1111 0001 >> 2 = ...1111 1100
-    {100, (SRAI_IMM << 6) | 4, 6},   // ...0110 0100 >> 4 = ...0000 0110
-    {UINT64_MAX, (SRAI_IMM << 6) | 63, UINT64_MAX}, // ...1111 >> 63 = ...1111
-    {100, (SRAI_IMM << 6) | 0, 100}, // ...0110 0100 >> 4 = ...0110 0100
+    {.rs1_value = -8, .immediate =  (SRAI_IMM << 6) | 2, .expected = -2},   // ...1111 1000 >> 2 = ...1111 1110
+    {.rs1_value = -15, .immediate =  (SRAI_IMM << 6) | 2, .expected = -4},  // ...1111 0001 >> 2 = ...1111 1100
+    {.rs1_value = 100, .immediate =  (SRAI_IMM << 6) | 4, .expected = 6},   // ...0110 0100 >> 4 = ...0000 0110
+    {.rs1_value = UINT64_MAX, .immediate =  (SRAI_IMM << 6) | 63, .expected = UINT64_MAX}, // ...1111 >> 63 = ...1111
+    {.rs1_value = 100, .immediate =  (SRAI_IMM << 6) | 0, .expected = 100}, // ...0110 0100 >> 4 = ...0110 0100
   };
 
   test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SRLIorSRAI, OP_IMM);
@@ -435,6 +484,7 @@ static void test_r_instruction(const struct r_instruction_case cases[],
 
 void test_ADD(void) {
   const struct r_instruction_case cases[] = {
+    // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
     {1, 1, 2},     // 1 + 1 = 2
     {10, 4, 14},   // 10 + 4 = 14
     {-10, 4, -6},  // -10 + 4 = -6
@@ -452,6 +502,7 @@ void test_ADD(void) {
 
 void test_SUB(void) {
   const struct r_instruction_case cases[] = {
+    // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
     {10, 4, 6},   // 10 + 4 = 14
     {-10, 4, -14},  // -10 + 4 = -6
     {-3, -4, 1},
@@ -467,6 +518,7 @@ void test_SUB(void) {
 
 void test_SLL(void) {
   const struct r_instruction_case cases[] = {
+    // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
     {9, 1, 18},
     {3, 6, 192},                    //  3 * 2^6 = 192
     {-2, 3, -16},                // -2 * 2 * 2 * 2 = 16
@@ -478,6 +530,7 @@ void test_SLL(void) {
 
 void test_SLT(void) {
   const struct r_instruction_case cases[] = {
+    // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
       {1, 9, 1},
       {9, 1, 0},
       {2, 2, 0},
@@ -492,6 +545,7 @@ void test_SLT(void) {
 
 void test_SLTU(void) {
   const struct r_instruction_case cases[] = {
+    // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
       {1, 9, 1},                  // 1 < 9
       {9, 1, 0},                  // 9 is not less than 1
       {2, 2, 0},                  // Equality is false
@@ -505,6 +559,7 @@ void test_SLTU(void) {
 
 void test_XOR(void) {
   const struct r_instruction_case cases[] = {
+    // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
     {0b0101, 0b1010, 0b1111},
     {0b0101, 0b0101, 0b0000},
     {0b1100, 0b1000, 0b0100},
@@ -521,6 +576,7 @@ void test_XOR(void) {
 
 void test_SRL(void) {
   const struct r_instruction_case cases[] = {
+    // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
       // Ordinary right shifts.
       // {value_shifted, (funct) | shift amount (shamt), result}
       {18, (SRLI_IMM << 5) | 1, 9},
@@ -542,6 +598,7 @@ void test_SRL(void) {
 
 void test_SRA(void) {
   const struct r_instruction_case cases[] = {
+    // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
     {-8, (SRAI_IMM << 6) | 2, -2},   // ...1111 1000 >> 2 = ...1111 1110
     {-15, (SRAI_IMM << 6) | 2, -4},  // ...1111 0001 >> 2 = ...1111 1100
     {100, (SRAI_IMM << 6) | 4, 6},   // ...0110 0100 >> 4 = ...0000 0110
@@ -554,6 +611,7 @@ void test_SRA(void) {
 
 void test_OR(void) {
   const struct r_instruction_case cases[] = {
+    // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
       {0b1010, 0b1010, 0b1010},             // Identical bit patterns
       {0b1010, 0b0101, 0b1111},             // Fill in the unset bits
       {0, -1, UINT64_MAX},                   // Sign-extended immediate sets all bits
@@ -565,6 +623,7 @@ void test_OR(void) {
 
 void test_AND(void) {
   const struct r_instruction_case cases[] = {
+    // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
       {0b1010, 0b1010, 0b1010},             // Identical bit patterns
       {0b0101, 0b1010, 0},                  // No overlapping set bits
       {0, -1, 0},                            // Zero AND sign-extended -1
@@ -668,6 +727,7 @@ void test_BEQ(void) {
   /* struct machine_state state = {0}; */
 
   struct branch_test_case cases[] = {
+    // rs1_value, rs2_value, pc, immediate, expected_pc_val;
     {0, 0, 12, 12, 24}, // equal; positive immediate
     {0, 0, 12, -4, 8},  // equal; negative immediate
     {0, 1, 12, 12, 16}, // noteq; branch not taken
@@ -684,6 +744,7 @@ void test_BEQ(void) {
 
 void test_BNE() {
   struct branch_test_case cases[] = {
+    // rs1_value, rs2_value, pc, immediate, expected_pc_val;
     {0, 1, 12, 12, 24}, // noteq; positive immediate
     {0, 1, 12, -4, 8},  // noteq; negative immediate
     {0, 0, 12, 12, 16}, // equal; branch not taken
@@ -701,6 +762,7 @@ void test_BNE() {
 
 void test_BLT() {
   struct branch_test_case cases[] = {
+    // rs1_value, rs2_value, pc, immediate, expected_pc_val;
     {0, 1, 12, 12, 24}, // less than; positive immediate
     {0, 1, 12, -4, 8},  // less than; negative immediate
     {0, 0, 12, 12, 16}, // equal; NOT less than; not branched
@@ -718,6 +780,7 @@ void test_BLT() {
 
 void test_BGE() {
   struct branch_test_case cases[] = {
+    // rs1_value, rs2_value, pc, immediate, expected_pc_val;
     {1, 0, 12, 12, 24}, // geq; positive immediate
     {1, 0, 12, -4, 8},  // geq; negative immediate
     {0, 0, 12, 12, 24}, // geq;
@@ -738,6 +801,7 @@ void test_BGE() {
 
 void test_BLTU() {
   struct branch_test_case cases[] = {
+    // rs1_value, rs2_value, pc, immediate, expected_pc_val;
     {0, 1, 12, 12, 24}, // ltu; positive immediate
     {0, 1, 12, -4, 8},  // ltu; negative immediate
     {0, 0, 12, 12, 16}, // not ltu
@@ -759,6 +823,7 @@ void test_BLTU() {
 
 void test_BGEU() {
   struct branch_test_case cases[] = {
+    // rs1_value, rs2_value, pc, immediate, expected_pc_val;
     {1, 0, 12, 12, 24}, // geq; positive immediate
     {1, 0, 12, -4, 8},  // geq; negative immediate
     {0, 0, 12, 12, 24}, // geq
@@ -841,7 +906,6 @@ void test_b_create(void) {
 }
 
 
-
 struct j_create_case {
   uint32_t imm_10_1;
   uint32_t imm_11;
@@ -914,16 +978,21 @@ int main(void) {
   RUN_TEST(test_b_create);
   RUN_TEST(test_get_s_immediate);
 
-
+  // test load
   RUN_TEST(test_LW);
   RUN_TEST(test_LH);
   RUN_TEST(test_LB);
   RUN_TEST(test_LBU);
   RUN_TEST(test_LHU);
+  RUN_TEST(test_LWU);
+
+  // test stores
   RUN_TEST(test_SB);
   RUN_TEST(test_SH);
   RUN_TEST(test_SW);
   RUN_TEST(test_SD);
+
+  // test arithmetic with immediates
   RUN_TEST(test_addi);
   RUN_TEST(test_andi);
   RUN_TEST(test_ori);
@@ -932,6 +1001,8 @@ int main(void) {
   RUN_TEST(test_slli);
   RUN_TEST(test_srli);
   RUN_TEST(test_srai);
+
+  // test arithmetic with JUST registers
   RUN_TEST(test_ADD);
   RUN_TEST(test_SUB);
   RUN_TEST(test_SLL);
@@ -942,10 +1013,16 @@ int main(void) {
   RUN_TEST(test_SRA);
   RUN_TEST(test_OR);
   RUN_TEST(test_AND);
+
+  // test upper immediate stuff (weird ones)
   RUN_TEST(test_LUI);
   RUN_TEST(test_AUIPC);
+
+  // teste JUMP instructions
   RUN_TEST(test_JAL);
   RUN_TEST(test_JALR);
+
+  // test branch instructions
   RUN_TEST(test_BEQ);
   RUN_TEST(test_BNE);
   RUN_TEST(test_BLT);

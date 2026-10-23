@@ -31,7 +31,7 @@ void run_instruction(uint32_t instruction,
     rd_index =  get_rd_index(instruction);
     funct3 = get_funct3(instruction);
 
-    address = registers[rs1_index] + immediate;
+    address = (int64_t) registers[rs1_index] + immediate;
     switch (funct3) {
     case LB:
       registers[rd_index] = (int8_t) get_byte(memory, address);
@@ -47,6 +47,12 @@ void run_instruction(uint32_t instruction,
       break;
     case LHU:
       registers[rd_index] = get_half_word(memory, address);
+      break;
+    case LWU:
+      registers[rd_index] = get_word(memory, address);
+      break;
+    case LD:
+      printf("LD\n");
       break;
     default:
       printf("funct3 %d does not correspond to any LOAD instruction.", funct3);
