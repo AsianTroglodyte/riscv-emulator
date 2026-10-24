@@ -144,9 +144,7 @@ void run_instruction(uint32_t instruction,
     address = registers[rs1_index] + immediate;
     switch (funct3) {
     case SB:
-      printf("got to SB\n");
       write_byte(memory, address, registers[rs2_index]);
-      printf("asfter write_byte\n");
       break;
     case SH:
       write_half_word(memory, address, registers[rs2_index]);

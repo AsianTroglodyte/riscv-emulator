@@ -199,7 +199,7 @@ struct store_test_case {
 void test_store_instruction(const struct store_test_case cases[],
                             size_t case_count,
                             uint32_t funct3,
-                            int width_in_bytes) {
+                            size_t width_in_bytes) {
   for (size_t i = 0; i < case_count;+ ++i) {
     /* assert((cases[i].immediate >= -2048|| cases[i].immediate <= 2047 ) && "immediate must not be larger 12 bits can represent"); */
 
@@ -211,21 +211,29 @@ void test_store_instruction(const struct store_test_case cases[],
     uint32_t instruction = create_s_type(cases[i].immediate, 10, 11, funct3, STORE);
     run_instruction(instruction, &state);
 
-
-
-    TEST_ASSERT_EQUAL_UINT64(state.memory[address], cases[i].expected);
+    /* print_memory(state.memory); */
+    /* print_registers(state.registers); */
+    for (size_t offset = 0; offset < width_in_bytes; ++offset) {
+      uint8_t expected_byte = (uint8_t) (cases[i].expected >> (8 * offset));
+      /* printf("expected byte: %d \n", expected_byte); */
+      TEST_ASSERT_EQUAL_UINT8(expected_byte, state.memory[address + offset]);
+    }
   }
 }
 
 void test_SB(void) {
   const struct store_test_case cases[] = {
-    {.immediate = 10, .rs2 = 0, .rs1 = 6},
-    {.immediate = 10, .rs2 = 10, .rs1 = 6},
-    {.immediate = 10, .rs2 = -10, .rs1 = 6},
-    {.immediate = -10, .rs2 = 10, .rs1 = 26},
+    {.immediate = 10, .rs2 = 0, .rs1 = 6, .expected = 0},
+    {.immediate = 10, .rs2 = 10, .rs1 = 6, .expected = 10},
+    {.immediate = 10, .rs2 = -10, .rs1 = 6, .expected = -10},
+    {.immediate = -10, .rs2 = 10, .rs1 = 26, .expected = 10},
+    {.immediate = -2048, .rs2 = 10, .rs1 = 2048 + 16, .expected = 10},
+    {.immediate = 2047, .rs2 = 10, .rs1 = -2047 + 16, .expected = 10},
+    {.immediate = 2047, .rs2 = 10, .rs1 = -2047 + 16, .expected = 10},
+    {.immediate = 10, .rs2 = UINT8_MAX, .rs1 = 6, .expected = UINT8_MAX},
   };
 
-  test_store_instruction(cases, sizeof(cases)/sizeof(cases[0]), SB, STORE);
+  test_store_instruction(cases, sizeof(cases)/sizeof(cases[0]), SB, 1);
 }
 
 void test_SH(void) {
