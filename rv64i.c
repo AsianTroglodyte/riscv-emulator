@@ -95,19 +95,24 @@ void run_instruction(uint32_t instruction,
       registers[rd_index] = registers[rs1_index] & immediate;
       break;
     case SLLI:
-      shamt = bits(immediate, 0, 5);
-      registers[rd_index] = registers[rs1_index] << shamt;
+      if (bits(instruction, 26, 31) == 0) {
+        shamt = bits(immediate, 0, 5);
+        registers[rd_index] = registers[rs1_index] << shamt;
+      } else {
+        print_bits(instruction);
+        printf("immediate of potentail SLLI is not ");
+      }
       break;
     case SRLIorSRAI:
       shamt = bits(immediate, 0, 5);
-      immediate_11_5 = bits(immediate, 6, 11);
-      switch (immediate_11_5) {
+      uint32_t funct6 = bits(immediate, 6, 11);
+      switch (funct6) {
       case SRLI_IMM:
         registers[rd_index] = registers[rs1_index] >> shamt;
         break;
       case SRAI_IMM: {
         uint64_t result = registers[rs1_index] >> shamt;
-        if (registers[rs1_index] & UINT64_C(1) << 63) {
+        if (shamt != 0 && (registers[rs1_index] & (UINT64_C(1) << 63)) != 0) {
           result |= (UINT64_MAX << (64 - shamt));
         }
         registers[rd_index] = result;
@@ -115,17 +120,13 @@ void run_instruction(uint32_t instruction,
       }
       default:
         print_bits(instruction);
-        printf("funct3 %d and imm_11_5 %d does not correspond to any OP_IMM instruction.\n",
-               funct3, immediate_11_5);
+        printf("funct3 %d and funct6 %d does not correspond to any OP_IMM instruction.\n",
+               funct3, funct6);
       }
       break;
     default:
       printf("funct3 %d does not correspond to any OP_IMM instruction.\n", funct3);
       assert(0);
-    }
-
-    switch (funct3) {
-
     }
     break;
   case AUIPC:

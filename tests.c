@@ -411,9 +411,11 @@ void test_sltiu(void) {
 void test_slli(void) {
   const struct i_instruction_case cases[] = {
       {.rs1_value = 9, .immediate =  1, .expected =  18},                     // basically
+      {.rs1_value = 9, .immediate =  0b100000000001, .expected = 0},   // nothing; immediate bits [11:6] must be 000000.
       {.rs1_value = 3, .immediate =  6, .expected =  192},                    //  3 * 2^6 = 192
       {.rs1_value = -2, .immediate =  3, .expected =  -16},                   // -2 * 2 * 2 * 2 = 16
-      {.rs1_value = 1, .immediate =  31, .expected =  INT64_C(1) << 31}, // 0 < UINT64_MAX
+      {.rs1_value = 1, .immediate =  31, .expected =  INT64_C(1) << 31},      // 0 < UINT64_MAX
+      {.rs1_value = 1, .immediate =  63, .expected =  0x8000000000000000}
   };
 
   test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLLI, OP_IMM);
@@ -423,18 +425,19 @@ void test_srli(void) {
   const struct i_instruction_case cases[] = {
       // Ordinary right shifts.
       // {value_shifted, (funct) | shift amount (shamt), result}
-      {.rs1_value = 18, .immediate =  (SRLI_IMM << 5) | 1, .expected =  9},
-      {.rs1_value = 192, .immediate =  (SRLI_IMM << 5) | 6, .expected =  3},
+      {.rs1_value = 18, .immediate =  (SRLI_IMM << 6) | 1, .expected =  9},
+      {.rs1_value = 192, .immediate =  (SRLI_IMM << 6) | 6, .expected =  3},
 
       // Logical shifts fill vacated high bits with zero, even when the
       // source's most significant bit is set.
       {.rs1_value = UINT64_C(0x8000000000000000), .immediate =  (SRLI_IMM << 5) | 1, .expected =
        UINT64_C(0x4000000000000000)},
-      {.rs1_value = UINT64_MAX, .immediate =  (SRLI_IMM << 5) | 31, .expected =  UINT64_C(0x00000001FFFFFFFF)},
+      {.rs1_value = UINT64_MAX, .immediate =  (SRLI_IMM << 6) | 31, .expected =  UINT64_C(0x00000001FFFFFFFF)},
 
       // Boundary shift amounts and bits shifted entirely out.
-      {.rs1_value = UINT64_C(0x8000000000000000), .immediate =  (SRLI_IMM << 5) | 63, .expected =  1},
-      {.rs1_value = 1, .immediate =  (SRLI_IMM << 5) | 1, .expected =  0},
+      {.rs1_value = UINT64_C(0x8000000000000000), .immediate =  (SRLI_IMM << 6) | 63, .expected =  1},
+      {.rs1_value = 1, .immediate =  (SRLI_IMM << 6) | 1, .expected =  0},
+      {.rs1_value = 1, .immediate =  0, .expected =  1}
   };
 
   test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SRLIorSRAI, OP_IMM);
@@ -447,6 +450,7 @@ void test_srai(void) {
     {.rs1_value = 100, .immediate =  (SRAI_IMM << 6) | 4, .expected = 6},   // ...0110 0100 >> 4 = ...0000 0110
     {.rs1_value = UINT64_MAX, .immediate =  (SRAI_IMM << 6) | 63, .expected = UINT64_MAX}, // ...1111 >> 63 = ...1111
     {.rs1_value = 100, .immediate =  (SRAI_IMM << 6) | 0, .expected = 100}, // ...0110 0100 >> 4 = ...0110 0100
+    {.rs1_value = -8, .immediate =  (SRAI_IMM << 6) | 0, .expected = -8}
   };
 
   test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SRLIorSRAI, OP_IMM);
