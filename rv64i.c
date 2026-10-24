@@ -99,7 +99,6 @@ void run_instruction(uint32_t instruction,
         shamt = bits(immediate, 0, 5);
         registers[rd_index] = registers[rs1_index] << shamt;
       } else {
-        print_bits(instruction);
         printf("immediate of potentail SLLI is not ");
       }
       break;
