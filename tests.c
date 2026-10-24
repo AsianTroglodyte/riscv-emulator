@@ -2,6 +2,7 @@
 #include "rv64i.h"
 #include <inttypes.h>
 #include <stddef.h>
+#include <assert.h>
 
 void setUp(void) {}
 
@@ -188,38 +189,43 @@ void test_LWU() {
   TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
 
+struct store_test_case {
+  int32_t immediate;
+  uint64_t rs2;
+  uint64_t rs1;
+  uint64_t expected;
+};
+
+void test_store_instruction(const struct store_test_case cases[],
+                            size_t case_count,
+                            uint32_t funct3,
+                            int width_in_bytes) {
+  for (size_t i = 0; i < case_count;+ ++i) {
+    /* assert((cases[i].immediate >= -2048|| cases[i].immediate <= 2047 ) && "immediate must not be larger 12 bits can represent"); */
+
+    struct machine_state state = {0};
+    // integer wraparound properly handles negative immediates anyway.
+    uint64_t address = (uint64_t) cases[i].immediate + cases[i].rs1;
+    state.registers[10] = cases[i].rs2;
+    state.registers[11] = cases[i].rs1;
+    uint32_t instruction = create_s_type(cases[i].immediate, 10, 11, funct3, STORE);
+    run_instruction(instruction, &state);
+
+
+
+    TEST_ASSERT_EQUAL_UINT64(state.memory[address], cases[i].expected);
+  }
+}
 
 void test_SB(void) {
-  struct machine_state state = {
-    .registers = {0, 1, 2, 0, 0, 5},
-    .memory = {0}
+  const struct store_test_case cases[] = {
+    {.immediate = 10, .rs2 = 0, .rs1 = 6},
+    {.immediate = 10, .rs2 = 10, .rs1 = 6},
+    {.immediate = 10, .rs2 = -10, .rs1 = 6},
+    {.immediate = -10, .rs2 = 10, .rs1 = 26},
   };
-  for (uint32_t i = 0; i < MEMORY_BYTES; i++) {
-    state.memory[i] = i;
-  }
 
-  // TEST WITH ZERO
-  state.registers[10] = 0;
-  uint32_t instruction = create_s_type(10, 10, 4, SB, STORE);
-  run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL(0, get_byte(state.memory, 10));
-
-  // TEST WITH STORING NEGATIVE VALUE
-  state.registers[10] = -10;
-  run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL(UINT8_MAX - 9, get_byte(state.memory, 10));
-
-  /* // TEST WITH POSITIVE */
-  state.registers[10] = 5;
-  run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL(5, get_byte(state.memory, 10));
-
-  /* // TEST WITH NEGATIVE IMMEDIATE */
-  state.registers[4] = 20;
-  state.registers[10] = 5;
-  uint32_t instruction_2 = create_s_type(-10, 10, 4, SB, STORE);
-  run_instruction(instruction_2, &state);
-  TEST_ASSERT_EQUAL(5, get_byte(state.memory, 10));
+  test_store_instruction(cases, sizeof(cases)/sizeof(cases[0]), SB, STORE);
 }
 
 void test_SH(void) {
@@ -230,6 +236,16 @@ void test_SH(void) {
   for (uint32_t i = 0; i < MEMORY_HALF_WORDS; i++) {
     state.memory[i * 2] = i * 2;
   }
+
+  const struct store_test_case cases[] = {
+    {.immediate = 10, .rs2 = 0, .rs1 = 6},
+    {.immediate = 10, .rs2 = 10, .rs1 = 6},
+    {.immediate = 10, .rs2 = -10, .rs1 = 6},
+    {.immediate = -10, .rs2 = 10, .rs1 = 26},
+  };
+
+  /* test_store_instruction(cases, sizeof(cases)/sizeof(cases[0]), SB, STORE); */
+
   // TEST WITH ZERO
   state.registers[10] = 0;
   uint32_t instruction = create_s_type(10, 10, 4, SH, STORE);
