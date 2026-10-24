@@ -52,7 +52,7 @@ void run_instruction(uint32_t instruction,
       registers[rd_index] = get_word(memory, address);
       break;
     case LD:
-      printf("LD\n");
+      registers[rd_index] = get_double_word(memory, address);
       break;
     default:
       printf("funct3 %d does not correspond to any LOAD instruction.", funct3);
