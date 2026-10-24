@@ -22,6 +22,14 @@ void test_load_instruction(const struct load_test_case cases[],
   for (size_t i = 0; i < case_count; ++i) {
     uint64_t memory_address  = (uint64_t) (int64_t) cases[i].immediate + cases[i].rs1_val;
     struct machine_state state = {0};
+
+    // Fill surrounding bytes with nonzero values so incorrectly wider loads affect the result
+    // | Byte    | `0x80` | `0x00` | `0x00` | `0x00` |` - (incorrectly) loading 2 or 4 bytes results in 0x80 anyway
+    // | Byte    | `0x80` | `0x12` | `0x34` | `0x56` |` - (incorrectly) loading 2 or 4 bytes results in different vals
+    for (size_t byte_index = 0; byte_index < sizeof(state.memory); ++byte_index) {
+      state.memory[byte_index] = 10;
+    }
+
     if (width_in_bytes == 1) {
       write_byte(state.memory, memory_address, cases[i].memory_value);
     } else if (width_in_bytes == 2) {
@@ -39,141 +47,126 @@ void test_load_instruction(const struct load_test_case cases[],
 }
 
 void test_LW(void) {
-  struct machine_state state = {
-    .registers = {0, 1, 2, 0, 0, 5},
-    .memory = {0}
+  struct load_test_case cases[] = {
+    {.immediate = 1, .rs1_val = 3, .memory_value = 1, .expected = 1},
+    {.immediate = 2, .rs1_val = 10,.memory_value = 1020343, .expected = 1020343},
+    {.immediate = 2, .rs1_val = 10,.memory_value = -4, .expected = UINT64_MAX - 3}, // check if -1 is sign extended;
+    {.immediate = 2, .rs1_val = 10, .memory_value = 0x80000000, .expected = 0xFFFFFFFF80000000}, // check for sign extension
+    {.immediate = -2048, .rs1_val = 2052,.memory_value = 4, .expected = 4}, // immediate negative boundary
+    {.immediate = 2047, .rs1_val = -2043,.memory_value = 4, .expected = 4}, // immediate positive boundary
+    {.immediate = -1, .rs1_val = 13,.memory_value = 10, .expected = 10}, // negative immediate;
+    {.immediate = 13, .rs1_val = -1,.memory_value = 10, .expected = 10}, // negative rs1_val;
   };
-  for (uint32_t i = 0; i < MEMORY_WORDS; i++) {
-    state.memory[i * 4] = i * 4;
-  }
+  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LW, 4);
 
-  // POSITIVE NUMBERS
-  uint32_t instruction = create_i_type(4, 4, LW, 10, LOAD);
+  struct machine_state state = {0};
+  state.registers[30] = 10;
+  uint32_t instruction = create_i_type(4, 0, LW, 30, LOAD); // instruction should x0 = 10 to x0 = 0;
   run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL(4, state.registers[10]);
-
-  // NEGATIVE IMMEDIATE
-  state.registers[4] = 8;
-  uint32_t instruction1 = create_i_type(-4, 4, LW, 10, LOAD);
-  run_instruction(instruction1, &state);
-  TEST_ASSERT_EQUAL_UINT64(4, state.registers[10]);
-
-  // NEGATIVE NUMBERS
-  state.registers[4] = 0;
-  state.memory[4] = (int8_t)-4;
-  state.memory[5] = 255;
-  state.memory[6] = 255;
-  state.memory[7] = 255;
-  run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL_UINT64(UINT64_MAX-3, state.registers[10]);
+  TEST_ASSERT_EQUAL_UINT64(0, state.registers[30]);
 }
 
 void test_LB(void) {
-  struct machine_state state = {
-    .registers = {0, 1, 2, 0, 0, 5},
-    .memory = {0}
+  struct load_test_case cases[] = {
+    {.immediate = 1, .rs1_val = 3, .memory_value = 1, .expected = 1},
+    {.immediate = 1, .rs1_val = 3,.memory_value = 123, .expected = 123},
+    {.immediate = 1, .rs1_val = 3,.memory_value = -4, .expected = UINT64_MAX - 3}, // check if -1 is sign extended;
+    {.immediate = 1, .rs1_val = 3, .memory_value = 0x80, .expected = 0xFFFFFFFFFFFFFF80}, // check for sign extension
+    {.immediate = -2048, .rs1_val = 2052,.memory_value = 4, .expected = 4}, // immediate negative boundary
+    {.immediate = 2047, .rs1_val = -2043,.memory_value = 4, .expected = 4}, // immediate positive boundary
+    {.immediate = -1, .rs1_val = 13,.memory_value = 10, .expected = 10}, // negative immediate;
+    {.immediate = 13, .rs1_val = -1,.memory_value = 10, .expected = 10}, // negative rs1_val;
   };
-  for (uint32_t i = 0; i < MEMORY_BYTES; i++) {
-    state.memory[i] = i;
-  }
+  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LB, 1);
 
-  // POSITIVE NUMBERS
-  uint32_t instruction = create_i_type(10, 4, LB, 10, LOAD);
-  run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL_UINT64(10, state.registers[10]);
-
-  // NEGATIVE NUMBERS
-  state.memory[10] = (int8_t)-4;
-  run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL_UINT64(UINT64_MAX-3, state.registers[10]);
-
-  // NEGATIVE IMMEDIATE
-  state.registers[4] = 8;
-  uint32_t instruction1 = create_i_type(-4, 4, LB, 10, LOAD);
-  run_instruction(instruction1, &state);
-  TEST_ASSERT_EQUAL_UINT64(4, state.registers[10]);
+  struct machine_state state1 = {0};
+  state1.registers[30] = 10;
+  uint32_t instruction = create_i_type(4, 0, LB, 30, LOAD); // instruction should x0 = 10 to x0 = 0;
+  run_instruction(instruction, &state1);
+  TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
 
 void test_LH(void) {
-  struct machine_state state = {
-    .registers = {0, 1, 2, 0, 0, 5},
-    .memory = {0}
+  struct load_test_case cases[] = {
+    {.immediate = 1, .rs1_val = 3, .memory_value = 1, .expected = 1},
+    {.immediate = 1, .rs1_val = 3,.memory_value = 123, .expected = 123},
+    {.immediate = 1, .rs1_val = 3,.memory_value = -4, .expected = UINT64_MAX - 3}, // check if -1 is sign extended;
+    {.immediate = 1, .rs1_val = 3, .memory_value = 0x8000, .expected = 0xFFFFFFFFFFFF8000}, // check for sign extension
+    {.immediate = -2048, .rs1_val = 2052,.memory_value = 4, .expected = 4}, // immediate negative boundary
+    {.immediate = 2047, .rs1_val = -2043,.memory_value = 4, .expected = 4}, // immediate positive boundary
+    {.immediate = -1, .rs1_val = 13,.memory_value = 10, .expected = 10}, // negative immediate;
+    {.immediate = 13, .rs1_val = -1,.memory_value = 10, .expected = 10}, // negative rs1_val;
   };
-  for (uint32_t i = 0; i < MEMORY_HALF_WORDS; i++) {
-    state.memory[i * 2] = i * 2;
-  }
+  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LH, 2);
 
-  uint32_t instruction = create_i_type(10, 4, LH, 10, LOAD);
-  // POSITIVE NUMBERS
-  run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL_UINT64(10, state.registers[10]);
-
-  // NEGATIVE NUMBERS
-  state.memory[10] = (int8_t)-4;
-  state.memory[11] = 255;
-  run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL_UINT64(UINT64_MAX-3, state.registers[10]);
-
-  // NEGATIVE IMMEDIATE
-  state.registers[4] = 8;
-  uint32_t instruction1 = create_i_type(-4, 4, LH, 10, LOAD);
-  run_instruction(instruction1, &state);
-  TEST_ASSERT_EQUAL_UINT64(4, state.registers[10]);
+  struct machine_state state1 = {0};
+  state1.registers[30] = 10;
+  uint32_t instruction = create_i_type(4, 0, LH, 30, LOAD); // instruction should x30 = 10 to x30 = 0;
+  run_instruction(instruction, &state1);
+  TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
 
 void test_LBU(void) {
-  struct machine_state state = {
-    .registers = {0, 1, 2, 0, 0, 5},
-    .memory = {0}
+  struct load_test_case cases[] = {
+    {.immediate = 1, .rs1_val = 3, .memory_value = 1, .expected = 1},
+    {.immediate = 1, .rs1_val = 3,.memory_value = 123, .expected = 123},
+    {.immediate = 1, .rs1_val = 3,.memory_value = -4, .expected = (uint64_t) 0xFC}, // check for zero extension;
+    {.immediate = 1, .rs1_val = 3, .memory_value = 0x80, .expected = 0x0000000000000080}, // check for zero extension
+    {.immediate = -2048, .rs1_val = 2052,.memory_value = 4, .expected = 4}, // immediate negative boundary
+    {.immediate = 2047, .rs1_val = -2043,.memory_value = 4, .expected = 4}, // immediate positive boundary
+    {.immediate = -1, .rs1_val = 13,.memory_value = 10, .expected = 10}, // negative immediate;
+    {.immediate = 13, .rs1_val = -1,.memory_value = 10, .expected = 10}, // negative rs1_val;
   };
-  for (uint32_t i = 0; i < MEMORY_BYTES; i++) {
-    state.memory[i] = i ;
-  }
 
-  // POSITIVE NUMBERS IN MEMORY
-  uint32_t instruction = create_i_type(10, 4, LBU, 10, LOAD);
-  run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL_UINT64(10, state.registers[10]);
+  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LBU, 1);
 
-  // NEGATIVE NUMBERS IN MEMORY
-  state.memory[10] = (int8_t)-4;
-  run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL_UINT64(UINT8_MAX - 3, state.registers[10]);
-
-  // NEGATIVE IMMEDIATE
-  state.registers[4] = 8;
-  uint32_t instruction1 = create_i_type(-4, 4, LBU, 10, LOAD);
-  run_instruction(instruction1, &state);
-  TEST_ASSERT_EQUAL_UINT64(4, state.registers[10]);
+  struct machine_state state1 = {0};
+  state1.registers[30] = 10;
+  uint32_t instruction = create_i_type(4, 0, LBU, 30, LOAD); // instruction should x30 = 10 to x30 = 0;
+  run_instruction(instruction, &state1);
+  TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
 
 void test_LHU(void) {
-  struct machine_state state = {
-    .registers = {0, 1, 2, 0, 0, 5},
-    .memory = {0}
+    struct load_test_case cases[] = {
+    {.immediate = 1, .rs1_val = 3, .memory_value = 1, .expected = 1},
+    {.immediate = 1, .rs1_val = 3,.memory_value = 123, .expected = 123},
+    {.immediate = 1, .rs1_val = 3,.memory_value = -4, .expected = (uint64_t) 0xFFFC}, // check for zero extension;
+    {.immediate = 1, .rs1_val = 3, .memory_value = 0x8000, .expected = 0x0000000000008000}, // check for zero extension
+    {.immediate = -2048, .rs1_val = 2052,.memory_value = 4, .expected = 4}, // immediate negative boundary
+    {.immediate = 2047, .rs1_val = -2043,.memory_value = 4, .expected = 4}, // immediate positive boundary
+    {.immediate = -1, .rs1_val = 13,.memory_value = 10, .expected = 10}, // negative immediate;
+    {.immediate = 13, .rs1_val = -1,.memory_value = 10, .expected = 10}, // negative rs1_val;
   };
-  for (uint32_t i = 0; i < MEMORY_HALF_WORDS; i++) {
-    state.memory[i * 2] = i * 2;
-  }
+  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LHU, 2);
 
-  // POSITIVE NUMBERS
-  uint32_t instruction = create_i_type(10, 4, LHU, 10, LOAD);
-  run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL_UINT64(10, state.registers[10]);
-
-  // NEGATIVE NUMBERS
-  state.memory[10] = (int8_t)-4;
-  state.memory[11] = 255;
-  run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL_UINT64(UINT16_MAX - 3, state.registers[10]);
-
-  // NEGATIVE IMMEDIATE
-  state.registers[4] = 8;
-  state.memory[4] = 4;
-  uint32_t instruction1 = create_i_type(-4, 4, LHU, 10, LOAD);
-  run_instruction(instruction1, &state);
-  TEST_ASSERT_EQUAL_UINT64(4, state.registers[10]);
+  struct machine_state state1 = {0};
+  state1.registers[30] = 10;
+  uint32_t instruction = create_i_type(4, 0, LHU, 30, LOAD); // instruction should x30 = 10 to x30 = 0;
+  run_instruction(instruction, &state1);
+  TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
+
+void test_LWU() {
+  struct load_test_case cases[] = {
+    {.immediate = 1, .rs1_val = 3, .memory_value = 1, .expected = 1},
+    {.immediate = 1, .rs1_val = 3,.memory_value = 123, .expected = 123},
+    {.immediate = 1, .rs1_val = 3,.memory_value = -4, .expected = (uint64_t) 0xFFFFFFFC}, // check for zero extension;
+    {.immediate = 1, .rs1_val = 3, .memory_value = 0x80, .expected = 0x0000000000000080}, // check for zero extension
+    {.immediate = -2048, .rs1_val = 2052,.memory_value = 4, .expected = 4}, // immediate negative boundary
+    {.immediate = 2047, .rs1_val = -2043,.memory_value = 4, .expected = 4}, // immediate positive boundary
+    {.immediate = -1, .rs1_val = 13,.memory_value = 10, .expected = 10}, // negative immediate;
+    {.immediate = 13, .rs1_val = -1,.memory_value = 10, .expected = 10}, // negative rs1_val;
+  };
+  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LWU, 4);
+
+  struct machine_state state1 = {0};
+  state1.registers[30] = 10;
+  uint32_t instruction = create_i_type(4, 0, LWU, 30, LOAD); // instruction should x30 = 10 to x30 = 0;
+  run_instruction(instruction, &state1);
+  TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
+}
+
 
 void test_SB(void) {
   struct machine_state state = {
@@ -303,21 +296,6 @@ void test_SD(void) {
   uint32_t instruction_2 = create_s_type(-8, 10, 4, SD, STORE);
   run_instruction(instruction_2, &state);
   TEST_ASSERT_EQUAL_UINT64(5, get_double_word(state.memory, 8));
-}
-
-void test_LWU() {
-
-  struct load_test_case cases[] = {
-    {.immediate = 1, .rs1_val = 4, .memory_value = 1, .expected = 1},
-    {.immediate = 0, .rs1_val = 10,.memory_value = 1020343, .expected = 1020343},
-    {.immediate = 0, .rs1_val = 10,.memory_value = -1, .expected = UINT32_MAX},
-    {1, 10, UINT32_MAX, UINT32_MAX},
-    {.immediate = -1, .rs1_val = 10,.memory_value = 10, .expected = 10},
-    {.immediate = 10, .rs1_val = -1,.memory_value = 10, .expected = 10},
-    //
-  };
-
-  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LWU, 4);
 }
 
 struct i_instruction_case {
