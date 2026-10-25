@@ -276,8 +276,8 @@ void test_SD(void) {
     {.immediate = -10, .rs2 = 10, .rs1 = 16 + 10, .expected = 10},
     {.immediate = -2048, .rs2 = 10, .rs1 = 2048 + 16, .expected = 10},
     {.immediate = 2047, .rs2 = 10, .rs1 = -2047 + 16, .expected = 10},
-    {.immediate = 10, .rs2 = UINT32_MAX, .rs1 = 6, .expected = UINT32_MAX},
-    {.immediate = 10, .rs2 = -1, .rs1 = 6, .expected = UINT32_MAX},
+    {.immediate = 10, .rs2 = UINT64_MAX, .rs1 = 6, .expected = UINT64_MAX},
+    {.immediate = 10, .rs2 = -1, .rs1 = 6, .expected = UINT64_MAX},
   };
 
   test_store_instruction(cases, sizeof(cases)/sizeof(cases[0]), SD, 8);
@@ -311,9 +311,16 @@ static void test_i_instruction(const struct i_instruction_case cases[],
 }
 
 void test_addi(void) {
-  /* rs1_value; */
-  /* immediate; */
-  /* expected; */
+  const struct i_instruction_case cases[] = {
+      {.rs1_value = 10, .immediate =  10, .expected =  20},             // Positive immediate
+      {.rs1_value = 10, .immediate =  -10, .expected =  0},             // Negative immediate cancels rs1
+      {.rs1_value = 10, .immediate =  -100, .expected =  (uint64_t)-90}, // Result wraps to a negative 64-bit value
+  };
+
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ADDI, OP_IMM);
+}
+
+void test_addiw(void) {
   const struct i_instruction_case cases[] = {
       {.rs1_value = 10, .immediate =  10, .expected =  20},             // Positive immediate
       {.rs1_value = 10, .immediate =  -10, .expected =  0},             // Negative immediate cancels rs1

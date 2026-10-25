@@ -134,6 +134,20 @@ void run_instruction(uint32_t instruction,
     break;
   case OP_IMM_32:
     printf("OP_IMM_32");
+    funct3 = get_funct3(instruction);
+    switch (funct3) {
+    case ADDIW:
+      printf("ADDIW\n");
+      break;
+    case SLLIW:
+      printf("SLLIW\n");
+      break;
+    case SRLIWorSRAIW:
+      printf("SRLIWorSRAIW\n");
+      break;
+    default:
+      printf("SRLIWorSRAIW\n");
+    }
     break;
   case STORE:
     immediate = get_s_immediate(instruction);
@@ -525,7 +539,6 @@ void write_half_word(uint8_t memory[], uint32_t address, uint64_t value) {
 void write_byte(uint8_t memory[], uint32_t address, uint64_t value) {
   memory[address ] = value;
 }
-
 
 static void assert_valid_opcode(int32_t opcode) {
   assert((opcode >= 0 && opcode <= 0b1111111 )

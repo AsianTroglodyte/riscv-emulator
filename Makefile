@@ -2,7 +2,9 @@
 
 CC=gcc
 
-CFLAGS= -Wall -Wextra -std=c11
+CFLAGS= -Wall -Wextra -Wno-unused-parameters -Wconversion \
+-Wno-sign-conversion -std=c11 -fsanitize=address,undefined -fno-omit-frame-pointer
+
 DEBUG= -Wall -Wextra -std=c11 -g -O0
 TEST_BIN=tests
 
@@ -19,7 +21,7 @@ comp_test: tests.c rv64i.c
 	$(CC) tests.c rv64i.c ./unity/src/unity.c -o ./build/tests
 
 debug_test: tests.c rv64i.c
-	$(DEBUG) tests.c rv64i.c ./unity/src/unity.c -o ./build/tests
+	$(CC) tests.c rv64i.c ./unity/src/unity.c -o ./build/tests
 
 clean:
 	rm tests main

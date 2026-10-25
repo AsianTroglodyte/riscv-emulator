@@ -23,7 +23,7 @@ void run_instruction(uint32_t instruction,
 
 enum status_code {
   RV64I_OK = 0,
-  RV64I_ERROR_ILLEGAL_INSTRUCTION = 1
+  RV64I_ERROR_ILLEGAL_INSTRUCTION = 1,
 };
 
 
@@ -87,7 +87,7 @@ enum load_funct3_enums: uint32_t {
   LD=         0b011,
 };
 
-enum op_imm_enums: uint32_t {
+enum op_imm_funct3_enums: uint32_t {
   ADDI=         0b000,
   SLTI=         0b010,
   SLTIU=        0b011,
@@ -98,6 +98,20 @@ enum op_imm_enums: uint32_t {
   SRLIorSRAI=   0b101,
   SRLI_IMM=     0b000000,
   SRAI_IMM=     0b010000,
+};
+
+
+//
+enum op_imm_32_funct3_enums: uint32_t {
+  ADDIW=        0b000,
+  SLLIW=        0b001,
+  SRLIWorSRAIW= 0b101,
+};
+
+enum op_imm_32_funct7_enums: uint32_t {
+  SLLIWfunct7=  0b0100000, // we technically don't have to use this
+  SRLIW=        0b0000000,
+  SRAIW=        0b0100000,
 };
 
 
