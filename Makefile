@@ -18,23 +18,27 @@ $(MAIN_BUILD): main.c rv64i.c rv64i.h | build
 # tests
 TEST_BIN=./build/tests
 
+## build and run test
 .PHONY: test
 test: $(TEST_BIN)
 	$(TEST_BIN)
 
+## only build test
+.PHONY: build-tests
+build-tests: $(TEST_BIN)
+
+## build test recipe
 $(TEST_BIN): tests.c rv64i.c rv64i.h | build
 	$(CC) $(CFLAGS) tests.c rv64i.c ./unity/src/unity.c -o $(TEST_BIN)
 
-comp_test: tests.c rv64i.c rv64i.h | build
-	$(CC) $(CFLAGS) tests.c rv64i.c ./unity/src/unity.c -o $(TEST_BIN)
 
-# make sure that the build file exists for tests and main
+# make sure that the build directory exists for tests and main
 build:
 	mkdir -p build
 
-# debug
+# build debug
 debug_test: tests.c rv64i.c
-	$(CC) tests.c rv64i.c ./unity/src/unity.c -o ./build/tests
+	$(CC) tests.c rv64i.c ./unity/src/unity.c -o ./build/debug_test
 
 clean:
-	rm ./build/tests main
+	rm -f ./build/tests ./build/main
