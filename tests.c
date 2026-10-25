@@ -239,14 +239,6 @@ void test_SB(void) {
 }
 
 void test_SH(void) {
-  struct machine_state state = {
-    .registers = {0, 1, 2, 0, 0, 5},
-    .memory = {0}
-  };
-  for (uint32_t i = 0; i < MEMORY_HALF_WORDS; i++) {
-    state.memory[i * 2] = i * 2;
-  }
-
   const struct store_test_case cases[] = {
     {.immediate = 10, .rs2 = 0, .rs1 = 6, .expected = 0},
     {.immediate = 10, .rs2 = 10, .rs1 = 6, .expected = 10},
@@ -259,94 +251,36 @@ void test_SH(void) {
   };
 
   test_store_instruction(cases, sizeof(cases)/sizeof(cases[0]), SH, 2);
-
-  // TEST WITH ZERO
-  state.registers[10] = 0;
-  uint32_t instruction = create_s_type(10, 10, 4, SH, STORE);
-  run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL(0, get_half_word(state.memory, 10));
-
-  // TEST WITH STORING NEGATIVE VALUE
-  state.registers[10] = -10;
-  run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL(UINT16_MAX - 9, get_half_word(state.memory, 10));
-
-  /* // TEST WITH POSITIVE */
-  state.registers[10] = 5;
-  run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL(5, get_half_word(state.memory, 10));
-
-  /* // TEST WITH NEGATIVE IMMEDIATE */
-  state.registers[4] = 20;
-  state.registers[10] = 5;
-  uint32_t instruction_2 = create_s_type(-10, 10, 4, SH, STORE);
-  run_instruction(instruction_2, &state);
-  TEST_ASSERT_EQUAL(5, get_half_word(state.memory, 10));
 }
 
 void test_SW(void) {
-  struct machine_state state = {
-    .registers = {0, 1, 2, 0, 0, 5},
-    .memory = {0}
+  const struct store_test_case cases[] = {
+    {.immediate = 10, .rs2 = 0, .rs1 = 6, .expected = 0},
+    {.immediate = 10, .rs2 = 10, .rs1 = 6, .expected = 10},
+    {.immediate = 10, .rs2 = -10, .rs1 = 6, .expected = -10},
+    {.immediate = -10, .rs2 = 10, .rs1 = 16 + 10, .expected = 10},
+    {.immediate = -2048, .rs2 = 10, .rs1 = 2048 + 16, .expected = 10},
+    {.immediate = 2047, .rs2 = 10, .rs1 = -2047 + 16, .expected = 10},
+    {.immediate = 10, .rs2 = UINT32_MAX, .rs1 = 6, .expected = UINT32_MAX},
+    {.immediate = 10, .rs2 = -1, .rs1 = 6, .expected = UINT32_MAX},
   };
-  for (uint32_t i = 0; i < MEMORY_WORDS; i++) {
-    state.memory[i * 4] = i * 4;
-  }
 
-  // TEST WITH ZERO
-  state.registers[8] = 0;
-  uint32_t instruction = create_s_type(8, 10, 4, SW, STORE);
-  run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL(0, get_word(state.memory, 8));
-
-  // TEST WITH STORING NEGATIVE VALUE
-  state.registers[10] = -10;
-  run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL(UINT32_MAX - 9, get_word(state.memory, 8));
-
-  /* // TEST WITH POSITIVE */
-  state.registers[10] = 5;
-  run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL(5, get_word(state.memory, 8));
-
-  /* // TEST WITH NEGATIVE IMMEDIATE */
-  state.registers[4] = 16;
-  state.registers[10] = 5;
-  uint32_t instruction_2 = create_s_type(-8, 10, 4, SW, STORE);
-  run_instruction(instruction_2, &state);
-  TEST_ASSERT_EQUAL(5, get_word(state.memory, 8));
+  test_store_instruction(cases, sizeof(cases)/sizeof(cases[0]), SW, 4);
 }
 
 void test_SD(void) {
-  struct machine_state state = {
-    .registers = {0, 1, 2, 0, 0, 5},
-    .memory = {0}
+  const struct store_test_case cases[] = {
+    {.immediate = 10, .rs2 = 0, .rs1 = 6, .expected = 0},
+    {.immediate = 10, .rs2 = 10, .rs1 = 6, .expected = 10},
+    {.immediate = 10, .rs2 = -10, .rs1 = 6, .expected = -10},
+    {.immediate = -10, .rs2 = 10, .rs1 = 16 + 10, .expected = 10},
+    {.immediate = -2048, .rs2 = 10, .rs1 = 2048 + 16, .expected = 10},
+    {.immediate = 2047, .rs2 = 10, .rs1 = -2047 + 16, .expected = 10},
+    {.immediate = 10, .rs2 = UINT32_MAX, .rs1 = 6, .expected = UINT32_MAX},
+    {.immediate = 10, .rs2 = -1, .rs1 = 6, .expected = UINT32_MAX},
   };
-  for (uint32_t i = 0; i < (MEMORY_WORDS / 2); i++) {
-    state.memory[i * 8] = i * 8;
-  }
 
-  // TEST WITH ZERO
-  uint32_t instruction = create_s_type(8, 10, 4, SD, STORE);
-  run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL(0, get_double_word(state.memory, 8));
-
-  // TEST WITH STORING NEGATIVE VALUE
-  state.registers[10] = -10;
-  run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL_UINT64(UINT64_MAX - 9, get_double_word(state.memory, 8));
-
-  // TEST WITH POSITIVE
-  state.registers[10] = 5;
-  run_instruction(instruction, &state);
-  TEST_ASSERT_EQUAL_UINT64(5, get_double_word(state.memory, 8));
-
-  // TEST WITH NEGATIVE IMMEDIATE
-  state.registers[4] = 16;
-  state.registers[10] = 5;
-  uint32_t instruction_2 = create_s_type(-8, 10, 4, SD, STORE);
-  run_instruction(instruction_2, &state);
-  TEST_ASSERT_EQUAL_UINT64(5, get_double_word(state.memory, 8));
+  test_store_instruction(cases, sizeof(cases)/sizeof(cases[0]), SD, 8);
 }
 
 struct i_instruction_case {
