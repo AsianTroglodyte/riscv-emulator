@@ -208,14 +208,16 @@ void test_store_instruction(const struct store_test_case cases[],
     uint64_t address = (uint64_t) cases[i].immediate + cases[i].rs1;
     state.registers[10] = cases[i].rs2;
     state.registers[11] = cases[i].rs1;
+
+    for (size_t byte_index = 0; byte_index < sizeof(state.memory); ++byte_index) {
+      state.memory[byte_index] = 10;
+    }
+
     uint32_t instruction = create_s_type(cases[i].immediate, 10, 11, funct3, STORE);
     run_instruction(instruction, &state);
 
-    /* print_memory(state.memory); */
-    /* print_registers(state.registers); */
     for (size_t offset = 0; offset < width_in_bytes; ++offset) {
       uint8_t expected_byte = (uint8_t) (cases[i].expected >> (8 * offset));
-      /* printf("expected byte: %d \n", expected_byte); */
       TEST_ASSERT_EQUAL_UINT8(expected_byte, state.memory[address + offset]);
     }
   }
@@ -229,8 +231,8 @@ void test_SB(void) {
     {.immediate = -10, .rs2 = 10, .rs1 = 26, .expected = 10},
     {.immediate = -2048, .rs2 = 10, .rs1 = 2048 + 16, .expected = 10},
     {.immediate = 2047, .rs2 = 10, .rs1 = -2047 + 16, .expected = 10},
-    {.immediate = 2047, .rs2 = 10, .rs1 = -2047 + 16, .expected = 10},
     {.immediate = 10, .rs2 = UINT8_MAX, .rs1 = 6, .expected = UINT8_MAX},
+    {.immediate = 10, .rs2 = -1, .rs1 = 6, .expected = UINT8_MAX},
   };
 
   test_store_instruction(cases, sizeof(cases)/sizeof(cases[0]), SB, 1);
@@ -246,13 +248,17 @@ void test_SH(void) {
   }
 
   const struct store_test_case cases[] = {
-    {.immediate = 10, .rs2 = 0, .rs1 = 6},
-    {.immediate = 10, .rs2 = 10, .rs1 = 6},
-    {.immediate = 10, .rs2 = -10, .rs1 = 6},
-    {.immediate = -10, .rs2 = 10, .rs1 = 26},
+    {.immediate = 10, .rs2 = 0, .rs1 = 6, .expected = 0},
+    {.immediate = 10, .rs2 = 10, .rs1 = 6, .expected = 10},
+    {.immediate = 10, .rs2 = -10, .rs1 = 6, .expected = -10},
+    {.immediate = -10, .rs2 = 10, .rs1 = 16 + 10, .expected = 10},
+    {.immediate = -2048, .rs2 = 10, .rs1 = 2048 + 16, .expected = 10},
+    {.immediate = 2047, .rs2 = 10, .rs1 = -2047 + 16, .expected = 10},
+    {.immediate = 10, .rs2 = UINT16_MAX, .rs1 = 6, .expected = UINT16_MAX},
+    {.immediate = 10, .rs2 = -1, .rs1 = 6, .expected = UINT16_MAX},
   };
 
-  /* test_store_instruction(cases, sizeof(cases)/sizeof(cases[0]), SB, STORE); */
+  test_store_instruction(cases, sizeof(cases)/sizeof(cases[0]), SH, 2);
 
   // TEST WITH ZERO
   state.registers[10] = 0;
