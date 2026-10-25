@@ -1,8 +1,8 @@
 
 
 CC=gcc
-CFLAGS= -Wall -Wextra -Wno-unused-parameter -Wconversion -Wno-sign-conversion -std=c11 -fsanitize=address,undefined -fno-omit-frame-pointer
-DEBUG= -Wall -Wextra -std=c11 -g -O0
+CFLAGS= -Wall -Wextra -Wno-unused-parameter -Wconversion -Wno-sign-conversion -std=c23 -fsanitize=address,undefined -fno-omit-frame-pointer
+DEBUG= -Wall -Wextra -std=c23 -g -O0
 
 
 # main build
@@ -37,8 +37,8 @@ build:
 	mkdir -p build
 
 # build debug
-debug_test: tests.c rv64i.c
-	$(CC) tests.c rv64i.c ./unity/src/unity.c -o ./build/debug_test
+# test-debug: tests.c rv64i.c
+# 	$(CC) tests.c rv64i.c ./unity/src/unity.c -o ./build/debug_test
 
 clean:
 	rm -f ./build/tests ./build/main
