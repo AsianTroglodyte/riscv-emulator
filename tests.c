@@ -30,16 +30,20 @@ void test_load_instruction(const struct load_test_case cases[],
     for (size_t byte_index = 0; byte_index < sizeof(state.memory); ++byte_index) {
       state.memory[byte_index] = 10;
     }
-
     if (width_in_bytes == 1) {
-      write_byte(state.memory, memory_address, cases[i].memory_value);
+      write_byte(state.memory, memory_address, (uint8_t) cases[i].memory_value);
     } else if (width_in_bytes == 2) {
-      write_half_word(state.memory, memory_address, cases[i].memory_value);
+      write_half_word(state.memory, memory_address, (uint16_t) cases[i].memory_value);
     } else if (width_in_bytes == 4) {
-      write_word(state.memory, memory_address, cases[i].memory_value);
+      write_word(state.memory, memory_address, (uint32_t) cases[i].memory_value);
     } else if (width_in_bytes == 8) {
+      /* assert((cases[i].memory_value < UINT64_MAX) && "test memory+value too bit for 8 byte"); */
       write_double_word(state.memory, memory_address, cases[i].memory_value);
+    } else {
+      printf("invalid width_in bytes %d", width_in_bytes);
+      assert(0);
     }
+
 
     state.registers[10] = cases[i].rs1_val;
     run_instruction(create_i_type(cases[i].immediate, 10, funct3, 11, LOAD), &state);
@@ -51,7 +55,7 @@ void test_LW(void) {
   struct load_test_case cases[] = {
     {.immediate = 1, .rs1_val = 3, .memory_value = 1, .expected = 1},
     {.immediate = 2, .rs1_val = 10,.memory_value = 1020343, .expected = 1020343},
-    {.immediate = 2, .rs1_val = 10,.memory_value = -4, .expected = UINT64_MAX - 3}, // check if -1 is sign extended;
+    {.immediate = 2, .rs1_val = 10,.memory_value = -4, .expected = UINT64_MAX - 3}, // check if sign extension;
     {.immediate = 2, .rs1_val = 10, .memory_value = 0x80000000, .expected = 0xFFFFFFFF80000000}, // check for sign extension
     {.immediate = -2048, .rs1_val = 2052,.memory_value = 4, .expected = 4}, // immediate negative boundary
     {.immediate = 2047, .rs1_val = -2043,.memory_value = 4, .expected = 4}, // immediate positive boundary

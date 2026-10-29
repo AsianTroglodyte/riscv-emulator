@@ -24,7 +24,7 @@ void run_instruction(uint32_t instruction,
     uint32_t rd_index;
     uint32_t funct3;
 
-    uint32_t address;
+    uint64_t address;
   case LOAD:
     // I Type
     immediate = get_i_immediate(instruction);
@@ -79,7 +79,6 @@ void run_instruction(uint32_t instruction,
 
     switch (funct3) {
       uint32_t shamt;
-      uint32_t immediate_11_5;
     case ADDI:
       registers[rd_index] = registers[rs1_index] + immediate;
       break;
@@ -407,7 +406,7 @@ uint32_t get_b_immediate(uint32_t instruction) {
   uint32_t imm_4_1 = bits(instruction, 8, 11) << 1;
   uint32_t imm_11 = bits(instruction, 7, 7) << 11;
 
-  return sign_extend_64((imm_12 + imm_11 + imm_10_5 + imm_4_1), 12);
+  return sign_extend_32((imm_12 + imm_11 + imm_10_5 + imm_4_1), 12);
 }
 
 // function works on U-Type (u for upper-immediate) AND regular immediate values.
@@ -415,7 +414,7 @@ int32_t get_upper_immediate(uint32_t instruction_or_immediate) {
   return instruction_or_immediate & (UINT32_MAX << 12);
 }
 
-int32_t sign_extend_32(uint32_t field, int width) {
+uint32_t sign_extend_32(uint32_t field, int width) {
   assert(width >= 1 && width <= 32);
   uint32_t mask = UINT32_MAX >> (32 - width);
   uint32_t sign_bit = UINT32_C(1) << (width - 1);
@@ -423,16 +422,16 @@ int32_t sign_extend_32(uint32_t field, int width) {
 
   // check if signage of number is negative
   if (field & sign_bit) {
-    return (int64_t)field - (INT64_C(1) << width);
+    return (int32_t)field - (INT32_C(1) << width);
   }
 
   return field;
 }
 
-int64_t sign_extend_64(uint64_t field, int width) {
+uint64_t sign_extend_64(uint64_t field, int width) {
   assert(width >= 1 && width <= 64);
-  uint32_t mask = UINT64_MAX >> (64 - width);
-  uint32_t sign_bit = UINT64_C(1) << (width - 1);
+  uint64_t mask = UINT64_MAX >> (64 - width);
+  uint64_t sign_bit = UINT64_C(1) << (width - 1);
   field &= mask;
 
   // check if signage of number is negative
@@ -499,7 +498,7 @@ inline uint64_t alternate_return_address(const uint64_t registers[NUM_REGISTERS]
 
 
 // GET DATA FROM MEMORY GIVEN AN ADDRESS
-inline uint64_t get_double_word(uint8_t const memory[], uint32_t address) {
+inline uint64_t get_double_word(uint8_t const memory[], uint64_t address) {
   return ((uint64_t)memory[address]) |
          ((uint64_t)memory[address + 1]) << 8 |
          ((uint64_t)memory[address + 2]) << 16 |
@@ -510,43 +509,43 @@ inline uint64_t get_double_word(uint8_t const memory[], uint32_t address) {
          ((uint64_t)memory[address + 7]) << 56 ;
 }
 
-inline uint32_t get_word(uint8_t const memory[], uint32_t address) {
+inline uint32_t get_word(uint8_t const memory[], uint64_t address) {
   return ((uint32_t)memory[address]) |
          ((uint32_t)memory[address + 1]) << 8  |
          ((uint32_t)memory[address + 2]) << 16 |
          ((uint32_t)memory[address + 3]) << 24;
 }
 
-inline uint16_t get_half_word(uint8_t const memory[], uint32_t address) {
+inline uint16_t get_half_word(uint8_t const memory[], uint64_t address) {
   return (uint16_t)memory[address] |
          (uint16_t)memory[address + 1] << 8;
 }
 
-inline uint8_t get_byte(uint8_t const memory[], uint32_t address) {
+inline uint8_t get_byte(uint8_t const memory[], uint64_t address) {
   return memory[address];
 }
 
 // WRITE DATA TO MEMORY GIVEN AN ADDRESS AND VALUE
-void write_double_word(uint8_t memory[], uint32_t address, uint64_t field) {
+void write_double_word(uint8_t memory[], uint64_t address, uint64_t field) {
   for (unsigned i = 0; i < 8; ++i) {
     memory[address + i] = (uint8_t)(field >> (i * 8));
   }
 }
 
-void write_word(uint8_t memory[], uint32_t address, uint64_t value) {
+void write_word(uint8_t memory[], uint64_t address, uint64_t value) {
   for (unsigned i = 0; i < 4; ++i) {
     memory[address + i] = (uint8_t)(value >> (i * 8));
   }
 }
 
-void write_half_word(uint8_t memory[], uint32_t address, uint64_t value) {
+void write_half_word(uint8_t memory[], uint64_t address, uint64_t value) {
   for (unsigned i = 0; i < 2; ++i) {
     memory[address + i] = (uint8_t)(value >> (i * 8));
   }
 }
 
-void write_byte(uint8_t memory[], uint32_t address, uint64_t value) {
-  memory[address ] = value;
+void write_byte(uint8_t memory[], uint64_t address, uint64_t value) {
+  memory[address] = (uint8_t) value;
 }
 
 static void assert_valid_opcode(int32_t opcode) {

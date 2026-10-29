@@ -184,18 +184,18 @@ uint64_t return_address(const uint64_t registers[NUM_REGISTERS]);
 uint64_t alternate_return_address(const uint64_t registers[NUM_REGISTERS]);
 
 // WRITE DATA FROM MEMORY GIVEN AN ADDRESS
-uint64_t get_double_word(uint8_t const memory[], uint32_t address);
-uint32_t get_word(uint8_t const memory[], uint32_t address);
-uint16_t get_half_word(uint8_t const memory[], uint32_t address);
-uint8_t get_byte(uint8_t const memory[], uint32_t address);
+uint64_t get_double_word(uint8_t const memory[], uint64_t address);
+uint32_t get_word(uint8_t const memory[], uint64_t address);
+uint16_t get_half_word(uint8_t const memory[], uint64_t address);
+uint8_t get_byte(uint8_t const memory[], uint64_t address);
 
 // WRITE DATA TO MEMORY GIVEN AN ADDRESS AND VALUE
-void write_byte(uint8_t memory[], uint32_t address, uint64_t value);
-void write_half_word(uint8_t memory[], uint32_t address, uint64_t value);
-void write_word(uint8_t memory[], uint32_t address, uint64_t value);
-void write_double_word(uint8_t memory[], uint32_t address, uint64_t value);
+void write_byte(uint8_t memory[], uint64_t address, uint64_t value);
+void write_half_word(uint8_t memory[], uint64_t address, uint64_t value);
+void write_word(uint8_t memory[], uint64_t address, uint64_t value);
+void write_double_word(uint8_t memory[], uint64_t address, uint64_t value);
 
-int32_t sign_extend_32(uint32_t value, int length);
-int64_t sign_extend_64(uint64_t field, int width);
+uint32_t sign_extend_32(uint32_t value, int length);
+uint64_t sign_extend_64(uint64_t field, int width);
 
 #endif
