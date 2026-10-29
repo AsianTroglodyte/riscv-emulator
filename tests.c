@@ -466,7 +466,7 @@ void test_ADD(void) {
     {0, 4, 4},
     {0, 0, 0},
     {UINT64_MAX, -1, UINT64_MAX - 1}, // -10 + 4 = -6
-    {INT64_MAX, 1, INT64_C(1) << 63}, // -10 + 4 = -6
+    {INT64_MAX, 1, UINT64_C(1) << 63}, // -10 + 4 = -6
     {INT64_MIN, -1, INT64_MAX}, // -10 + 4 = -6
     {UINT64_MAX, 1, 0}
   };
@@ -868,7 +868,7 @@ void test_b_create(void) {
   /* print_bits(instruction); */
   /* print_bits((0b1 << 31) | (0b1  << 7) | (0b111011 << 25) | (0b1000 << 8)); */
   // NOTE: 1st bit not encoded as immediate must be multiple of two for instruction alignment hence: 0b1000 << 8
-  TEST_ASSERT_EQUAL_UINT32((0b1 << 31) | (0b1  << 7) | (0b111011 << 25) | (0b1000 << 8), instruction);
+  TEST_ASSERT_EQUAL_UINT32((0b1U << 31) | (0b1  << 7) | (0b111011 << 25) | (0b1000 << 8), instruction);
 
   // TEST OPCODE AND FUNCT 3
   instruction = create_b_type(0, 0, 0, BGEU, BRANCH);
@@ -976,6 +976,9 @@ int main(void) {
   RUN_TEST(test_slli);
   RUN_TEST(test_srli);
   RUN_TEST(test_srai);
+
+  // test 32-bit-result immediate operations
+  /* RUN_TEST(test_addiw); */
 
   // test arithmetic with JUST registers
   RUN_TEST(test_ADD);

@@ -134,10 +134,14 @@ void run_instruction(uint32_t instruction,
     break;
   case OP_IMM_32:
     printf("OP_IMM_32");
+
     funct3 = get_funct3(instruction);
     switch (funct3) {
     case ADDIW:
-      printf("ADDIW\n");
+      immediate = get_i_immediate(instruction);
+      rs1_index = get_rs1_index(instruction);
+      rd_index = get_rd_index(instruction);
+      registers[rd_index] = sign_extend_64((uint32_t)(registers[rs1_index] + immediate), 32);
       break;
     case SLLIW:
       printf("SLLIW\n");
@@ -196,7 +200,8 @@ void run_instruction(uint32_t instruction,
       registers[rd_index] = registers[rs1_index] - registers[rs2_index];
       break;
     case SLL:
-      registers[rd_index] = registers[rs1_index] << registers[rs2_index];
+      // we only use lowest 6 bits of register value to shift
+      registers[rd_index] = registers[rs1_index] << (registers[rs2_index] & 0b111111);
       break;
     case SLT:
       registers[rd_index] = (int64_t) registers[rs1_index] < (int64_t) registers[rs2_index];
@@ -208,10 +213,12 @@ void run_instruction(uint32_t instruction,
       registers[rd_index] = registers[rs1_index] ^ registers[rs2_index];
       break;
     case SRL:
-      registers[rd_index] = registers[rs1_index] >> registers[rs2_index];
+      // we only use lowest 6 bits of register value to shift
+      registers[rd_index] = registers[rs1_index] >> (registers[rs2_index] & 0b111111);
       break;
     case SRA:
-      registers[rd_index] = (int64_t) registers[rs1_index] >> registers[rs2_index];
+      // we only use lowest 6 bits of register value to shift
+      registers[rd_index] = (int64_t) registers[rs1_index] >> (registers[rs2_index] & 0b111111);
       break;
     case OR:
       registers[rd_index] = (int64_t) registers[rs1_index] | registers[rs2_index];
@@ -230,6 +237,7 @@ void run_instruction(uint32_t instruction,
     registers[rd_index] = get_upper_immediate(instruction);
     break;
   case OP_32:
+
     printf("OP_32\n");
     break;
 
@@ -640,7 +648,7 @@ uint32_t create_b_type(uint32_t immediate,
   assert(((immediate % 2) == 0) && "Immediate must be factor of 2 to align with 16 bit and 32 bit instruction");
 
   // Immediate is expected to 12-1 NOT 12-0
-  immediate = (immediate >> 1) | (1 << 31);
+  immediate = (immediate >> 1) | (1U << 31);
   /* printf("create_b_type - immediate:"); */
   /* print_bits(immediate); */
 
