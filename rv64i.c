@@ -11,6 +11,7 @@ void run_instruction(uint32_t instruction,
   uint64_t *registers = machine_state->registers;
   uint64_t *program_counter = &machine_state->program_counter;
   assert((*program_counter % 4) == 0);
+  assert(registers[0] == 0);
 
   // program_counter set to next_pc at end
   // default value here overrided by JUMP and BRANCH instructions if needed.
