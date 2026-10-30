@@ -3,6 +3,7 @@
 #include <inttypes.h>
 #include "rv64i.h"
 #include <assert.h>
+#include <stdlib.h>
 
 
 void run_instruction(uint32_t instruction,
@@ -99,10 +100,11 @@ void run_instruction(uint32_t instruction,
         shamt = bits(immediate, 0, 5);
         registers[rd_index] = registers[rs1_index] << shamt;
       } else {
-        printf("immediate of potentail SLLI is not ");
+        /* assert(1 & printf("immediate of potential SLLI is not ")); */
+        printf("immediate of potential SLLI is not ");
       }
       break;
-    case SRLIorSRAI:
+    case SHIFT_RIGHT_IMM:
       shamt = bits(immediate, 0, 5);
       uint32_t funct6 = bits(immediate, 6, 11);
       switch (funct6) {
@@ -111,7 +113,8 @@ void run_instruction(uint32_t instruction,
         break;
       case SRAI_IMM: {
         uint64_t result = registers[rs1_index] >> shamt;
-        if (shamt != 0 && (registers[rs1_index] & (UINT64_C(1) << 63)) != 0) {
+        bool is_negative = (registers[rs1_index] & (UINT64_C(1) << 63)) != 0;
+        if (shamt != 0 && is_negative) {
           result |= (UINT64_MAX << (64 - shamt));
         }
         registers[rd_index] = result;
@@ -134,23 +137,34 @@ void run_instruction(uint32_t instruction,
     break;
   case OP_IMM_32:
     printf("OP_IMM_32");
-
+    rs1_index = get_rs1_index(instruction);
+    rd_index = get_rd_index(instruction);
     funct3 = get_funct3(instruction);
-    switch (funct3) {
-    case ADDIW:
+
+    // ADDIW can be determined using juts func3
+    if (funct3 == ADDIW) {
       immediate = get_i_immediate(instruction);
-      rs1_index = get_rs1_index(instruction);
-      rd_index = get_rd_index(instruction);
       registers[rd_index] = sign_extend_64((uint32_t)(registers[rs1_index] + immediate), 32);
       break;
-    case SLLIW:
-      printf("SLLIW\n");
-      break;
-    case SRLIWorSRAIW:
-      printf("SRLIWorSRAIW\n");
-      break;
-    default:
-      printf("SRLIWorSRAIW\n");
+    }
+
+    // other OP_IMM_32 values are determined by combination of funct7_funct3
+    uint32_t funct7_funct3 = (get_funct7(instruction) << 3) | get_funct3(instruction);
+    if (funct7_funct3 == SRLIW) {
+      /* immediate = get_i_immediate(instruction); */
+      /* registers[rd_index] = sign_extend_64((uint32_t)(registers[rs1_index] + immediate), 32); */
+      printf("SRLIW\n");
+    }
+    else if (funct7_funct3 == SRAIW) {
+      /* uint64_t result = registers[rs1_index] >> shamt; */
+      /* bool is_negative = (registers[rs1_index] & (UINT64_C(1) << 63)) != 0; */
+      /* if (shamt != 0 && is_negative) { */
+      /*   result |= (UINT64_MAX << (64 - shamt)); */
+      /* } */
+      /* registers[rd_index] = result; */
+      /* immediate = get_i_immediate(instruction); */
+      /* registers[rd_index] = sign_extend_64((uint32_t)(registers[rs1_index] + immediate), 32); */
+      printf("SRAIW\n");
     }
     break;
   case STORE:
@@ -187,7 +201,8 @@ void run_instruction(uint32_t instruction,
   case AMO:
     printf("AMO\n");
     break;
-  case OP:
+  case OP: {
+
     rs1_index = get_rs1_index(instruction);
     rs2_index =  get_rs2_index(instruction);
     rd_index = get_rd_index(instruction);
@@ -231,16 +246,30 @@ void run_instruction(uint32_t instruction,
       assert(0);
     }
     break;
+  }
   case LUI:
     rd_index = get_rd_index(instruction);
     // NOTE: upper immediate is ONLY understood as a
     registers[rd_index] = get_upper_immediate(instruction);
     break;
   case OP_32:
-
     printf("OP_32\n");
-    break;
+    funct3 = get_funct3(instruction);
+    /* switch (funct3) { */
 
+    /* case ADDW: */
+    /*   printf("ADDW\n"); */
+    /* case SUBW: */
+    /*   printf("SUBW\n"); */
+    /* case SLLW: */
+    /*   printf("SLLW\n"); */
+    /* case SRLW: */
+    /*   printf("SRLW\n"); */
+    /* case SRAW: */
+    /*   printf("SRAW\n"); */
+    /*   break; */
+    /* } */
+    break;
   case MADD:
     printf("MADD\n");
     break;
@@ -581,6 +610,41 @@ uint32_t create_i_type(uint32_t immediate,
   return (uint32_t) immediate | rs1_index | funct3 | rd_index | opcode;
 }
 
+
+uint32_t create_i_type_shamt(uint32_t shamt,
+                             int32_t rs1_index,
+                             int32_t rd_index,
+                             int32_t opcode,
+                             int32_t funct3,
+                             uint32_t upper_imm) {
+  uint32_t shamt_bits;
+
+  switch (opcode) {
+  case OP_IMM:
+    shamt_bits = 6;
+    if (!((funct3 == SLLI && upper_imm == 0) ||
+          (funct3 == SHIFT_RIGHT_IMM &&
+           (upper_imm == SRLI_IMM || upper_imm == SRAI_IMM)))) {
+      abort();
+    }
+    break;
+  case OP_IMM_32:
+    shamt_bits = 5;
+    if (!((funct3 == (SLLIW & 7) && upper_imm == (SLLIW >> 3)) ||
+          (funct3 == SHIFT_RIGHT_IMM_32 &&
+           (upper_imm == SRLIW || upper_imm == SRAIW)))) {
+      abort();
+    }
+    break;
+  default:
+    abort();
+  }
+
+  assert((shamt < (UINT32_C(1) << shamt_bits)) && "shift amount out of range");
+  uint32_t immediate = (upper_imm << shamt_bits) | shamt;
+  return create_i_type(immediate, rs1_index, funct3, rd_index, opcode);
+}
+
 uint32_t create_s_type(uint32_t immediate,
                        int32_t rs2_index,
                        int32_t rs1_index,
@@ -650,8 +714,6 @@ uint32_t create_b_type(uint32_t immediate,
 
   // Immediate is expected to 12-1 NOT 12-0
   immediate = (immediate >> 1) | (1U << 31);
-  /* printf("create_b_type - immediate:"); */
-  /* print_bits(immediate); */
 
   // extract bits then move them into place
   uint32_t imm_12 = ((0b1 << 11) & immediate) << 20;
@@ -659,30 +721,11 @@ uint32_t create_b_type(uint32_t immediate,
   uint32_t imm_10_5 = ((0b111111 << 4) & immediate) << 21;
   uint32_t imm_4_1 = (0b1111 & immediate) << 8;
 
-  /* printf("immediate: "); */
-  /* print_bits(immediate); */
-  /* printf("imm_12: "); */
-  /* print_bits(imm_12); */
-  /* printf("imm_11: "); */
-  /* print_bits(imm_11); */
-  /* printf("imm_10_5: "); */
-  /* print_bits(imm_10_5); */
-  /* printf("imm_4_1: "); */
-  /* print_bits(imm_4_1); */
-
   rs2_index = rs2_index << 20;
   rs1_index = rs1_index << 15;
-  /* printf("rs2: "); */
-  /* print_bits(rs2); */
-  /* printf("rs1: "); */
-  /* print_bits(rs1); */
 
   funct3 = funct3 << 12;
   opcode = opcode;
-  /* printf("funct3: "); */
-  /* print_bits(funct3); */
-  /* printf("opcode: "); */
-  /* print_bits(opcode); */
 
   immediate = (imm_12 | imm_11 | imm_10_5 | imm_4_1);
 

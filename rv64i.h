@@ -95,25 +95,20 @@ enum op_imm_funct3_enums: uint32_t {
   ORI=          0b110,
   ANDI=         0b111,
   SLLI=         0b001,
-  SRLIorSRAI=   0b101,
+  SHIFT_RIGHT_IMM=   0b101,
   SRLI_IMM=     0b000000,
   SRAI_IMM=     0b010000,
 };
 
 
 //
-enum op_imm_32_funct3_enums: uint32_t {
+enum op_imm_32_enums: uint32_t {
   ADDIW=        0b000,
-  SLLIW=        0b001,
-  SRLIWorSRAIW= 0b101,
-};
-
-enum op_imm_32_funct7_enums: uint32_t {
-  SLLIWfunct7=  0b0100000, // we technically don't have to use this
+  SLLIW=        0b0000000001, // we combine funct7 (technically has len ) with funct3
+  SHIFT_RIGHT_IMM_32=   0b101,
   SRLIW=        0b0000000,
   SRAIW=        0b0100000,
 };
-
 
 // backing numbers are funct7 + funct3
 // sub_funct7 = 0100000; sub_func3 = 000
@@ -153,6 +148,8 @@ void print_bits_impl(uint64_t value, unsigned width);
 #define print_bits(x) print_bits_impl((uint64_t)(x), sizeof(x) * 8)
 
 uint32_t create_i_type(uint32_t immediate, int32_t rs1, int32_t funct3, int32_t rd, int32_t opcode);
+uint32_t create_i_type_shamt(uint32_t shamt, int32_t rs1_index, int32_t rd_index,
+                             int32_t opcode, int32_t funct3, uint32_t upper_imm);
 uint32_t create_s_type(uint32_t immediate, int32_t rs2_index, int32_t rs1_index, int32_t funct3, int32_t opcode);
 uint32_t create_r_type(uint32_t funct7_funct3, int32_t rs2_index, int32_t rs1_index, int32_t rd_index, int32_t opcode);
 uint32_t create_u_type(uint32_t upper_immediate, uint32_t rd_index, uint32_t opcode);
