@@ -552,6 +552,7 @@ static void assert_valid_opcode(int32_t opcode) {
   assert((opcode >= 0 && opcode <= 0b1111111 )
          && "opcode must be a within 0-127");
 }
+
 static void assert_valid_register(int32_t rs1_index) {
   assert((rs1_index >= 0 && rs1_index < NUM_REGISTERS )
          && "rs1_index must be a valid register index");

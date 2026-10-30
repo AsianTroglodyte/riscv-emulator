@@ -31,13 +31,44 @@ void test_load_instruction(const struct load_test_case cases[],
       state.memory[byte_index] = 10;
     }
     if (width_in_bytes == 1) {
+      if (cases[i].memory_value > UINT8_MAX) {
+        char message[128];
+        snprintf(message, sizeof(message),
+                 "Case %zu: memory_value 0x%" PRIx64 " does not fit in one byte",
+                 i + 1, cases[i].memory_value);
+        TEST_ASSERT_TRUE_MESSAGE(cases[i].memory_value <= UINT8_MAX, message);
+      }
+
       write_byte(state.memory, memory_address, (uint8_t) cases[i].memory_value);
     } else if (width_in_bytes == 2) {
+      if (cases[i].memory_value > UINT16_MAX) {
+        char message[128];
+        snprintf(message, sizeof(message),
+                 "Case %zu: memory_value 0x%" PRIx64 " does not fit in one byte",
+                 i + 1, cases[i].memory_value);
+        TEST_ASSERT_TRUE_MESSAGE(cases[i].memory_value <= UINT8_MAX, message);
+      }
+
       write_half_word(state.memory, memory_address, (uint16_t) cases[i].memory_value);
     } else if (width_in_bytes == 4) {
+      if (cases[i].memory_value > UINT32_MAX) {
+        char message[128];
+        snprintf(message, sizeof(message),
+                 "Case %zu: memory_value 0x%" PRIx64 " does not fit in one ",
+                 i + 1, cases[i].memory_value);
+        TEST_ASSERT_TRUE_MESSAGE(cases[i].memory_value <= UINT8_MAX, message);
+      }
+
       write_word(state.memory, memory_address, (uint32_t) cases[i].memory_value);
     } else if (width_in_bytes == 8) {
-      /* assert((cases[i].memory_value < UINT64_MAX) && "test memory+value too bit for 8 byte"); */
+      if (cases[i].memory_value > UINT64_MAX) {
+        char message[128];
+        snprintf(message, sizeof(message),
+                 "Case %zu: memory_value 0x%" PRIx64 " does not fit in one double word",
+                 i + 1, cases[i].memory_value);
+        TEST_ASSERT_TRUE_MESSAGE(cases[i].memory_value <= UINT8_MAX, message);
+      }
+
       write_double_word(state.memory, memory_address, cases[i].memory_value);
     } else {
       printf("invalid width_in bytes %d", width_in_bytes);
@@ -54,13 +85,13 @@ void test_load_instruction(const struct load_test_case cases[],
 void test_LW(void) {
   struct load_test_case cases[] = {
     {.immediate = 1, .rs1_val = 3, .memory_value = 1, .expected = 1},
-    {.immediate = 2, .rs1_val = 10,.memory_value = 1020343, .expected = 1020343},
-    {.immediate = 2, .rs1_val = 10,.memory_value = -4, .expected = UINT64_MAX - 3}, // check if sign extension;
+    {.immediate = 2, .rs1_val = 10, .memory_value = (uint32_t) 1020343, .expected = 1020343},
+    {.immediate = 2, .rs1_val = 10, .memory_value = (uint32_t) -4, .expected = UINT64_MAX - 3}, // check if sign extension;
     {.immediate = 2, .rs1_val = 10, .memory_value = 0x80000000, .expected = 0xFFFFFFFF80000000}, // check for sign extension
-    {.immediate = -2048, .rs1_val = 2052,.memory_value = 4, .expected = 4}, // immediate negative boundary
-    {.immediate = 2047, .rs1_val = -2043,.memory_value = 4, .expected = 4}, // immediate positive boundary
-    {.immediate = -1, .rs1_val = 13,.memory_value = 10, .expected = 10}, // negative immediate;
-    {.immediate = 13, .rs1_val = -1,.memory_value = 10, .expected = 10}, // negative rs1_val;
+    {.immediate = -2048, .rs1_val = 2052, .memory_value = 4, .expected = 4}, // immediate negative boundary
+    {.immediate = 2047, .rs1_val = -2043, .memory_value = 4, .expected = 4}, // immediate positive boundary
+    {.immediate = -1, .rs1_val = 13, .memory_value = 10, .expected = 10}, // negative immediate;
+    {.immediate = 13, .rs1_val = -1, .memory_value = 10, .expected = 10}, // negative rs1_val;
   };
   test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LW, 4);
 
@@ -75,12 +106,13 @@ void test_LB(void) {
   struct load_test_case cases[] = {
     {.immediate = 1, .rs1_val = 3, .memory_value = 1, .expected = 1},
     {.immediate = 1, .rs1_val = 3,.memory_value = 123, .expected = 123},
-    {.immediate = 1, .rs1_val = 3,.memory_value = -4, .expected = UINT64_MAX - 3}, // check if -1 is sign extended;
-    {.immediate = 1, .rs1_val = 3, .memory_value = 0x80, .expected = 0xFFFFFFFFFFFFFF80}, // check for sign extension
+    {.immediate = 1, .rs1_val = 3,.memory_value = (uint8_t) -4, .expected = UINT64_MAX - 3}, // check if -1 is sign extended;
+    {.immediate = 1, .rs1_val = 3, .memory_value = (uint8_t) 0x80, .expected = 0xFFFFFFFFFFFFFF80}, // check for sign extension
     {.immediate = -2048, .rs1_val = 2052,.memory_value = 4, .expected = 4}, // immediate negative boundary
     {.immediate = 2047, .rs1_val = -2043,.memory_value = 4, .expected = 4}, // immediate positive boundary
     {.immediate = -1, .rs1_val = 13,.memory_value = 10, .expected = 10}, // negative immediate;
     {.immediate = 13, .rs1_val = -1,.memory_value = 10, .expected = 10}, // negative rs1_val;
+    /* {.immediate = 1, .rs1_val = 3,.memory_value = (uint16_t)-4, .expected = UINT64_MAX - 3}, // check if -1 is sign extended; */
   };
   test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LB, 1);
 
@@ -95,7 +127,7 @@ void test_LH(void) {
   struct load_test_case cases[] = {
     {.immediate = 1, .rs1_val = 3, .memory_value = 1, .expected = 1},
     {.immediate = 1, .rs1_val = 3,.memory_value = 123, .expected = 123},
-    {.immediate = 1, .rs1_val = 3,.memory_value = -4, .expected = UINT64_MAX - 3}, // check if -1 is sign extended;
+    {.immediate = 1, .rs1_val = 3,.memory_value = (uint16_t)-4, .expected = UINT64_MAX - 3}, // check if -1 is sign extended;
     {.immediate = 1, .rs1_val = 3, .memory_value = 0x8000, .expected = 0xFFFFFFFFFFFF8000}, // check for sign extension
     {.immediate = -2048, .rs1_val = 2052,.memory_value = 4, .expected = 4}, // immediate negative boundary
     {.immediate = 2047, .rs1_val = -2043,.memory_value = 4, .expected = 4}, // immediate positive boundary
@@ -136,8 +168,8 @@ void test_LBU(void) {
   struct load_test_case cases[] = {
     {.immediate = 1, .rs1_val = 3, .memory_value = 1, .expected = 1},
     {.immediate = 1, .rs1_val = 3,.memory_value = 123, .expected = 123},
-    {.immediate = 1, .rs1_val = 3,.memory_value = -4, .expected = (uint64_t) 0xFC}, // check for zero extension;
-    {.immediate = 1, .rs1_val = 3, .memory_value = 0x80, .expected = 0x0000000000000080}, // check for zero extension
+    {.immediate = 1, .rs1_val = 3,.memory_value = (uint8_t) -4, .expected = (uint64_t) 0xFC}, // check for zero extension;
+    {.immediate = 1, .rs1_val = 3, .memory_value = (uint8_t) 0x80, .expected = 0x0000000000000080}, // check for zero extension
     {.immediate = -2048, .rs1_val = 2052,.memory_value = 4, .expected = 4}, // immediate negative boundary
     {.immediate = 2047, .rs1_val = -2043,.memory_value = 4, .expected = 4}, // immediate positive boundary
     {.immediate = -1, .rs1_val = 13,.memory_value = 10, .expected = 10}, // negative immediate;
@@ -157,8 +189,8 @@ void test_LHU(void) {
     struct load_test_case cases[] = {
     {.immediate = 1, .rs1_val = 3, .memory_value = 1, .expected = 1},
     {.immediate = 1, .rs1_val = 3,.memory_value = 123, .expected = 123},
-    {.immediate = 1, .rs1_val = 3,.memory_value = -4, .expected = (uint64_t) 0xFFFC}, // check for zero extension;
-    {.immediate = 1, .rs1_val = 3, .memory_value = 0x8000, .expected = 0x0000000000008000}, // check for zero extension
+    {.immediate = 1, .rs1_val = 3,.memory_value = (uint16_t) -4, .expected = (uint64_t) 0xFFFC}, // check for zero extension;
+    {.immediate = 1, .rs1_val = 3, .memory_value = (uint16_t) 0x8000, .expected = 0x0000000000008000}, // check for zero extension
     {.immediate = -2048, .rs1_val = 2052,.memory_value = 4, .expected = 4}, // immediate negative boundary
     {.immediate = 2047, .rs1_val = -2043,.memory_value = 4, .expected = 4}, // immediate positive boundary
     {.immediate = -1, .rs1_val = 13,.memory_value = 10, .expected = 10}, // negative immediate;
@@ -176,8 +208,8 @@ void test_LHU(void) {
 void test_LWU() {
   struct load_test_case cases[] = {
     {.immediate = 1, .rs1_val = 3, .memory_value = 1, .expected = 1},
-    {.immediate = 1, .rs1_val = 3,.memory_value = 123, .expected = 123},
-    {.immediate = 1, .rs1_val = 3,.memory_value = -4, .expected = (uint64_t) 0xFFFFFFFC}, // check for zero extension;
+    {.immediate = 1, .rs1_val = 3, .memory_value = 123, .expected = 123},
+    {.immediate = 1, .rs1_val = 3,.memory_value = (uint32_t)-4, .expected = (uint64_t) 0xFFFFFFFC}, // check for zero extension;
     {.immediate = 1, .rs1_val = 3, .memory_value = 0x80, .expected = 0x0000000000000080}, // check for zero extension
     {.immediate = -2048, .rs1_val = 2052,.memory_value = 4, .expected = 4}, // immediate negative boundary
     {.immediate = 2047, .rs1_val = -2043,.memory_value = 4, .expected = 4}, // immediate positive boundary
