@@ -625,6 +625,7 @@ uint32_t create_i_type_shamt(uint32_t shamt,
     if (!((funct3 == SLLI && upper_imm == 0) ||
           (funct3 == SHIFT_RIGHT_IMM &&
            (upper_imm == SRLI_IMM || upper_imm == SRAI_IMM)))) {
+
       abort();
     }
     break;
