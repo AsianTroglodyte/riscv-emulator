@@ -35,25 +35,25 @@ void run_instruction(uint32_t instruction,
 
     address = (int64_t) registers[rs1_index] + immediate;
     switch (funct3) {
-    case LB:
+    case LB_FUNCT_3:
       registers[rd_index] = (int8_t) get_byte(memory, address);
       break;
-    case LH:
+    case LH_FUNCT_3:
       registers[rd_index] = (int16_t) get_half_word(memory, address);
       break;
-    case LW:
+    case LW_FUNCT_3:
       registers[rd_index] = (int32_t) get_word(memory, address);
       break;
-    case LBU:
+    case LBU_FUNCT_3:
       registers[rd_index] = get_byte(memory, address);
       break;
-    case LHU:
+    case LHU_FUNCT_3:
       registers[rd_index] = get_half_word(memory, address);
       break;
-    case LWU:
+    case LWU_FUNCT_3:
       registers[rd_index] = get_word(memory, address);
       break;
-    case LD:
+    case LD_FUNCT_3:
       registers[rd_index] = get_double_word(memory, address);
       break;
     default:

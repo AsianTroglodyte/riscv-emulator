@@ -93,11 +93,11 @@ void test_LW(void) {
     {.immediate = -1, .rs1_val = 13, .memory_value = 10, .expected = 10}, // negative immediate;
     {.immediate = 13, .rs1_val = -1, .memory_value = 10, .expected = 10}, // negative rs1_val;
   };
-  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LW, 4);
+  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LW_FUNCT_3, 4);
 
   struct machine_state state = {0};
   state.registers[30] = 10;
-  uint32_t instruction = create_i_type(4, 0, LW, 30, LOAD); // instruction should x0 = 10 to x0 = 0;
+  uint32_t instruction = create_i_type(4, 0, LW_FUNCT_3, 30, LOAD); // instruction should x0 = 10 to x0 = 0;
   run_instruction(instruction, &state);
   TEST_ASSERT_EQUAL_UINT64(0, state.registers[30]);
 }
@@ -114,11 +114,11 @@ void test_LB(void) {
     {.immediate = 13, .rs1_val = -1,.memory_value = 10, .expected = 10}, // negative rs1_val;
     /* {.immediate = 1, .rs1_val = 3,.memory_value = (uint16_t)-4, .expected = UINT64_MAX - 3}, // check if -1 is sign extended; */
   };
-  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LB, 1);
+  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LB_FUNCT_3, 1);
 
   struct machine_state state1 = {0};
   state1.registers[30] = 10;
-  uint32_t instruction = create_i_type(4, 0, LB, 30, LOAD); // instruction should x0 = 10 to x0 = 0;
+  uint32_t instruction = create_i_type(4, 0, LB_FUNCT_3, 30, LOAD); // instruction should x0 = 10 to x0 = 0;
   run_instruction(instruction, &state1);
   TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
@@ -134,11 +134,11 @@ void test_LH(void) {
     {.immediate = -1, .rs1_val = 13,.memory_value = 10, .expected = 10}, // negative immediate;
     {.immediate = 13, .rs1_val = -1,.memory_value = 10, .expected = 10}, // negative rs1_val;
   };
-  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LH, 2);
+  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LH_FUNCT_3, 2);
 
   struct machine_state state1 = {0};
   state1.registers[30] = 10;
-  uint32_t instruction = create_i_type(4, 0, LH, 30, LOAD); // instruction should x30 = 10 to x30 = 0;
+  uint32_t instruction = create_i_type(4, 0, LH_FUNCT_3, 30, LOAD); // instruction should x30 = 10 to x30 = 0;
   run_instruction(instruction, &state1);
   TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
@@ -155,11 +155,11 @@ void test_LD() {
     {.immediate = -1, .rs1_val = 9,.memory_value = 10, .expected = 10}, // negative immediate;
     {.immediate = 9, .rs1_val = -1,.memory_value = 10, .expected = 10}, // negative rs1_val;
   };
-  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LD, 8);
+  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LD_FUNCT_3, 8);
 
   struct machine_state state1 = {0};
   state1.registers[30] = 10;
-  uint32_t instruction = create_i_type(4, 0, LD, 30, LOAD); // instruction should x30 = 10 to x30 = 0;
+  uint32_t instruction = create_i_type(4, 0, LD_FUNCT_3, 30, LOAD); // instruction should x30 = 10 to x30 = 0;
   run_instruction(instruction, &state1);
   TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
@@ -176,11 +176,11 @@ void test_LBU(void) {
     {.immediate = 13, .rs1_val = -1,.memory_value = 10, .expected = 10}, // negative rs1_val;
   };
 
-  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LBU, 1);
+  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LBU_FUNCT_3, 1);
 
   struct machine_state state1 = {0};
   state1.registers[30] = 10;
-  uint32_t instruction = create_i_type(4, 0, LBU, 30, LOAD); // instruction should x30 = 10 to x30 = 0;
+  uint32_t instruction = create_i_type(4, 0, LBU_FUNCT_3, 30, LOAD); // instruction should x30 = 10 to x30 = 0;
   run_instruction(instruction, &state1);
   TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
@@ -196,11 +196,11 @@ void test_LHU(void) {
     {.immediate = -1, .rs1_val = 13,.memory_value = 10, .expected = 10}, // negative immediate;
     {.immediate = 13, .rs1_val = -1,.memory_value = 10, .expected = 10}, // negative rs1_val;
   };
-  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LHU, 2);
+  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LHU_FUNCT_3, 2);
 
   struct machine_state state1 = {0};
   state1.registers[30] = 10;
-  uint32_t instruction = create_i_type(4, 0, LHU, 30, LOAD); // instruction should x30 = 10 to x30 = 0;
+  uint32_t instruction = create_i_type(4, 0, LHU_FUNCT_3, 30, LOAD); // instruction should x30 = 10 to x30 = 0;
   run_instruction(instruction, &state1);
   TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
@@ -218,11 +218,11 @@ void test_LWU() {
     {.immediate = -1, .rs1_val = 13,.memory_value = 10, .expected = 10}, // negative immediate;
     {.immediate = 13, .rs1_val = -1,.memory_value = 10, .expected = 10}, // negative rs1_val;
   };
-  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LWU, 4);
+  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LWU_FUNCT_3, 4);
 
   struct machine_state state1 = {0};
   state1.registers[30] = 10;
-  uint32_t instruction = create_i_type(4, 0, LWU, 30, LOAD); // instruction should x30 = 10 to x30 = 0;
+  uint32_t instruction = create_i_type(4, 0, LWU_FUNCT_3, 30, LOAD); // instruction should x30 = 10 to x30 = 0;
   run_instruction(instruction, &state1);
   TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }

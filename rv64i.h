@@ -77,14 +77,14 @@ enum JALR_funct3_enum: uint32_t {
 };
 
 enum load_funct3_enums: uint32_t {
-  LB=         0b000,
-  LH=         0b001,
-  LW=         0b010,
-  LBU=        0b100,
-  LHU=        0b101,
+  LB_FUNCT_3=         0b000,
+  LH_FUNCT_3=         0b001,
+  LW_FUNCT_3=         0b010,
+  LBU_FUNCT_3=        0b100,
+  LHU_FUNCT_3=        0b101,
   // RV64I stuff
-  LWU=        0b110,
-  LD=         0b011,
+  LWU_FUNCT_3=        0b110,
+  LD_FUNCT_3=         0b011,
 };
 
 enum op_imm_funct3_enums: uint32_t {
