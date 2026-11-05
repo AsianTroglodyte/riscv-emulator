@@ -523,7 +523,7 @@ void test_srliw(void) {
 }
 
 static const struct shamt_instruction SRAI_DESCRIPTOR = {
-    .opcode = OP_IMM_32,
+    .opcode = OP_IMM,
     .funct3 = SHIFT_RIGHT_IMM,
     .upper_imm = SRAI_IMM,
 };
@@ -1123,7 +1123,7 @@ int main(void) {
   RUN_TEST(test_slli);
   /* RUN_TEST(test_slliw); */
   RUN_TEST(test_srli);
-  /* RUN_TEST(test_srai); */
+  RUN_TEST(test_srai);
 
   // test 32-bit-result immediate operations
   RUN_TEST(test_addiw);
