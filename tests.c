@@ -348,7 +348,7 @@ static void test_i_instruction(const struct i_instruction_case cases[],
   }
 }
 
-void test_addi(void) {
+void test_ADDI(void) {
   const struct i_instruction_case cases[] = {
       {.rs1_value = 10, .immediate =  10, .expected =  20},             // Positive immediate
       {.rs1_value = 10, .immediate =  -10, .expected =  0},             // Negative immediate cancels rs1
@@ -358,7 +358,7 @@ void test_addi(void) {
   test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ADDI, OP_IMM);
 }
 
-void test_addiw(void) {
+void test_ADDIW(void) {
   const struct i_instruction_case cases[] = {
       {.rs1_value = 10, .immediate =  10, .expected =  20},             // Positive immediate
       {.rs1_value = 10, .immediate =  -10, .expected =  0},             // Negative immediate cancels rs1
@@ -370,7 +370,7 @@ void test_addiw(void) {
   test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ADDIW, OP_IMM);
 }
 
-void test_andi(void) {
+void test_ANDI(void) {
   const struct i_instruction_case cases[] = {
       {.rs1_value = 0b1010, .immediate =  0b1010, .expected =  0b1010},             // Identical bit patterns
       {.rs1_value = 0b0101, .immediate =  0b1010, .expected =  0},                  // No overlapping set bits
@@ -381,7 +381,7 @@ void test_andi(void) {
   test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ANDI, OP_IMM);
 }
 
-void test_ori(void) {
+void test_ORI(void) {
   const struct i_instruction_case cases[] = {
       {.rs1_value = 0b1010, .immediate =  0b1010, .expected =  0b1010},             // Identical bit patterns
       {.rs1_value = 0b1010, .immediate =  0b0101, .expected =  0b1111},             // Fill in the unset bits
@@ -392,7 +392,7 @@ void test_ori(void) {
   test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ORI, OP_IMM);
 }
 
-void test_slti(void) {
+void test_SLTI(void) {
   const struct i_instruction_case cases[] = {
       {.rs1_value = 1, .immediate =  9, .expected =  1},
       {.rs1_value = 9, .immediate =  1, .expected =  0},
@@ -406,7 +406,7 @@ void test_slti(void) {
   test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLTI, OP_IMM);
 }
 
-void test_sltiu(void) {
+void test_SLTIU(void) {
   const struct i_instruction_case cases[] = {
       {.rs1_value = 1, .immediate =  9, .expected =  1},                  // 1 < 9
       {.rs1_value = 9, .immediate =  1, .expected =  0},                  // 9 is not less than 1
@@ -462,7 +462,7 @@ static const struct shamt_instruction SLLI_DESCRIPTOR = {
     .upper_imm = 0,
 };
 
-void test_slli(void) {
+void test_SLLI(void) {
   const struct shamt_instruction_case cases[] = {
       {.rs1_value = 9, .shamt = 1, .expected =  18},                     // basically
       {.rs1_value = 0, .shamt = 0, .expected = 0},   // nothing; shamt bts [11:6] must be 000000.
@@ -475,7 +475,7 @@ void test_slli(void) {
   test_shamt_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLLI_DESCRIPTOR);
 }
 
-void test_slliw(void) {
+void test_SLLIW(void) {
   const struct shamt_instruction_case cases[] = {
       {.rs1_value = 9, .shamt = 1, .expected =  18},                     // basically
       {.rs1_value = 0, .shamt = 0, .expected = 0},   // nothing; shamt bts [11:6] must be 000000.
@@ -494,7 +494,7 @@ static const struct shamt_instruction SRLI_DESCRIPTOR = {
     .upper_imm = SRLI_IMM,
 };
 
-void test_srli(void) {
+void test_SRLI(void) {
   const struct shamt_instruction_case cases[] = {
       // Ordinary right shifts.
       // {value_shifted, (funct) | shift amount (shamt), result}
@@ -541,7 +541,7 @@ static const struct shamt_instruction SRAI_DESCRIPTOR = {
     .upper_imm = SRAI_IMM,
 };
 
-void test_srai(void) {
+void test_SRAI(void) {
   const struct shamt_instruction_case cases[] = {
     {.rs1_value = -8, .shamt = 2, .expected = -2},   // ...1111 1000 >> 2 = ...1111 1110
     {.rs1_value = -15, .shamt = 2, .expected = -4},  // ...1111 0001 >> 2 = ...1111 1100
@@ -1128,18 +1128,18 @@ int main(void) {
   RUN_TEST(test_SD);
 
   // test arithmetic with immediates
-  RUN_TEST(test_addi);
-  RUN_TEST(test_andi);
-  RUN_TEST(test_ori);
-  RUN_TEST(test_slti);
-  RUN_TEST(test_sltiu);
-  RUN_TEST(test_slli);
-  RUN_TEST(test_slliw);
-  RUN_TEST(test_srli);
-  RUN_TEST(test_srai);
+  RUN_TEST(test_ADDI);
+  RUN_TEST(test_ANDI);
+  RUN_TEST(test_ORI);
+  RUN_TEST(test_SLTI);
+  RUN_TEST(test_SLTIU);
+  RUN_TEST(test_SLLI);
+  RUN_TEST(test_SLLIW);
+  RUN_TEST(test_SRLI);
+  RUN_TEST(test_SRAI);
 
   // test 32-bit-result immediate operations
-  RUN_TEST(test_addiw);
+  RUN_TEST(test_ADDIW);
 
   // test arithmetic with JUST registers
   RUN_TEST(test_ADD);
