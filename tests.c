@@ -522,8 +522,8 @@ void test_create_i_type_shamt(void) {
   TEST_ASSERT_EQUAL_HEX32(0x03f0d513, create_i_type_shamt(63, 1, 10, OP_IMM, SHIFT_RIGHT_IMM, SRLI_IMM));
   TEST_ASSERT_EQUAL_HEX32(0x43f0d513, create_i_type_shamt(63, 1, 10, OP_IMM, SHIFT_RIGHT_IMM, SRAI_IMM));
   TEST_ASSERT_EQUAL_HEX32(0x01f0951b, create_i_type_shamt(31, 1, 10, OP_IMM_32, SLLIW & 7, SLLIW >> 3));
-  TEST_ASSERT_EQUAL_HEX32(0x01f0d51b, create_i_type_shamt(31, 1, 10, OP_IMM_32, SHIFT_RIGHT_IMM_32, SRLIW));
-  TEST_ASSERT_EQUAL_HEX32(0x41f0d51b, create_i_type_shamt(31, 1, 10, OP_IMM_32, SHIFT_RIGHT_IMM_32, SRAIW));
+  TEST_ASSERT_EQUAL_HEX32(0x01f0d51b, create_i_type_shamt(31, 1, 10, OP_IMM_32, SHIFT_RIGHT_IMM_32, SRLIW_IMM));
+  TEST_ASSERT_EQUAL_HEX32(0x41f0d51b, create_i_type_shamt(31, 1, 10, OP_IMM_32, SHIFT_RIGHT_IMM_32, SRAIW_IMM));
   TEST_ASSERT_EQUAL_HEX32(0x4000d513, create_i_type_shamt(0, 1, 10, OP_IMM, SHIFT_RIGHT_IMM, SRAI_IMM));
 }
 

@@ -140,31 +140,41 @@ void run_instruction(uint32_t instruction,
     rs1_index = get_rs1_index(instruction);
     rd_index = get_rd_index(instruction);
     funct3 = get_funct3(instruction);
-
+    immediate = get_i_immediate(instruction);
     // ADDIW can be determined using juts func3
-    if (funct3 == ADDIW) {
-      immediate = get_i_immediate(instruction);
-      registers[rd_index] = sign_extend_64((uint32_t)(registers[rs1_index] + immediate), 32);
+    switch (funct3) {
+    case ADDIW:
+      printf("addiw");
       break;
-    }
+    case SHIFT_RIGHT_IMM_32:
 
-    // other OP_IMM_32 values are determined by combination of funct7_funct3
-    uint32_t funct7_funct3 = (get_funct7(instruction) << 3) | get_funct3(instruction);
-    if (funct7_funct3 == SRLIW) {
-      /* immediate = get_i_immediate(instruction); */
-      /* registers[rd_index] = sign_extend_64((uint32_t)(registers[rs1_index] + immediate), 32); */
-      printf("SRLIW\n");
-    }
-    else if (funct7_funct3 == SRAIW) {
-      /* uint64_t result = registers[rs1_index] >> shamt; */
-      /* bool is_negative = (registers[rs1_index] & (UINT64_C(1) << 63)) != 0; */
-      /* if (shamt != 0 && is_negative) { */
-      /*   result |= (UINT64_MAX << (64 - shamt)); */
-      /* } */
-      /* registers[rd_index] = result; */
-      /* immediate = get_i_immediate(instruction); */
-      /* registers[rd_index] = sign_extend_64((uint32_t)(registers[rs1_index] + immediate), 32); */
-      printf("SRAIW\n");
+      uint32_t shamt = bits(immediate, 0, 5);
+      const uint32_t imm = get_funct7(instruction);
+      switch (imm) {
+      case (SRLIW_IMM):
+        printf("SRLIW_IMM");
+        uint64_t result = registers[rs1_index] >> shamt;
+        bool is_negative = (registers[rs1_index] & (UINT64_C(1) << 63)) != 0;
+        if (shamt != 0 && is_negative) {
+          result |= (UINT64_MAX << (64 - shamt));
+        }
+        registers[rd_index] = result;
+        immediate = get_i_immediate(instruction);
+        registers[rd_index] = sign_extend_64((uint32_t)(registers[rs1_index] + immediate), 32);
+        break;
+      case (SRAIW_IMM):
+        /* uint64_t result = registers[rs1_index] >> shamt; */
+        /* bool is_negative = (registers[rs1_index] & (UINT64_C(1) << 63)) != 0; */
+        /* if (shamt != 0 && is_negative) { */
+        /*   result |= (UINT64_MAX << (64 - shamt)); */
+        /* } */
+        /* registers[rd_index] = result; */
+        /* immediate = get_i_immediate(instruction); */
+        /* registers[rd_index] = sign_extend_64((uint32_t)(registers[rs1_index] + immediate), 32); */
+        printf("SRLIW_IMM");
+        break;
+
+      }
     }
     break;
   case STORE:
@@ -633,7 +643,7 @@ uint32_t create_i_type_shamt(uint32_t shamt,
     shamt_bits = 5;
     if (!((funct3 == (SLLIW & 7) && upper_imm == (SLLIW >> 3)) ||
           (funct3 == SHIFT_RIGHT_IMM_32 &&
-           (upper_imm == SRLIW || upper_imm == SRAIW)))) {
+           (upper_imm == SRLIW_IMM || upper_imm == SRAIW_IMM)))) {
       abort();
     }
     break;
