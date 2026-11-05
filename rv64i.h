@@ -88,12 +88,12 @@ enum load_funct3_enums: uint32_t {
 };
 
 enum op_imm_funct3_enums: uint32_t {
-  ADDI=         0b000,
-  SLTI=         0b010,
-  SLTIU=        0b011,
-  XORI=         0b100,
-  ORI=          0b110,
-  ANDI=         0b111,
+  ADDI_FUNCT_3=         0b000,
+  SLTI_FUNCT_3=         0b010,
+  SLTIU_FUNCT_3=        0b011,
+  XORI_FUNCT_3=         0b100,
+  ORI_FUNCT_3=          0b110,
+  ANDI_FUNCT_3=         0b111,
   SLLI_FUNCT_3=      0b001,
   SHIFT_RIGHT_IMM=   0b101,
   SRLI_IMM=     0b000000,

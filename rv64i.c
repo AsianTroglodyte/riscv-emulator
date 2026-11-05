@@ -80,19 +80,19 @@ void run_instruction(uint32_t instruction,
 
     switch (funct3) {
       uint32_t shamt;
-    case ADDI:
+    case ADDI_FUNCT_3:
       registers[rd_index] = registers[rs1_index] + immediate;
       break;
-    case SLTI:
+    case SLTI_FUNCT_3:
       registers[rd_index] = (int64_t) registers[rs1_index] < immediate;
       break;
-    case SLTIU:
+    case SLTIU_FUNCT_3:
       registers[rd_index] = registers[rs1_index] < (uint64_t) immediate;
       break;
-    case ORI:
+    case ORI_FUNCT_3:
       registers[rd_index] = registers[rs1_index] | immediate;
       break;
-    case ANDI:
+    case ANDI_FUNCT_3:
       registers[rd_index] = registers[rs1_index] & immediate;
       break;
     case SLLI_FUNCT_3:

@@ -355,7 +355,7 @@ void test_ADDI(void) {
       {.rs1_value = 10, .immediate =  -100, .expected =  (uint64_t)-90}, // Result wraps to a negative 64-bit value
   };
 
-  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ADDI, OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ADDI_FUNCT_3, OP_IMM);
 }
 
 void test_ADDIW(void) {
@@ -378,7 +378,7 @@ void test_ANDI(void) {
       {.rs1_value = 0b1100010, .immediate =  0b1000010, .expected =  0b1000010},    // Keep only shared set bits
   };
 
-  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ANDI, OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ANDI_FUNCT_3, OP_IMM);
 }
 
 void test_ORI(void) {
@@ -389,7 +389,7 @@ void test_ORI(void) {
       {.rs1_value = 0b1100010, .immediate =  0b1001010, .expected =  0b1101010},     // Combine set bits from both operands
   };
 
-  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ORI, OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ORI_FUNCT_3, OP_IMM);
 }
 
 void test_SLTI(void) {
@@ -403,7 +403,7 @@ void test_SLTI(void) {
       {.rs1_value = (uint64_t)-10, .immediate =  -9, .expected =  1},
   };
 
-  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLTI, OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLTI_FUNCT_3, OP_IMM);
 }
 
 void test_SLTIU(void) {
@@ -416,7 +416,7 @@ void test_SLTIU(void) {
       {.rs1_value = UINT64_MAX - 1, .immediate =  -1, .expected =  1},    // UINT64_MAX - 1 < UINT64_MAX
   };
 
-  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLTIU, OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLTIU_FUNCT_3, OP_IMM);
 }
 
 struct shamt_instruction_case {
