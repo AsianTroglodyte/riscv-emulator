@@ -95,7 +95,7 @@ void run_instruction(uint32_t instruction,
     case ANDI:
       registers[rd_index] = registers[rs1_index] & immediate;
       break;
-    case SLLI:
+    case SLLI_FUNCT_3:
       if (bits(instruction, 26, 31) == 0) {
         shamt = bits(immediate, 0, 5);
         registers[rd_index] = registers[rs1_index] << shamt;
@@ -629,7 +629,7 @@ uint32_t create_i_type_shamt(uint32_t shamt,
   switch (opcode) {
   case OP_IMM:
     shamt_bits = 6;
-    if (!((funct3 == SLLI && upper_imm == 0) ||
+    if (!((funct3 == SLLI_FUNCT_3 && upper_imm == 0) ||
           (funct3 == SHIFT_RIGHT_IMM &&
            (upper_imm == SRLI_IMM || upper_imm == SRAI_IMM)))) {
 

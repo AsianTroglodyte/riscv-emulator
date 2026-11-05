@@ -94,7 +94,7 @@ enum op_imm_funct3_enums: uint32_t {
   XORI=         0b100,
   ORI=          0b110,
   ANDI=         0b111,
-  SLLI=         0b001,
+  SLLI_FUNCT_3=      0b001,
   SHIFT_RIGHT_IMM=   0b101,
   SRLI_IMM=     0b000000,
   SRAI_IMM=     0b010000,

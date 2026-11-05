@@ -458,11 +458,24 @@ static void test_shamt_instruction(const struct shamt_instruction_case cases[],
 
 static const struct shamt_instruction SLLI_DESCRIPTOR = {
     .opcode = OP_IMM,
-    .funct3 = 0b001,
+    .funct3 = SLLI_FUNCT_3,
     .upper_imm = 0,
 };
 
 void test_slli(void) {
+  const struct shamt_instruction_case cases[] = {
+      {.rs1_value = 9, .shamt = 1, .expected =  18},                     // basically
+      {.rs1_value = 0, .shamt = 0, .expected = 0},   // nothing; shamt bts [11:6] must be 000000.
+      {.rs1_value = 3, .shamt = 6, .expected =  192},                    //  3 * 2^6 = 192
+      {.rs1_value = -2, .shamt = 3, .expected =  -16},                   // -2 * 2 * 2 * 2 = 16
+      {.rs1_value = 1, .shamt = 31, .expected =  INT64_C(1) << 31},      // 0 < UINT64_MAX
+      {.rs1_value = 1, .shamt = 63, .expected =  0x8000000000000000}
+  };
+
+  test_shamt_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLLI_DESCRIPTOR);
+}
+
+void test_slliw(void) {
   const struct shamt_instruction_case cases[] = {
       {.rs1_value = 9, .shamt = 1, .expected =  18},                     // basically
       {.rs1_value = 0, .shamt = 0, .expected = 0},   // nothing; shamt bts [11:6] must be 000000.
@@ -561,7 +574,7 @@ void test_sraiw(void) {
 }
 
 void test_create_i_type_shamt(void) {
-  TEST_ASSERT_EQUAL_HEX32(0x03f09513, create_i_type_shamt(63, 1, 10, OP_IMM, SLLI, 0));
+  TEST_ASSERT_EQUAL_HEX32(0x03f09513, create_i_type_shamt(63, 1, 10, OP_IMM, SLLI_FUNCT_3, 0));
   TEST_ASSERT_EQUAL_HEX32(0x03f0d513, create_i_type_shamt(63, 1, 10, OP_IMM, SHIFT_RIGHT_IMM, SRLI_IMM));
   TEST_ASSERT_EQUAL_HEX32(0x43f0d513, create_i_type_shamt(63, 1, 10, OP_IMM, SHIFT_RIGHT_IMM, SRAI_IMM));
   TEST_ASSERT_EQUAL_HEX32(0x01f0951b, create_i_type_shamt(31, 1, 10, OP_IMM_32, SLLIW & 7, SLLIW >> 3));
@@ -1121,7 +1134,7 @@ int main(void) {
   RUN_TEST(test_slti);
   RUN_TEST(test_sltiu);
   RUN_TEST(test_slli);
-  /* RUN_TEST(test_slliw); */
+  RUN_TEST(test_slliw);
   RUN_TEST(test_srli);
   RUN_TEST(test_srai);
 
