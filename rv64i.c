@@ -136,7 +136,6 @@ void run_instruction(uint32_t instruction,
     registers[rd_index] = (uint64_t)(int64_t)get_upper_immediate(instruction) + *program_counter;
     break;
   case OP_IMM_32:
-    printf("OP_IMM_32");
     rs1_index = get_rs1_index(instruction);
     rd_index = get_rd_index(instruction);
     funct3 = get_funct3(instruction);
@@ -147,12 +146,11 @@ void run_instruction(uint32_t instruction,
       printf("addiw");
       break;
     case SHIFT_RIGHT_IMM_32:
-
       uint32_t shamt = bits(immediate, 0, 5);
       const uint32_t imm = get_funct7(instruction);
+
       switch (imm) {
       case (SRLIW_IMM):
-        printf("SRLIW_IMM");
         uint64_t result = registers[rs1_index] >> shamt;
         bool is_negative = (registers[rs1_index] & (UINT64_C(1) << 63)) != 0;
         if (shamt != 0 && is_negative) {
@@ -173,7 +171,6 @@ void run_instruction(uint32_t instruction,
         /* registers[rd_index] = sign_extend_64((uint32_t)(registers[rs1_index] + immediate), 32); */
         printf("SRLIW_IMM");
         break;
-
       }
     }
     break;

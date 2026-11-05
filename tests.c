@@ -446,8 +446,13 @@ static void test_shamt_instruction(const struct shamt_instruction_case cases[],
         cases[i].shamt, rs1_index, rd_index, instr_desc.opcode, instr_desc.funct3, instr_desc.upper_imm);
 
     run_instruction(instruction, &state);
+    char message[128];
+    snprintf(message, sizeof(message), " Case %zu was incorrect", i + 1);
+    TEST_ASSERT_EQUAL_UINT64_MESSAGE(cases[i].expected, state.registers[rd_index], message);
 
-    TEST_ASSERT_EQUAL_UINT64(cases[i].expected, state.registers[rd_index]);
+    /* snprintf(message, sizeof(message), */
+    /*          "Case %zu failed" ); */
+    /* TEST_ASSERT_TRUE_MESSAGE(cases[i].memory_value <= UINT8_MAX, message); */
   }
 }
 
@@ -471,17 +476,17 @@ void test_slli(void) {
 }
 
 static const struct shamt_instruction SRLI_DESCRIPTOR = {
-    .opcode = OP_IMM_32,
-    .funct3 = 0b101,
-    .upper_imm = 0,
+    .opcode = OP_IMM,
+    .funct3 = SHIFT_RIGHT_IMM,
+    .upper_imm = SRLI_IMM,
 };
 
 void test_srli(void) {
   const struct shamt_instruction_case cases[] = {
       // Ordinary right shifts.
       // {value_shifted, (funct) | shift amount (shamt), result}
-      {.rs1_value = 18, .shamt = 1, .expected =  9},
-      {.rs1_value = 192, .shamt = 6, .expected =  3},
+      {.rs1_value = 18, .shamt = 1, .expected = 9}, // 10010 > 1 = 1001;
+      {.rs1_value = 192, .shamt = 6, .expected = 3},
 
       // Logical shifts fill vacated high bits with zero, even when the
       // source's most significant bit is set.
@@ -498,13 +503,51 @@ void test_srli(void) {
   test_shamt_instruction(cases, sizeof(cases) / sizeof(cases[0]), SRLI_DESCRIPTOR);
 }
 
-static const struct shamt_instruction SRAIW_DESCRIPTOR = {
+static const struct shamt_instruction SRLIW_DESCRIPTOR = {
     .opcode = OP_IMM_32,
-    .funct3 = 0b101,
-    .upper_imm = 0b010000,
+    .funct3 = SHIFT_RIGHT_IMM_32,
+    .upper_imm = SRLIW_IMM,
+};
+
+void test_srliw(void) {
+  const struct shamt_instruction_case cases[] = {
+    {.rs1_value = -8, .shamt = 2, .expected = -2},   // ...1111 1000 >> 2 = ...1111 1110
+    {.rs1_value = -15, .shamt = 2, .expected = -4},  // ...1111 0001 >> 2 = ...1111 1100
+    {.rs1_value = 100, .shamt = 4, .expected = 6},   // ...0110 0100 >> 4 = ...0000 0110
+    {.rs1_value = UINT64_MAX, .shamt = 63, .expected = UINT64_MAX}, // ...1111 >> 63 = ...1111
+    {.rs1_value = 100, .shamt = 0, .expected = 100}, // ...0110 0100 >> 4 = ...0110 0100
+    {.rs1_value = -8, .shamt = 0, .expected = -8}
+  };
+
+  test_shamt_instruction(cases, sizeof(cases) / sizeof(cases[0]), SRLIW_DESCRIPTOR);
+}
+
+static const struct shamt_instruction SRAI_DESCRIPTOR = {
+    .opcode = OP_IMM_32,
+    .funct3 = SHIFT_RIGHT_IMM,
+    .upper_imm = SRAI_IMM,
 };
 
 void test_srai(void) {
+  const struct shamt_instruction_case cases[] = {
+    {.rs1_value = -8, .shamt = 2, .expected = -2},   // ...1111 1000 >> 2 = ...1111 1110
+    {.rs1_value = -15, .shamt = 2, .expected = -4},  // ...1111 0001 >> 2 = ...1111 1100
+    {.rs1_value = 100, .shamt = 4, .expected = 6},   // ...0110 0100 >> 4 = ...0000 0110
+    {.rs1_value = UINT64_MAX, .shamt = 63, .expected = UINT64_MAX}, // ...1111 >> 63 = ...1111
+    {.rs1_value = 100, .shamt = 0, .expected = 100}, // ...0110 0100 >> 4 = ...0110 0100
+    {.rs1_value = -8, .shamt = 0, .expected = -8}
+  };
+
+  test_shamt_instruction(cases, sizeof(cases) / sizeof(cases[0]), SRAI_DESCRIPTOR);
+}
+
+static const struct shamt_instruction SRAIW_DESCRIPTOR = {
+    .opcode = OP_IMM_32,
+    .funct3 = SHIFT_RIGHT_IMM_32,
+    .upper_imm = SRAIW_IMM,
+};
+
+void test_sraiw(void) {
   const struct shamt_instruction_case cases[] = {
     {.rs1_value = -8, .shamt = 2, .expected = -2},   // ...1111 1000 >> 2 = ...1111 1110
     {.rs1_value = -15, .shamt = 2, .expected = -4},  // ...1111 0001 >> 2 = ...1111 1100
@@ -526,6 +569,8 @@ void test_create_i_type_shamt(void) {
   TEST_ASSERT_EQUAL_HEX32(0x41f0d51b, create_i_type_shamt(31, 1, 10, OP_IMM_32, SHIFT_RIGHT_IMM_32, SRAIW_IMM));
   TEST_ASSERT_EQUAL_HEX32(0x4000d513, create_i_type_shamt(0, 1, 10, OP_IMM, SHIFT_RIGHT_IMM, SRAI_IMM));
 }
+
+
 
 
 struct r_instruction_case {
@@ -1077,7 +1122,7 @@ int main(void) {
   RUN_TEST(test_sltiu);
   RUN_TEST(test_slli);
   /* RUN_TEST(test_slliw); */
-  /* RUN_TEST(test_srli); */
+  RUN_TEST(test_srli);
   /* RUN_TEST(test_srai); */
 
   // test 32-bit-result immediate operations
