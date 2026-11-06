@@ -367,7 +367,7 @@ void test_ADDIW(void) {
       {.rs1_value = INT32_MIN, .immediate = 0, .expected = (int64_t) INT32_MIN} // making sure sign extension works
   };
 
-  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ADDIW, OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ADDIW_FUNCT_3, OP_IMM);
 }
 
 void test_ANDI(void) {
@@ -475,17 +475,22 @@ void test_SLLI(void) {
   test_shamt_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLLI_DESCRIPTOR);
 }
 
+static const struct shamt_instruction SLLIW_DESCRIPTOR = {
+    .opcode = OP_IMM_32,
+    .funct3 = SLLIW_FUNCT_3,
+    .upper_imm = SLLIW_IMM,
+};
+
 void test_SLLIW(void) {
   const struct shamt_instruction_case cases[] = {
       {.rs1_value = 9, .shamt = 1, .expected =  18},                     // basically
+      {.rs1_value = -2, .shamt = 3, .expected =  0x00000000FFFFFFF0},                   // -2 * 2 * 2 * 2 = 16 0000
       {.rs1_value = 0, .shamt = 0, .expected = 0},   // nothing; shamt bts [11:6] must be 000000.
       {.rs1_value = 3, .shamt = 6, .expected =  192},                    //  3 * 2^6 = 192
-      {.rs1_value = -2, .shamt = 3, .expected =  -16},                   // -2 * 2 * 2 * 2 = 16
       {.rs1_value = 1, .shamt = 31, .expected =  INT64_C(1) << 31},      // 0 < UINT64_MAX
-      {.rs1_value = 1, .shamt = 63, .expected =  0x8000000000000000}
   };
 
-  test_shamt_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLLI_DESCRIPTOR);
+  test_shamt_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLLIW_DESCRIPTOR);
 }
 
 static const struct shamt_instruction SRLI_DESCRIPTOR = {

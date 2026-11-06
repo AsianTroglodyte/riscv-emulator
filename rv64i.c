@@ -140,33 +140,28 @@ void run_instruction(uint32_t instruction,
     rd_index = get_rd_index(instruction);
     funct3 = get_funct3(instruction);
     immediate = get_i_immediate(instruction);
+    uint32_t immediate_id;
     // ADDIW can be determined using juts func3
     switch (funct3) {
-    case ADDIW:
+    case ADDIW_FUNCT_3:
       printf("addiw");
+      break;
+    case SLLIW_FUNCT_3:
+      immediate_id = get_funct7(instruction);
+      if (immediate_id == SLLIW_IMM) {
+        uint32_t shamt = bits(immediate, 0, 4);
+        registers[rd_index] = (uint32_t) registers[rs1_index] << shamt;
+      }
+      else {
+        printf("SLLIW_FUNCT_3 does not have correct corresponding immediate_id/funct7 val");
+      }
       break;
     case SHIFT_RIGHT_OPP_32_FUNCT_3:
       uint32_t shamt = bits(immediate, 0, 4);
-      const uint32_t imm = get_funct7(instruction);
-
-      switch (imm) {
+      immediate_id = get_funct7(instruction);
+      switch (immediate_id) {
       case (SRLIW_IMM):
-        printf("shamt: %d\n", shamt);
-        uint64_t result = (uint32_t)registers[rs1_index] >> shamt;
-        printf("results: ");
-        print_bits(result);
-        printf("registers[rs1_index]: ");
-        print_bits(registers[rs1_index]);
-
-        /* bool is_negative = (registers[rs1_index] & (UINT64_C(1) << 63)) != 0; */
-        /* if (shamt != 0 && is_negative) { */
-        /*   result |= (UINT64_MAX << (64 - shamt)); */
-        /* } */
-        registers[rd_index] = result;
-        /* immediate = get_i_immediate(instruction); */
-        /* registers[rd_index] = sign_extend_64((uint32_t)(registers[rs1_index] + immediate), 32); */
-        printf("registers[rs1_index]: %" PRIi64 "\n", registers[rs1_index]);
-        printf("registers[rd_index]: %" PRIi64 "\n", registers[rd_index]);
+        registers[rd_index] = (uint32_t)registers[rs1_index] >> shamt;
         break;
       case (SRAIW_IMM):
         /* uint64_t result = registers[rs1_index] >> shamt; */

@@ -103,11 +103,13 @@ enum op_imm_funct3_enums: uint32_t {
 
 //
 enum op_imm_32_enums: uint32_t {
-  ADDIW=        0b000,
-  SLLIW=        0b0000000001, // we combine funct7 (technically has len ) with funct3
+  ADDIW_FUNCT_3=                0b000,
+  SLLIW_FUNCT_3=                0b001,
+  SLLIW_IMM=                    0b000,
+  SLLIW=                        0b0000000001, // we combine funct7 (technically has len ) with funct3
   SHIFT_RIGHT_OPP_32_FUNCT_3=   0b101,
-  SRLIW_IMM=        0b0000000,
-  SRAIW_IMM=        0b0100000,
+  SRLIW_IMM=                    0b0000000,
+  SRAIW_IMM=                    0b0100000,
 };
 
 // backing numbers are funct7 + funct3
