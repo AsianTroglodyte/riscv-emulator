@@ -61,6 +61,17 @@ enum major_opcodes: uint32_t {
   CUSTOM_3=   0b1111011
 };
 
+enum OP_32_funct3_enums: uint32_t {
+  ADDW_SUBW_FUNCT_3=      0b000,
+  ADDW_IMM=               0b0000000,
+  SUBW_IMM=               0b0100000,
+  SLLW_FUNCT_3=           0b001,
+  SLLW_IMM=               0b001,
+  SHIFT_RIGHT_FUNCT_3=    0b101,
+  SRLW_IMM=           0b0000000,
+  SRAW_IMM=           0b0100000,
+};
+
 enum MISC_MEM_enum: uint32_t {
   FENCE = 0b000,
   FENCE_TSO = 0b1000001100110000000000000, // includes all FENCE_TSO fields. best way to guarantee ID

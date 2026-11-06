@@ -40,7 +40,7 @@ The following handlers currently operate on the emulator's 64-bit registers. The
 - [x] ADDI
 - [x] SLTI
 - [x] SLTIU
-- [ ] XORI
+- [x] XORI
 - [x] ORI
 - [x] ANDI
 - [x] SLLI

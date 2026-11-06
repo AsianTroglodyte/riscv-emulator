@@ -26,6 +26,8 @@ void run_instruction(uint32_t instruction,
     uint32_t funct3;
 
     uint64_t address;
+    uint32_t immediate_id;
+
   case LOAD:
     // I Type
     immediate = get_i_immediate(instruction);
@@ -143,7 +145,6 @@ void run_instruction(uint32_t instruction,
     rd_index = get_rd_index(instruction);
     funct3 = get_funct3(instruction);
     immediate = get_i_immediate(instruction);
-    uint32_t immediate_id;
     // ADDIW can be determined using juts func3
     switch (funct3) {
     case ADDIW_FUNCT_3:
@@ -260,20 +261,39 @@ void run_instruction(uint32_t instruction,
   case OP_32:
     printf("OP_32\n");
     funct3 = get_funct3(instruction);
-    /* switch (funct3) { */
-
-    /* case ADDW: */
-    /*   printf("ADDW\n"); */
-    /* case SUBW: */
-    /*   printf("SUBW\n"); */
-    /* case SLLW: */
-    /*   printf("SLLW\n"); */
-    /* case SRLW: */
-    /*   printf("SRLW\n"); */
-    /* case SRAW: */
-    /*   printf("SRAW\n"); */
-    /*   break; */
-    /* } */
+    immediate_id = get_funct7(instruction);
+    switch (funct3) {
+    case SLLW_FUNCT_3:
+      if (SLLW_IMM == immediate_id) {
+        printf("SUBW\n");
+      }
+      else {
+        printf("immediate_id not valid given SLLW_FUNCT_3\n");
+      }
+      break;
+    case ADDW_SUBW_FUNCT_3:
+      printf("ADDW_SUBW_FUNCT_3\n");
+      if (ADDW_IMM == immediate_id) {
+        printf("ADDW\n");
+      }
+      else if (SUBW_IMM == immediate_id) {
+        printf("SUBW\n");
+      }
+      else {
+        printf("immediate ID given ADDW_SUBW_FUNCT_3 not valid\n");
+      }
+      break;
+    case SHIFT_RIGHT_FUNCT_3:
+      printf("SHIFT_RIGHT_FUNCT_3\n");
+      if (SRLW_IMM == immediate_id) {
+        printf("SRLW\n");
+      } else if (SRAW_IMM == immediate_id) {
+        printf("SRLW\n");
+      } else {
+        printf("immediate ID SHIFT_RIGHT_FUNCT_3 not valid\n");
+      }
+      break;
+    }
     break;
   case MADD:
     printf("MADD\n");
