@@ -96,13 +96,16 @@ void run_instruction(uint32_t instruction,
       registers[rd_index] = registers[rs1_index] & immediate;
       break;
     case SLLI_FUNCT_3:
-      if (bits(instruction, 26, 31) == 0) {
+      if (bits(instruction, 26, 31) == SLLI_IMM) {
         shamt = bits(immediate, 0, 5);
         registers[rd_index] = registers[rs1_index] << shamt;
       } else {
         /* assert(1 & printf("immediate of potential SLLI is not ")); */
-        printf("immediate of potential SLLI is not ");
+        printf("immediate of potential SLLI is not \n");
       }
+      break;
+    case XORI_FUNCT_3:
+      registers[rd_index] = registers[rs1_index] ^ immediate;
       break;
     case SHIFT_RIGHT_OPP_FUNCT_3:
       shamt = bits(immediate, 0, 5);
@@ -144,7 +147,7 @@ void run_instruction(uint32_t instruction,
     // ADDIW can be determined using juts func3
     switch (funct3) {
     case ADDIW_FUNCT_3:
-      printf("addiw");
+      registers[rd_index] = (uint32_t) registers[rs1_index] + immediate;
       break;
     case SLLIW_FUNCT_3:
       immediate_id = get_funct7(instruction);

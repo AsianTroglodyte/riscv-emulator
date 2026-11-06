@@ -419,6 +419,24 @@ void test_SLTIU(void) {
   test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLTIU_FUNCT_3, OP_IMM);
 }
 
+
+void test_XORI(void) {
+  const struct i_instruction_case cases[] = {
+      {.rs1_value = 0b0101, .immediate = 0b1010, .expected = 0b1111},
+      {.rs1_value = 0b0101, .immediate = 0b0101, .expected = 0b0000},
+      {.rs1_value = 0b1100, .immediate = 0b1000, .expected = 0b0100},
+      {.rs1_value = 0, .immediate = 0, .expected = 0}, // zero identity
+      // the following aren't the best but whatever
+      {.rs1_value = UINT64_MAX, .immediate = 0, .expected = UINT64_MAX},
+      {.rs1_value = UINT64_C(1) << 63, .immediate = 0, .expected = UINT64_C(1) << 63},
+      {.rs1_value = 0, .immediate = -1, .expected = UINT64_MAX},
+      {.rs1_value = (UINT64_C(1) << 63) | 1, .immediate = 1, .expected = (UINT64_C(1) << 63)}
+  };
+
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), XORI_FUNCT_3, OP_IMM);
+}
+
+
 struct shamt_instruction_case {
   uint64_t rs1_value;
   int32_t shamt;
@@ -1146,6 +1164,7 @@ int main(void) {
   RUN_TEST(test_SRLIW);
   RUN_TEST(test_SRAI);
   RUN_TEST(test_SRAIW);
+  RUN_TEST(test_XORI);
 
   // test 32-bit-result immediate operations
   RUN_TEST(test_ADDIW);

@@ -74,8 +74,8 @@ The following handlers currently operate on the emulator's 64-bit registers. The
 ### 32-bit-result immediate operations
 - [x] ADDIW
 - [x] SLLIW
-- [ ] SRLIW
-- [ ] SRAIW
+- [x] SRLIW
+- [x] SRAIW
 
 ### 32-bit-result register operations
 - [ ] ADDW
