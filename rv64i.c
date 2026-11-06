@@ -104,7 +104,7 @@ void run_instruction(uint32_t instruction,
         printf("immediate of potential SLLI is not ");
       }
       break;
-    case SHIFT_RIGHT_IMM:
+    case SHIFT_RIGHT_OPP_FUNCT_3:
       shamt = bits(immediate, 0, 5);
       uint32_t funct6 = bits(immediate, 6, 11);
       switch (funct6) {
@@ -145,20 +145,28 @@ void run_instruction(uint32_t instruction,
     case ADDIW:
       printf("addiw");
       break;
-    case SHIFT_RIGHT_IMM_32:
-      uint32_t shamt = bits(immediate, 0, 5);
+    case SHIFT_RIGHT_OPP_32_FUNCT_3:
+      uint32_t shamt = bits(immediate, 0, 4);
       const uint32_t imm = get_funct7(instruction);
 
       switch (imm) {
       case (SRLIW_IMM):
-        uint64_t result = registers[rs1_index] >> shamt;
-        bool is_negative = (registers[rs1_index] & (UINT64_C(1) << 63)) != 0;
-        if (shamt != 0 && is_negative) {
-          result |= (UINT64_MAX << (64 - shamt));
-        }
+        printf("shamt: %d\n", shamt);
+        uint64_t result = (uint32_t)registers[rs1_index] >> shamt;
+        printf("results: ");
+        print_bits(result);
+        printf("registers[rs1_index]: ");
+        print_bits(registers[rs1_index]);
+
+        /* bool is_negative = (registers[rs1_index] & (UINT64_C(1) << 63)) != 0; */
+        /* if (shamt != 0 && is_negative) { */
+        /*   result |= (UINT64_MAX << (64 - shamt)); */
+        /* } */
         registers[rd_index] = result;
-        immediate = get_i_immediate(instruction);
-        registers[rd_index] = sign_extend_64((uint32_t)(registers[rs1_index] + immediate), 32);
+        /* immediate = get_i_immediate(instruction); */
+        /* registers[rd_index] = sign_extend_64((uint32_t)(registers[rs1_index] + immediate), 32); */
+        printf("registers[rs1_index]: %" PRIi64 "\n", registers[rs1_index]);
+        printf("registers[rd_index]: %" PRIi64 "\n", registers[rd_index]);
         break;
       case (SRAIW_IMM):
         /* uint64_t result = registers[rs1_index] >> shamt; */
@@ -630,7 +638,7 @@ uint32_t create_i_type_shamt(uint32_t shamt,
   case OP_IMM:
     shamt_bits = 6;
     if (!((funct3 == SLLI_FUNCT_3 && upper_imm == 0) ||
-          (funct3 == SHIFT_RIGHT_IMM &&
+          (funct3 == SHIFT_RIGHT_OPP_FUNCT_3 &&
            (upper_imm == SRLI_IMM || upper_imm == SRAI_IMM)))) {
 
       abort();
@@ -639,7 +647,7 @@ uint32_t create_i_type_shamt(uint32_t shamt,
   case OP_IMM_32:
     shamt_bits = 5;
     if (!((funct3 == (SLLIW & 7) && upper_imm == (SLLIW >> 3)) ||
-          (funct3 == SHIFT_RIGHT_IMM_32 &&
+          (funct3 == SHIFT_RIGHT_OPP_32_FUNCT_3 &&
            (upper_imm == SRLIW_IMM || upper_imm == SRAIW_IMM)))) {
       abort();
     }

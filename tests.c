@@ -490,7 +490,7 @@ void test_SLLIW(void) {
 
 static const struct shamt_instruction SRLI_DESCRIPTOR = {
     .opcode = OP_IMM,
-    .funct3 = SHIFT_RIGHT_IMM,
+    .funct3 = SHIFT_RIGHT_OPP_FUNCT_3,
     .upper_imm = SRLI_IMM,
 };
 
@@ -518,18 +518,19 @@ void test_SRLI(void) {
 
 static const struct shamt_instruction SRLIW_DESCRIPTOR = {
     .opcode = OP_IMM_32,
-    .funct3 = SHIFT_RIGHT_IMM_32,
+    .funct3 = SHIFT_RIGHT_OPP_32_FUNCT_3,
     .upper_imm = SRLIW_IMM,
 };
 
-void test_srliw(void) {
+void test_SRLIW(void) {
   const struct shamt_instruction_case cases[] = {
-    {.rs1_value = -8, .shamt = 2, .expected = -2},   // ...1111 1000 >> 2 = ...1111 1110
-    {.rs1_value = -15, .shamt = 2, .expected = -4},  // ...1111 0001 >> 2 = ...1111 1100
+    {.rs1_value = -8, .shamt = 2, .expected = 0x000000003FFFFFFE},   // ...1111 1000 >> 2 = ...1111 1110
+                                                                    // -8 have 1s until the very left bits
+    {.rs1_value = -15, .shamt = 2, .expected = 0x000000003FFFFFFC},  // ...1111 0001 >> 2 = ...1111 1100
     {.rs1_value = 100, .shamt = 4, .expected = 6},   // ...0110 0100 >> 4 = ...0000 0110
-    {.rs1_value = UINT64_MAX, .shamt = 63, .expected = UINT64_MAX}, // ...1111 >> 63 = ...1111
+    {.rs1_value = UINT32_MAX, .shamt = 31, .expected = 1}, // ...1111 >> 63 = ...1111
     {.rs1_value = 100, .shamt = 0, .expected = 100}, // ...0110 0100 >> 4 = ...0110 0100
-    {.rs1_value = -8, .shamt = 0, .expected = -8}
+    {.rs1_value = -8, .shamt = 0, .expected = 0x00000000FFFFFFF8}
   };
 
   test_shamt_instruction(cases, sizeof(cases) / sizeof(cases[0]), SRLIW_DESCRIPTOR);
@@ -537,7 +538,7 @@ void test_srliw(void) {
 
 static const struct shamt_instruction SRAI_DESCRIPTOR = {
     .opcode = OP_IMM,
-    .funct3 = SHIFT_RIGHT_IMM,
+    .funct3 = SHIFT_RIGHT_OPP_FUNCT_3,
     .upper_imm = SRAI_IMM,
 };
 
@@ -556,7 +557,7 @@ void test_SRAI(void) {
 
 static const struct shamt_instruction SRAIW_DESCRIPTOR = {
     .opcode = OP_IMM_32,
-    .funct3 = SHIFT_RIGHT_IMM_32,
+    .funct3 = SHIFT_RIGHT_OPP_32_FUNCT_3,
     .upper_imm = SRAIW_IMM,
 };
 
@@ -575,12 +576,12 @@ void test_sraiw(void) {
 
 void test_create_i_type_shamt(void) {
   TEST_ASSERT_EQUAL_HEX32(0x03f09513, create_i_type_shamt(63, 1, 10, OP_IMM, SLLI_FUNCT_3, 0));
-  TEST_ASSERT_EQUAL_HEX32(0x03f0d513, create_i_type_shamt(63, 1, 10, OP_IMM, SHIFT_RIGHT_IMM, SRLI_IMM));
-  TEST_ASSERT_EQUAL_HEX32(0x43f0d513, create_i_type_shamt(63, 1, 10, OP_IMM, SHIFT_RIGHT_IMM, SRAI_IMM));
+  TEST_ASSERT_EQUAL_HEX32(0x03f0d513, create_i_type_shamt(63, 1, 10, OP_IMM, SHIFT_RIGHT_OPP_FUNCT_3, SRLI_IMM));
+  TEST_ASSERT_EQUAL_HEX32(0x43f0d513, create_i_type_shamt(63, 1, 10, OP_IMM, SHIFT_RIGHT_OPP_FUNCT_3, SRAI_IMM));
   TEST_ASSERT_EQUAL_HEX32(0x01f0951b, create_i_type_shamt(31, 1, 10, OP_IMM_32, SLLIW & 7, SLLIW >> 3));
-  TEST_ASSERT_EQUAL_HEX32(0x01f0d51b, create_i_type_shamt(31, 1, 10, OP_IMM_32, SHIFT_RIGHT_IMM_32, SRLIW_IMM));
-  TEST_ASSERT_EQUAL_HEX32(0x41f0d51b, create_i_type_shamt(31, 1, 10, OP_IMM_32, SHIFT_RIGHT_IMM_32, SRAIW_IMM));
-  TEST_ASSERT_EQUAL_HEX32(0x4000d513, create_i_type_shamt(0, 1, 10, OP_IMM, SHIFT_RIGHT_IMM, SRAI_IMM));
+  TEST_ASSERT_EQUAL_HEX32(0x01f0d51b, create_i_type_shamt(31, 1, 10, OP_IMM_32, SHIFT_RIGHT_OPP_32_FUNCT_3, SRLIW_IMM));
+  TEST_ASSERT_EQUAL_HEX32(0x41f0d51b, create_i_type_shamt(31, 1, 10, OP_IMM_32, SHIFT_RIGHT_OPP_32_FUNCT_3, SRAIW_IMM));
+  TEST_ASSERT_EQUAL_HEX32(0x4000d513, create_i_type_shamt(0, 1, 10, OP_IMM, SHIFT_RIGHT_OPP_FUNCT_3, SRAI_IMM));
 }
 
 
@@ -1136,6 +1137,7 @@ int main(void) {
   RUN_TEST(test_SLLI);
   RUN_TEST(test_SLLIW);
   RUN_TEST(test_SRLI);
+  RUN_TEST(test_SRLIW);
   RUN_TEST(test_SRAI);
 
   // test 32-bit-result immediate operations
