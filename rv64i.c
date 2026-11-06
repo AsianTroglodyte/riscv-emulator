@@ -164,15 +164,7 @@ void run_instruction(uint32_t instruction,
         registers[rd_index] = (uint32_t)registers[rs1_index] >> shamt;
         break;
       case (SRAIW_IMM):
-        /* uint64_t result = registers[rs1_index] >> shamt; */
-        /* bool is_negative = (registers[rs1_index] & (UINT64_C(1) << 63)) != 0; */
-        /* if (shamt != 0 && is_negative) { */
-        /*   result |= (UINT64_MAX << (64 - shamt)); */
-        /* } */
-        /* registers[rd_index] = result; */
-        /* immediate = get_i_immediate(instruction); */
-        /* registers[rd_index] = sign_extend_64((uint32_t)(registers[rs1_index] + immediate), 32); */
-        printf("SRLIW_IMM");
+        registers[rd_index] = (int64_t)(int32_t)registers[rs1_index] >> shamt;
         break;
       }
     }

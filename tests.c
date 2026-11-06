@@ -566,14 +566,15 @@ static const struct shamt_instruction SRAIW_DESCRIPTOR = {
     .upper_imm = SRAIW_IMM,
 };
 
-void test_sraiw(void) {
+void test_SRAIW(void) {
   const struct shamt_instruction_case cases[] = {
-    {.rs1_value = -8, .shamt = 2, .expected = -2},   // ...1111 1000 >> 2 = ...1111 1110
-    {.rs1_value = -15, .shamt = 2, .expected = -4},  // ...1111 0001 >> 2 = ...1111 1100
+    {.rs1_value = -8, .shamt = 2, .expected =  0xFFFFFFFFFFFFFFFE},   // ...1111 1000 >> 2 = ...1111 1110
+                                                                    // -8 have 1s until the very left bits
+    {.rs1_value = -15, .shamt = 2, .expected = 0xFFFFFFFFFFFFFFFC},  // ...1111 0001 >> 2 = ...1111 1100
     {.rs1_value = 100, .shamt = 4, .expected = 6},   // ...0110 0100 >> 4 = ...0000 0110
-    {.rs1_value = UINT64_MAX, .shamt = 63, .expected = UINT64_MAX}, // ...1111 >> 63 = ...1111
+    {.rs1_value = UINT32_MAX, .shamt = 31, .expected = UINT64_MAX}, // ...1111 >> 63 = ...1111
     {.rs1_value = 100, .shamt = 0, .expected = 100}, // ...0110 0100 >> 4 = ...0110 0100
-    {.rs1_value = -8, .shamt = 0, .expected = -8}
+    {.rs1_value = -8, .shamt = 0, .expected =  0xFFFFFFFFFFFFFFF8}
   };
 
   test_shamt_instruction(cases, sizeof(cases) / sizeof(cases[0]), SRAIW_DESCRIPTOR);
@@ -1144,6 +1145,7 @@ int main(void) {
   RUN_TEST(test_SRLI);
   RUN_TEST(test_SRLIW);
   RUN_TEST(test_SRAI);
+  RUN_TEST(test_SRAIW);
 
   // test 32-bit-result immediate operations
   RUN_TEST(test_ADDIW);
