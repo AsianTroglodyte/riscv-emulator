@@ -127,8 +127,6 @@ enum immediate_id_enums: uint32_t {
   /* enum op_imm_32_enums: uint32_t { */
   IMM_SRLIW=    0b0000000,
   IMM_SRAIW=    0b0100000,
-
-  SLLIW=        0b0000000001, // we combine funct7 (technically has len ) with funct3
 };
 
 enum MISC_MEM_enum: uint32_t {
