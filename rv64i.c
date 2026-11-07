@@ -153,7 +153,7 @@ void run_instruction(uint32_t instruction,
       break;
     case FUNCT3_SLLIW:
       immediate_id = get_funct7(instruction);
-      if (immediate_id == SLLIW_IMM) {
+      if (immediate_id == IMM_SLLIW) {
         uint32_t shamt = bits(immediate, 0, 4);
         registers[rd_index] = (uint32_t) registers[rs1_index] << shamt;
       }
@@ -663,7 +663,7 @@ uint32_t create_i_type_shamt(uint32_t shamt,
     break;
   case OPCODE_OP_IMM_32:
     shamt_bits = 5;
-    if (!((funct3 == (FUNCT3_SLLIW & 7) && upper_imm == (SLLIW_IMM >> 3)) ||
+    if (!((funct3 == (FUNCT3_SLLIW & 7) && upper_imm == (IMM_SLLIW >> 3)) ||
           (funct3 == FUNCT3_SHIFT_RIGHT_OPP_32 &&
            (upper_imm == IMM_SRLIW || upper_imm == IMM_SRAIW)))) {
       abort();

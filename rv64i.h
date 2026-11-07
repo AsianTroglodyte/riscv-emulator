@@ -88,7 +88,7 @@ enum funct3_enums: uint32_t {
   // OP_IMMEDIATE_32
   FUNCT3_ADDIW=                0b000,
   FUNCT3_SLLIW=                0b001,
-  SLLIW_IMM=                    0b000,
+  IMM_SLLIW=                    0b0000000,
   FUNCT3_SHIFT_RIGHT_OPP_32=    0b101,
 
 

@@ -496,7 +496,7 @@ void test_SLLI(void) {
 static const struct shamt_instruction SLLIW_DESCRIPTOR = {
     .opcode = OPCODE_OP_IMM_32,
     .funct3 = FUNCT3_SLLIW,
-    .upper_imm = SLLIW_IMM,
+    .upper_imm = IMM_SLLIW,
 };
 
 void test_SLLIW(void) {
@@ -602,6 +602,7 @@ void test_create_i_type_shamt(void) {
   TEST_ASSERT_EQUAL_HEX32(0x03f09513, create_i_type_shamt(63, 1, 10, OPCODE_OP_IMM, FUNCT3_SLLI, 0));
   TEST_ASSERT_EQUAL_HEX32(0x03f0d513, create_i_type_shamt(63, 1, 10, OPCODE_OP_IMM, FUNCT3_SHIFT_RIGHT_OPP, IMM_SRLI));
   TEST_ASSERT_EQUAL_HEX32(0x43f0d513, create_i_type_shamt(63, 1, 10, OPCODE_OP_IMM, FUNCT3_SHIFT_RIGHT_OPP, IMM_SRAI));
+  /* TEST_ASSERT_EQUAL_HEX32(0x01f0951b, create_i_type_shamt(31, 1, 10, OPCODE_OP_IMM_32, SLLIW & 7, SLLIW >> 3)); */
   TEST_ASSERT_EQUAL_HEX32(0x01f0951b, create_i_type_shamt(31, 1, 10, OPCODE_OP_IMM_32, SLLIW & 7, SLLIW >> 3));
   TEST_ASSERT_EQUAL_HEX32(0x01f0d51b, create_i_type_shamt(31, 1, 10, OPCODE_OP_IMM_32, FUNCT3_SHIFT_RIGHT_OPP_32, IMM_SRLIW));
   TEST_ASSERT_EQUAL_HEX32(0x41f0d51b, create_i_type_shamt(31, 1, 10, OPCODE_OP_IMM_32, FUNCT3_SHIFT_RIGHT_OPP_32, IMM_SRAIW));
