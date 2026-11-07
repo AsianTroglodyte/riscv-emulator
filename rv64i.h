@@ -120,13 +120,13 @@ enum funct7_enusm: uint32_t {
 
 enum immediate_id_enums: uint32_t {
   /* enum op_imm_funct3_enums: uint32_t { */
-  SLLI_IMM=     0b000000,
-  SRLI_IMM=     0b000000,
-  SRAI_IMM=     0b010000,
+  IMM_SLLI=     0b000000,
+  IMM_SRLI=     0b000000,
+  IMM_SRAI=     0b010000,
 
   /* enum op_imm_32_enums: uint32_t { */
-  SRLIW_IMM=    0b0000000,
-  SRAIW_IMM=    0b0100000,
+  IMM_SRLIW=    0b0000000,
+  IMM_SRAIW=    0b0100000,
 
   SLLIW=        0b0000000001, // we combine funct7 (technically has len ) with funct3
 };

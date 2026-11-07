@@ -99,7 +99,7 @@ void run_instruction(uint32_t instruction,
       registers[rd_index] = registers[rs1_index] & immediate;
       break;
     case FUNCT3_SLLI:
-      if (bits(instruction, 26, 31) == SLLI_IMM) {
+      if (bits(instruction, 26, 31) == IMM_SLLI) {
         shamt = bits(immediate, 0, 5);
         registers[rd_index] = registers[rs1_index] << shamt;
       } else {
@@ -114,10 +114,10 @@ void run_instruction(uint32_t instruction,
       shamt = bits(immediate, 0, 5);
       uint32_t funct6 = bits(immediate, 6, 11);
       switch (funct6) {
-      case SRLI_IMM:
+      case IMM_SRLI:
         registers[rd_index] = registers[rs1_index] >> shamt;
         break;
-      case SRAI_IMM: {
+      case IMM_SRAI: {
         uint64_t result = registers[rs1_index] >> shamt;
         bool is_negative = (registers[rs1_index] & (UINT64_C(1) << 63)) != 0;
         if (shamt != 0 && is_negative) {
@@ -165,10 +165,10 @@ void run_instruction(uint32_t instruction,
       uint32_t shamt = bits(immediate, 0, 4);
       immediate_id = get_funct7(instruction);
       switch (immediate_id) {
-      case (SRLIW_IMM):
+      case (IMM_SRLIW):
         registers[rd_index] = (uint32_t)registers[rs1_index] >> shamt;
         break;
-      case (SRAIW_IMM):
+      case (IMM_SRAIW):
         registers[rd_index] = (int64_t)(int32_t)registers[rs1_index] >> shamt;
         break;
       }
@@ -656,7 +656,7 @@ uint32_t create_i_type_shamt(uint32_t shamt,
     shamt_bits = 6;
     if (!((funct3 == FUNCT3_SLLI && upper_imm == 0) ||
           (funct3 == FUNCT3_SHIFT_RIGHT_OPP &&
-           (upper_imm == SRLI_IMM || upper_imm == SRAI_IMM)))) {
+           (upper_imm == IMM_SRLI || upper_imm == IMM_SRAI)))) {
 
       abort();
     }
@@ -665,7 +665,7 @@ uint32_t create_i_type_shamt(uint32_t shamt,
     shamt_bits = 5;
     if (!((funct3 == (FUNCT3_SLLIW & 7) && upper_imm == (SLLIW_IMM >> 3)) ||
           (funct3 == FUNCT3_SHIFT_RIGHT_OPP_32 &&
-           (upper_imm == SRLIW_IMM || upper_imm == SRAIW_IMM)))) {
+           (upper_imm == IMM_SRLIW || upper_imm == IMM_SRAIW)))) {
       abort();
     }
     break;

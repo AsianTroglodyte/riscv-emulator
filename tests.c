@@ -514,7 +514,7 @@ void test_SLLIW(void) {
 static const struct shamt_instruction SRLI_DESCRIPTOR = {
     .opcode = OPCODE_OP_IMM,
     .funct3 = FUNCT3_SHIFT_RIGHT_OPP,
-    .upper_imm = SRLI_IMM,
+    .upper_imm = IMM_SRLI,
 };
 
 void test_SRLI(void) {
@@ -542,7 +542,7 @@ void test_SRLI(void) {
 static const struct shamt_instruction SRLIW_DESCRIPTOR = {
     .opcode = OPCODE_OP_IMM_32,
     .funct3 = FUNCT3_SHIFT_RIGHT_OPP_32,
-    .upper_imm = SRLIW_IMM,
+    .upper_imm = IMM_SRLIW,
 };
 
 void test_SRLIW(void) {
@@ -562,7 +562,7 @@ void test_SRLIW(void) {
 static const struct shamt_instruction SRAI_DESCRIPTOR = {
     .opcode = OPCODE_OP_IMM,
     .funct3 = FUNCT3_SHIFT_RIGHT_OPP,
-    .upper_imm = SRAI_IMM,
+    .upper_imm = IMM_SRAI,
 };
 
 void test_SRAI(void) {
@@ -581,7 +581,7 @@ void test_SRAI(void) {
 static const struct shamt_instruction SRAIW_DESCRIPTOR = {
     .opcode = OPCODE_OP_IMM_32,
     .funct3 = FUNCT3_SHIFT_RIGHT_OPP_32,
-    .upper_imm = SRAIW_IMM,
+    .upper_imm = IMM_SRAIW,
 };
 
 void test_SRAIW(void) {
@@ -600,12 +600,12 @@ void test_SRAIW(void) {
 
 void test_create_i_type_shamt(void) {
   TEST_ASSERT_EQUAL_HEX32(0x03f09513, create_i_type_shamt(63, 1, 10, OPCODE_OP_IMM, FUNCT3_SLLI, 0));
-  TEST_ASSERT_EQUAL_HEX32(0x03f0d513, create_i_type_shamt(63, 1, 10, OPCODE_OP_IMM, FUNCT3_SHIFT_RIGHT_OPP, SRLI_IMM));
-  TEST_ASSERT_EQUAL_HEX32(0x43f0d513, create_i_type_shamt(63, 1, 10, OPCODE_OP_IMM, FUNCT3_SHIFT_RIGHT_OPP, SRAI_IMM));
+  TEST_ASSERT_EQUAL_HEX32(0x03f0d513, create_i_type_shamt(63, 1, 10, OPCODE_OP_IMM, FUNCT3_SHIFT_RIGHT_OPP, IMM_SRLI));
+  TEST_ASSERT_EQUAL_HEX32(0x43f0d513, create_i_type_shamt(63, 1, 10, OPCODE_OP_IMM, FUNCT3_SHIFT_RIGHT_OPP, IMM_SRAI));
   TEST_ASSERT_EQUAL_HEX32(0x01f0951b, create_i_type_shamt(31, 1, 10, OPCODE_OP_IMM_32, SLLIW & 7, SLLIW >> 3));
-  TEST_ASSERT_EQUAL_HEX32(0x01f0d51b, create_i_type_shamt(31, 1, 10, OPCODE_OP_IMM_32, FUNCT3_SHIFT_RIGHT_OPP_32, SRLIW_IMM));
-  TEST_ASSERT_EQUAL_HEX32(0x41f0d51b, create_i_type_shamt(31, 1, 10, OPCODE_OP_IMM_32, FUNCT3_SHIFT_RIGHT_OPP_32, SRAIW_IMM));
-  TEST_ASSERT_EQUAL_HEX32(0x4000d513, create_i_type_shamt(0, 1, 10, OPCODE_OP_IMM, FUNCT3_SHIFT_RIGHT_OPP, SRAI_IMM));
+  TEST_ASSERT_EQUAL_HEX32(0x01f0d51b, create_i_type_shamt(31, 1, 10, OPCODE_OP_IMM_32, FUNCT3_SHIFT_RIGHT_OPP_32, IMM_SRLIW));
+  TEST_ASSERT_EQUAL_HEX32(0x41f0d51b, create_i_type_shamt(31, 1, 10, OPCODE_OP_IMM_32, FUNCT3_SHIFT_RIGHT_OPP_32, IMM_SRAIW));
+  TEST_ASSERT_EQUAL_HEX32(0x4000d513, create_i_type_shamt(0, 1, 10, OPCODE_OP_IMM, FUNCT3_SHIFT_RIGHT_OPP, IMM_SRAI));
 }
 
 
@@ -737,18 +737,18 @@ void test_SRL(void) {
     // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
       // Ordinary right shifts.
       // {value_shifted, (funct) | shift amount (shamt), result}
-      {.rs1_value= 18, .rs2_value= (SRLI_IMM << 5) | 1, .expected= 9},
-      {.rs1_value= 192, .rs2_value= (SRLI_IMM << 5) | 6, .expected= 3},
+      {.rs1_value= 18, .rs2_value= (IMM_SRLI << 5) | 1, .expected= 9},
+      {.rs1_value= 192, .rs2_value= (IMM_SRLI << 5) | 6, .expected= 3},
 
       // Logical shifts fill vacated high bits with zero, even when the
       // source's most significant bit is set.
-      {.rs1_value= UINT64_C(0x8000000000000000), .rs2_value= (SRLI_IMM << 5) | 1, .expected=
+      {.rs1_value= UINT64_C(0x8000000000000000), .rs2_value= (IMM_SRLI << 5) | 1, .expected=
        UINT64_C(0x4000000000000000)},
-      {.rs1_value= UINT64_MAX, .rs2_value= (SRLI_IMM << 5) | 31, .expected= UINT64_C(0x00000001FFFFFFFF)},
+      {.rs1_value= UINT64_MAX, .rs2_value= (IMM_SRLI << 5) | 31, .expected= UINT64_C(0x00000001FFFFFFFF)},
 
       // Boundary shift amounts and bits shifted entirely out.
-      {.rs1_value= UINT64_C(0x8000000000000000), .rs2_value= (SRLI_IMM << 5) | 63, .expected= 1},
-      {.rs1_value= 1, .rs2_value= (SRLI_IMM << 5) | 1, .expected= 0},
+      {.rs1_value= UINT64_C(0x8000000000000000), .rs2_value= (IMM_SRLI << 5) | 63, .expected= 1},
+      {.rs1_value= 1, .rs2_value= (IMM_SRLI << 5) | 1, .expected= 0},
   };
 
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SRL, OPCODE_OP);
@@ -757,11 +757,11 @@ void test_SRL(void) {
 void test_SRA(void) {
   const struct r_instruction_case cases[] = {
     // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
-    {.rs1_value= -8, .rs2_value= (SRAI_IMM << 6) | 2, .expected= -2},   // ...1111 1000 >> 2 = ...1111 1110
-    {.rs1_value= -15, .rs2_value= (SRAI_IMM << 6) | 2, .expected= -4},  // ...1111 0001 >> 2 = ...1111 1100
-    {.rs1_value= 100, .rs2_value= (SRAI_IMM << 6) | 4, .expected= 6},   // ...0110 0100 >> 4 = ...0000 0110
-    {.rs1_value= UINT64_MAX, .rs2_value= (SRAI_IMM << 6) | 63, .expected= UINT64_MAX}, // ...1111 >> 63 = ...1111
-    {.rs1_value= 100, .rs2_value= (SRAI_IMM << 6) | 0, .expected= 100}, // ...0110 0100 >> 4 = ...0110 0100
+    {.rs1_value= -8, .rs2_value= (IMM_SRAI << 6) | 2, .expected= -2},   // ...1111 1000 >> 2 = ...1111 1110
+    {.rs1_value= -15, .rs2_value= (IMM_SRAI << 6) | 2, .expected= -4},  // ...1111 0001 >> 2 = ...1111 1100
+    {.rs1_value= 100, .rs2_value= (IMM_SRAI << 6) | 4, .expected= 6},   // ...0110 0100 >> 4 = ...0000 0110
+    {.rs1_value= UINT64_MAX, .rs2_value= (IMM_SRAI << 6) | 63, .expected= UINT64_MAX}, // ...1111 >> 63 = ...1111
+    {.rs1_value= 100, .rs2_value= (IMM_SRAI << 6) | 0, .expected= 100}, // ...0110 0100 >> 4 = ...0110 0100
   };
 
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SRA, OPCODE_OP);
