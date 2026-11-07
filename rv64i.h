@@ -129,7 +129,6 @@ enum immediate_id_enums: uint32_t {
   SRAIW_IMM=    0b0100000,
 
   SLLIW=        0b0000000001, // we combine funct7 (technically has len ) with funct3
-
 };
 
 enum MISC_MEM_enum: uint32_t {
@@ -173,6 +172,7 @@ uint32_t create_u_type(uint32_t upper_immediate, uint32_t rd_index, uint32_t opc
 uint32_t create_j_type(uint32_t immediate, uint32_t rd_index, uint32_t opcode);
 uint32_t create_b_type(uint32_t immediate, uint32_t rs2_index, uint32_t rs1_index, uint32_t funct3, uint32_t opcode);
 uint32_t bits(uint32_t instruction, int start, int end);
+uint64_t bits64(uint64_t bits, int start, int end);
 
 // EXTRACT DATA FROM INSTRUCTION
 int get_opcode(uint32_t instruction);

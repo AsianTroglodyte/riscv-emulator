@@ -792,15 +792,14 @@ void test_AND(void) {
 }
 
 void test_SLLW(void) {
-  /* const struct r_instruction_case cases[] = { */
-  /*   // int64_t rs1_value, int64_t rs2_value, uint64_t expected; */
-  /*     {.rs1_value= 0b1010, .rs2_value= 0b1010, .expected= 0b1010},             // Identical bit patterns */
-  /*     {.rs1_value= 0b0101, .rs2_value= 0b1010, .expected= 0},                  // No overlapping set bits */
-  /*     {.rs1_value= 0, .rs2_value= -1, .expected= 0},                            // Zero AND sign-extended -1 */
-  /*     {.rs1_value= 0b1100010, .rs2_value= 0b1000010, .expected= 0b1000010},    // Keep only shared set bits */
-  /* }; */
+  const struct r_instruction_case cases[] = {
+      {.rs1_value= -1, .rs2_value= 3, .expected= 0x00000000FFFFFFF8},
+      {.rs1_value= 1, .rs2_value= 5, .expected= 32},
+      {.rs1_value= 0b101, .rs2_value= 5, .expected= 0b10100000},
+      {.rs1_value= 0, .rs2_value= 0, .expected= 0},
+  };
 
-  /* test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), (SLLW_FUNCT_7 << 3) | SLLW_FUNCT_3, OPCODE_OP_32); */
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), (FUNCT7_SLLW << 3) | FUNCT3_SLLW, OPCODE_OP_32);
 }
 
 void test_LUI(void) {

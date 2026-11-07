@@ -24,6 +24,7 @@ void run_instruction(uint32_t instruction,
     uint32_t rs2_index;
     uint32_t rd_index;
     uint32_t funct3;
+    uint32_t funct7;
 
     uint64_t address;
     uint32_t immediate_id;
@@ -259,27 +260,26 @@ void run_instruction(uint32_t instruction,
     registers[rd_index] = get_upper_immediate(instruction);
     break;
   case OPCODE_OP_32:
-    printf("OP_32\n");
     funct3 = get_funct3(instruction);
-    immediate_id = get_funct7(instruction);
+    funct7 = get_funct7(instruction);
     rs1_index = get_rs1_index(instruction);
     rs2_index = get_rs2_index(instruction);
     rd_index = get_rd_index(instruction);
     switch (funct3) {
     case FUNCT3_SLLW:
-      if (FUNCT7_SLLW == immediate_id) {
-        printf("SUBW\n");
+      if (FUNCT7_SLLW == funct7) {
+        registers[rd_index] = (uint32_t) registers[rs1_index] << bits64(registers[rs2_index], 0, 4);
       }
       else {
-        printf("immediate_id not valid given SLLW_FUNCT_3\n");
+        printf("funct7 not valid given SLLW_FUNCT_3\n");
       }
       break;
     case FUNCT3_ADDW_SUBW:
       printf("ADDW_SUBW_FUNCT_3\n");
-      if (FUNCT7_ADDW == immediate_id) {
+      if (FUNCT7_ADDW == funct7) {
         printf("ADDW\n");
       }
-      else if (FUNCT7_SUBW == immediate_id) {
+      else if (FUNCT7_SUBW == funct7) {
         printf("SUBW\n");
       }
       else {
@@ -288,9 +288,9 @@ void run_instruction(uint32_t instruction,
       break;
     case FUNCT3_SHIFT_RIGHT:
       printf("SHIFT_RIGHT_FUNCT_3\n");
-      if (FUNCT7_SRLW == immediate_id) {
+      if (FUNCT7_SRLW == funct7) {
         printf("SRLW\n");
-      } else if (FUNCT7_SRAW == immediate_id) {
+      } else if (FUNCT7_SRAW == funct7) {
         printf("SRLW\n");
       } else {
         printf("immediate ID SHIFT_RIGHT_FUNCT_3 not valid\n");
@@ -406,8 +406,14 @@ void run_instruction(uint32_t instruction,
  * @param the length of slice
  * @return uint32_t bit slice shifted so start is beginning digit.
  **/
-inline uint32_t bits(uint32_t instruction, int start, int end) {
-  return (instruction >> start) & ((1u << (end - start + 1)) - 1);
+inline uint32_t bits(uint32_t bits, int start, int end) {
+  assert(start <= end && end < 32);
+  return (bits >> start) & ((1u << (end - start + 1)) - 1);
+}
+
+inline uint64_t bits64(uint64_t bits, int start, int end) {
+  assert(start <= end && end < 64);
+  return (bits >> start) & (((uint64_t)1 << (end - start + 1)) - 1);
 }
 
 uint32_t get_rd_index(uint32_t instruction) {
