@@ -28,7 +28,7 @@ void run_instruction(uint32_t instruction,
     uint64_t address;
     uint32_t immediate_id;
 
-  case LOAD:
+  case OPCODE_LOAD:
     // I Type
     immediate = get_i_immediate(instruction);
     rs1_index = get_rs1_index(instruction);
@@ -63,16 +63,16 @@ void run_instruction(uint32_t instruction,
       assert(0);
     }
     break;
-  case LOAD_FP:
+  case OPCODE_LOAD_FP:
     printf("LOAD_FP\n");
     break;
-  case CUSTOM_0:
+  case OPCODE_CUSTOM_0:
     printf("CUSTOM_0\n");
     break;
-  case MISC_MEM:
+  case OPCODE_MISC_MEM:
     printf("MISC_MEM\n");
     break;
-  case OP_IMM:
+  case OPCODE_OP_IMM:
     // Integer Register-Immediate Instructions
     // I-Type
     immediate = get_i_immediate(instruction);
@@ -136,11 +136,11 @@ void run_instruction(uint32_t instruction,
       assert(0);
     }
     break;
-  case AUIPC:
+  case OPCODE_AUIPC:
     rd_index = get_rd_index(instruction);
     registers[rd_index] = (uint64_t)(int64_t)get_upper_immediate(instruction) + *program_counter;
     break;
-  case OP_IMM_32:
+  case OPCODE_OP_IMM_32:
     rs1_index = get_rs1_index(instruction);
     rd_index = get_rd_index(instruction);
     funct3 = get_funct3(instruction);
@@ -173,7 +173,7 @@ void run_instruction(uint32_t instruction,
       }
     }
     break;
-  case STORE:
+  case OPCODE_STORE:
     immediate = get_s_immediate(instruction);
     rs1_index = get_rs1_index(instruction);
     rs2_index =  get_rs2_index(instruction);
@@ -198,16 +198,16 @@ void run_instruction(uint32_t instruction,
       assert(0);
     }
     break;
-  case STORE_FP:
+  case OPCODE_STORE_FP:
     printf("STORE_FP\n");
     break;
-  case CUSTOM_1:
+  case OPCODE_CUSTOM_1:
     printf("CUSTOM_1\n");
     break;
-  case AMO:
+  case OPCODE_AMO:
     printf("AMO\n");
     break;
-  case OP: {
+  case OPCODE_OP: {
 
     rs1_index = get_rs1_index(instruction);
     rs2_index =  get_rs2_index(instruction);
@@ -253,12 +253,12 @@ void run_instruction(uint32_t instruction,
     }
     break;
   }
-  case LUI:
+  case OPCODE_LUI:
     rd_index = get_rd_index(instruction);
     // NOTE: upper immediate is ONLY understood as a
     registers[rd_index] = get_upper_immediate(instruction);
     break;
-  case OP_32:
+  case OPCODE_OP_32:
     printf("OP_32\n");
     funct3 = get_funct3(instruction);
     immediate_id = get_funct7(instruction);
@@ -267,7 +267,7 @@ void run_instruction(uint32_t instruction,
     rd_index = get_rd_index(instruction);
     switch (funct3) {
     case SLLW_FUNCT_3:
-      if (SLLW_IMM == immediate_id) {
+      if (SLLW_FUNCT_7 == immediate_id) {
         printf("SUBW\n");
       }
       else {
@@ -276,10 +276,10 @@ void run_instruction(uint32_t instruction,
       break;
     case ADDW_SUBW_FUNCT_3:
       printf("ADDW_SUBW_FUNCT_3\n");
-      if (ADDW_IMM == immediate_id) {
+      if (ADDW_FUNCT_7 == immediate_id) {
         printf("ADDW\n");
       }
-      else if (SUBW_IMM == immediate_id) {
+      else if (SUBW_FUNCT_7 == immediate_id) {
         printf("SUBW\n");
       }
       else {
@@ -288,9 +288,9 @@ void run_instruction(uint32_t instruction,
       break;
     case SHIFT_RIGHT_FUNCT_3:
       printf("SHIFT_RIGHT_FUNCT_3\n");
-      if (SRLW_IMM == immediate_id) {
+      if (SRLW_FUNCT_7 == immediate_id) {
         printf("SRLW\n");
-      } else if (SRAW_IMM == immediate_id) {
+      } else if (SRAW_FUNCT_7 == immediate_id) {
         printf("SRLW\n");
       } else {
         printf("immediate ID SHIFT_RIGHT_FUNCT_3 not valid\n");
@@ -298,29 +298,29 @@ void run_instruction(uint32_t instruction,
       break;
     }
     break;
-  case MADD:
+  case OPCODE_MADD:
     printf("MADD\n");
     break;
-  case MSUB:
+  case OPCODE_MSUB:
     printf("MSUB\n");
     break;
-  case NMSUB:
+  case OPCODE_NMSUB:
     printf("NMSUB\n");
     break;
-  case NMADD:
+  case OPCODE_NMADD:
     printf("NMADD\n");
     break;
-  case OP_FP:
+  case OPCODE_OP_FP:
     printf("OP_FP\n");
     break;
-  case OP_V:
+  case OPCODE_OP_V:
     printf("OP_V\n");
     break;
-  case CUSTOM_2:
+  case OPCODE_CUSTOM_2:
     printf("CUSTOM_2\n");
     break;
 
-  case BRANCH:
+  case OPCODE_BRANCH:
     rs2_index = get_rs2_index(instruction);
     rs1_index = get_rs1_index(instruction);
     immediate = get_b_immediate(instruction);
@@ -364,7 +364,7 @@ void run_instruction(uint32_t instruction,
       break;
     }
     break;
-  case JALR:
+  case OPCODE_JALR:
     rd_index = get_rd_index(instruction);
     rs1_index = get_rs1_index(instruction);
     // save address of next instruction
@@ -372,23 +372,23 @@ void run_instruction(uint32_t instruction,
     // jump to target address
     next_pc = (int64_t) get_i_immediate(instruction) + registers[rs1_index];
     break;
-  case RESERVED:
+  case OPCODE_RESERVED:
     printf("RESERVED\n");
     break;
-  case JAL:
+  case OPCODE_JAL:
     rd_index = get_rd_index(instruction);
     // save address of next instruction
     registers[rd_index] = next_pc;
     // jump to target address
     next_pc = (int64_t) *program_counter + (int64_t) get_j_immediate(instruction);
     break;
-  case SYSTEM:
+  case OPCODE_SYSTEM:
     printf("SYSTEM\n");
     break;
-  case OP_VE:
+  case OPCODE_OP_VE:
     printf("OP_VE\n");
     break;
-  case CUSTOM_3:
+  case OPCODE_CUSTOM_3:
     printf("CUSTOM_3\n");
     break;
   default:
@@ -648,7 +648,7 @@ uint32_t create_i_type_shamt(uint32_t shamt,
   uint32_t shamt_bits;
 
   switch (opcode) {
-  case OP_IMM:
+  case OPCODE_OP_IMM:
     shamt_bits = 6;
     if (!((funct3 == SLLI_FUNCT_3 && upper_imm == 0) ||
           (funct3 == SHIFT_RIGHT_OPP_FUNCT_3 &&
@@ -657,7 +657,7 @@ uint32_t create_i_type_shamt(uint32_t shamt,
       abort();
     }
     break;
-  case OP_IMM_32:
+  case OPCODE_OP_IMM_32:
     shamt_bits = 5;
     if (!((funct3 == (SLLIW & 7) && upper_imm == (SLLIW >> 3)) ||
           (funct3 == SHIFT_RIGHT_OPP_32_FUNCT_3 &&

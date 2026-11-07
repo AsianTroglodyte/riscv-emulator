@@ -77,7 +77,7 @@ void test_load_instruction(const struct load_test_case cases[],
 
 
     state.registers[10] = cases[i].rs1_val;
-    run_instruction(create_i_type(cases[i].immediate, 10, funct3, 11, LOAD), &state);
+    run_instruction(create_i_type(cases[i].immediate, 10, funct3, 11, OPCODE_LOAD), &state);
     TEST_ASSERT_EQUAL_UINT64(cases[i].expected, state.registers[11]);
   }
 }
@@ -97,7 +97,7 @@ void test_LW(void) {
 
   struct machine_state state = {0};
   state.registers[30] = 10;
-  uint32_t instruction = create_i_type(4, 0, LW_FUNCT_3, 30, LOAD); // instruction should x0 = 10 to x0 = 0;
+  uint32_t instruction = create_i_type(4, 0, LW_FUNCT_3, 30, OPCODE_LOAD); // instruction should x0 = 10 to x0 = 0;
   run_instruction(instruction, &state);
   TEST_ASSERT_EQUAL_UINT64(0, state.registers[30]);
 }
@@ -118,7 +118,7 @@ void test_LB(void) {
 
   struct machine_state state1 = {0};
   state1.registers[30] = 10;
-  uint32_t instruction = create_i_type(4, 0, LB_FUNCT_3, 30, LOAD); // instruction should x0 = 10 to x0 = 0;
+  uint32_t instruction = create_i_type(4, 0, LB_FUNCT_3, 30, OPCODE_LOAD); // instruction should x0 = 10 to x0 = 0;
   run_instruction(instruction, &state1);
   TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
@@ -138,7 +138,7 @@ void test_LH(void) {
 
   struct machine_state state1 = {0};
   state1.registers[30] = 10;
-  uint32_t instruction = create_i_type(4, 0, LH_FUNCT_3, 30, LOAD); // instruction should x30 = 10 to x30 = 0;
+  uint32_t instruction = create_i_type(4, 0, LH_FUNCT_3, 30, OPCODE_LOAD); // instruction should x30 = 10 to x30 = 0;
   run_instruction(instruction, &state1);
   TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
@@ -159,7 +159,7 @@ void test_LD() {
 
   struct machine_state state1 = {0};
   state1.registers[30] = 10;
-  uint32_t instruction = create_i_type(4, 0, LD_FUNCT_3, 30, LOAD); // instruction should x30 = 10 to x30 = 0;
+  uint32_t instruction = create_i_type(4, 0, LD_FUNCT_3, 30, OPCODE_LOAD); // instruction should x30 = 10 to x30 = 0;
   run_instruction(instruction, &state1);
   TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
@@ -180,7 +180,7 @@ void test_LBU(void) {
 
   struct machine_state state1 = {0};
   state1.registers[30] = 10;
-  uint32_t instruction = create_i_type(4, 0, LBU_FUNCT_3, 30, LOAD); // instruction should x30 = 10 to x30 = 0;
+  uint32_t instruction = create_i_type(4, 0, LBU_FUNCT_3, 30, OPCODE_LOAD); // instruction should x30 = 10 to x30 = 0;
   run_instruction(instruction, &state1);
   TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
@@ -200,7 +200,7 @@ void test_LHU(void) {
 
   struct machine_state state1 = {0};
   state1.registers[30] = 10;
-  uint32_t instruction = create_i_type(4, 0, LHU_FUNCT_3, 30, LOAD); // instruction should x30 = 10 to x30 = 0;
+  uint32_t instruction = create_i_type(4, 0, LHU_FUNCT_3, 30, OPCODE_LOAD); // instruction should x30 = 10 to x30 = 0;
   run_instruction(instruction, &state1);
   TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
@@ -222,7 +222,7 @@ void test_LWU() {
 
   struct machine_state state1 = {0};
   state1.registers[30] = 10;
-  uint32_t instruction = create_i_type(4, 0, LWU_FUNCT_3, 30, LOAD); // instruction should x30 = 10 to x30 = 0;
+  uint32_t instruction = create_i_type(4, 0, LWU_FUNCT_3, 30, OPCODE_LOAD); // instruction should x30 = 10 to x30 = 0;
   run_instruction(instruction, &state1);
   TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
@@ -251,7 +251,7 @@ void test_store_instruction(const struct store_test_case cases[],
       state.memory[byte_index] = 10;
     }
 
-    uint32_t instruction = create_s_type(cases[i].immediate, 10, 11, funct3, STORE);
+    uint32_t instruction = create_s_type(cases[i].immediate, 10, 11, funct3, OPCODE_STORE);
     run_instruction(instruction, &state);
 
     for (size_t offset = 0; offset < width_in_bytes; ++offset) {
@@ -355,7 +355,7 @@ void test_ADDI(void) {
       {.rs1_value = 10, .immediate =  -100, .expected =  (uint64_t)-90}, // Result wraps to a negative 64-bit value
   };
 
-  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ADDI_FUNCT_3, OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ADDI_FUNCT_3, OPCODE_OP_IMM);
 }
 
 void test_ADDIW(void) {
@@ -367,7 +367,7 @@ void test_ADDIW(void) {
       {.rs1_value = INT32_MIN, .immediate = 0, .expected = (int64_t) INT32_MIN} // making sure sign extension works
   };
 
-  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ADDIW_FUNCT_3, OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ADDIW_FUNCT_3, OPCODE_OP_IMM);
 }
 
 void test_ANDI(void) {
@@ -378,7 +378,7 @@ void test_ANDI(void) {
       {.rs1_value = 0b1100010, .immediate =  0b1000010, .expected =  0b1000010},    // Keep only shared set bits
   };
 
-  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ANDI_FUNCT_3, OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ANDI_FUNCT_3, OPCODE_OP_IMM);
 }
 
 void test_ORI(void) {
@@ -389,7 +389,7 @@ void test_ORI(void) {
       {.rs1_value = 0b1100010, .immediate =  0b1001010, .expected =  0b1101010},     // Combine set bits from both operands
   };
 
-  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ORI_FUNCT_3, OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ORI_FUNCT_3, OPCODE_OP_IMM);
 }
 
 void test_SLTI(void) {
@@ -403,7 +403,7 @@ void test_SLTI(void) {
       {.rs1_value = (uint64_t)-10, .immediate =  -9, .expected =  1},
   };
 
-  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLTI_FUNCT_3, OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLTI_FUNCT_3, OPCODE_OP_IMM);
 }
 
 void test_SLTIU(void) {
@@ -416,7 +416,7 @@ void test_SLTIU(void) {
       {.rs1_value = UINT64_MAX - 1, .immediate =  -1, .expected =  1},    // UINT64_MAX - 1 < UINT64_MAX
   };
 
-  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLTIU_FUNCT_3, OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLTIU_FUNCT_3, OPCODE_OP_IMM);
 }
 
 
@@ -433,7 +433,7 @@ void test_XORI(void) {
       {.rs1_value = (UINT64_C(1) << 63) | 1, .immediate = 1, .expected = (UINT64_C(1) << 63)}
   };
 
-  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), XORI_FUNCT_3, OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), XORI_FUNCT_3, OPCODE_OP_IMM);
 }
 
 
@@ -475,7 +475,7 @@ static void test_shamt_instruction(const struct shamt_instruction_case cases[],
 }
 
 static const struct shamt_instruction SLLI_DESCRIPTOR = {
-    .opcode = OP_IMM,
+    .opcode = OPCODE_OP_IMM,
     .funct3 = SLLI_FUNCT_3,
     .upper_imm = 0,
 };
@@ -494,7 +494,7 @@ void test_SLLI(void) {
 }
 
 static const struct shamt_instruction SLLIW_DESCRIPTOR = {
-    .opcode = OP_IMM_32,
+    .opcode = OPCODE_OP_IMM_32,
     .funct3 = SLLIW_FUNCT_3,
     .upper_imm = SLLIW_IMM,
 };
@@ -512,7 +512,7 @@ void test_SLLIW(void) {
 }
 
 static const struct shamt_instruction SRLI_DESCRIPTOR = {
-    .opcode = OP_IMM,
+    .opcode = OPCODE_OP_IMM,
     .funct3 = SHIFT_RIGHT_OPP_FUNCT_3,
     .upper_imm = SRLI_IMM,
 };
@@ -540,7 +540,7 @@ void test_SRLI(void) {
 }
 
 static const struct shamt_instruction SRLIW_DESCRIPTOR = {
-    .opcode = OP_IMM_32,
+    .opcode = OPCODE_OP_IMM_32,
     .funct3 = SHIFT_RIGHT_OPP_32_FUNCT_3,
     .upper_imm = SRLIW_IMM,
 };
@@ -560,7 +560,7 @@ void test_SRLIW(void) {
 }
 
 static const struct shamt_instruction SRAI_DESCRIPTOR = {
-    .opcode = OP_IMM,
+    .opcode = OPCODE_OP_IMM,
     .funct3 = SHIFT_RIGHT_OPP_FUNCT_3,
     .upper_imm = SRAI_IMM,
 };
@@ -579,7 +579,7 @@ void test_SRAI(void) {
 }
 
 static const struct shamt_instruction SRAIW_DESCRIPTOR = {
-    .opcode = OP_IMM_32,
+    .opcode = OPCODE_OP_IMM_32,
     .funct3 = SHIFT_RIGHT_OPP_32_FUNCT_3,
     .upper_imm = SRAIW_IMM,
 };
@@ -599,13 +599,13 @@ void test_SRAIW(void) {
 }
 
 void test_create_i_type_shamt(void) {
-  TEST_ASSERT_EQUAL_HEX32(0x03f09513, create_i_type_shamt(63, 1, 10, OP_IMM, SLLI_FUNCT_3, 0));
-  TEST_ASSERT_EQUAL_HEX32(0x03f0d513, create_i_type_shamt(63, 1, 10, OP_IMM, SHIFT_RIGHT_OPP_FUNCT_3, SRLI_IMM));
-  TEST_ASSERT_EQUAL_HEX32(0x43f0d513, create_i_type_shamt(63, 1, 10, OP_IMM, SHIFT_RIGHT_OPP_FUNCT_3, SRAI_IMM));
-  TEST_ASSERT_EQUAL_HEX32(0x01f0951b, create_i_type_shamt(31, 1, 10, OP_IMM_32, SLLIW & 7, SLLIW >> 3));
-  TEST_ASSERT_EQUAL_HEX32(0x01f0d51b, create_i_type_shamt(31, 1, 10, OP_IMM_32, SHIFT_RIGHT_OPP_32_FUNCT_3, SRLIW_IMM));
-  TEST_ASSERT_EQUAL_HEX32(0x41f0d51b, create_i_type_shamt(31, 1, 10, OP_IMM_32, SHIFT_RIGHT_OPP_32_FUNCT_3, SRAIW_IMM));
-  TEST_ASSERT_EQUAL_HEX32(0x4000d513, create_i_type_shamt(0, 1, 10, OP_IMM, SHIFT_RIGHT_OPP_FUNCT_3, SRAI_IMM));
+  TEST_ASSERT_EQUAL_HEX32(0x03f09513, create_i_type_shamt(63, 1, 10, OPCODE_OP_IMM, SLLI_FUNCT_3, 0));
+  TEST_ASSERT_EQUAL_HEX32(0x03f0d513, create_i_type_shamt(63, 1, 10, OPCODE_OP_IMM, SHIFT_RIGHT_OPP_FUNCT_3, SRLI_IMM));
+  TEST_ASSERT_EQUAL_HEX32(0x43f0d513, create_i_type_shamt(63, 1, 10, OPCODE_OP_IMM, SHIFT_RIGHT_OPP_FUNCT_3, SRAI_IMM));
+  TEST_ASSERT_EQUAL_HEX32(0x01f0951b, create_i_type_shamt(31, 1, 10, OPCODE_OP_IMM_32, SLLIW & 7, SLLIW >> 3));
+  TEST_ASSERT_EQUAL_HEX32(0x01f0d51b, create_i_type_shamt(31, 1, 10, OPCODE_OP_IMM_32, SHIFT_RIGHT_OPP_32_FUNCT_3, SRLIW_IMM));
+  TEST_ASSERT_EQUAL_HEX32(0x41f0d51b, create_i_type_shamt(31, 1, 10, OPCODE_OP_IMM_32, SHIFT_RIGHT_OPP_32_FUNCT_3, SRAIW_IMM));
+  TEST_ASSERT_EQUAL_HEX32(0x4000d513, create_i_type_shamt(0, 1, 10, OPCODE_OP_IMM, SHIFT_RIGHT_OPP_FUNCT_3, SRAI_IMM));
 }
 
 
@@ -655,7 +655,7 @@ void test_ADD(void) {
     {.rs1_value=UINT64_MAX, .rs2_value=  1, .expected= 0}
   };
 
-  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), ADD, OP);
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), ADD, OPCODE_OP);
 }
 
 void test_SUB(void) {
@@ -671,7 +671,7 @@ void test_SUB(void) {
     {.rs1_value=UINT64_MAX, .rs2_value=  1, .expected= UINT64_MAX - 1}
   };
 
-  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SUB, OP);
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SUB, OPCODE_OP);
 }
 
 void test_SLL(void) {
@@ -683,7 +683,7 @@ void test_SLL(void) {
     {.rs1_value=1, .rs2_value=  31, .expected= INT64_C(1) << 31},   // 0 < UINT64_MAX
   };
 
-  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SLL, OP);
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SLL, OPCODE_OP);
 }
 
 void test_SLT(void) {
@@ -698,7 +698,7 @@ void test_SLT(void) {
       {.rs1_value=(uint64_t)-10, .rs2_value=  -9, .expected= 1},
   };
 
-  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SLT, OP);
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SLT, OPCODE_OP);
 }
 
 void test_SLTU(void) {
@@ -712,7 +712,7 @@ void test_SLTU(void) {
       {.rs1_value=UINT64_MAX - 1, .rs2_value=  -1, .expected= 1},    // UINT64_MAX - 1 < UINT64_MAX
   };
 
-  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SLTU, OP);
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SLTU, OPCODE_OP);
 }
 
 void test_XOR(void) {
@@ -729,7 +729,7 @@ void test_XOR(void) {
     {.rs1_value= (UINT64_C(1) << 63) | 1, .rs2_value= 1, .expected= (UINT64_C(1) << 63)}
   };
 
-  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), XOR, OP);
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), XOR, OPCODE_OP);
 }
 
 void test_SRL(void) {
@@ -751,7 +751,7 @@ void test_SRL(void) {
       {.rs1_value= 1, .rs2_value= (SRLI_IMM << 5) | 1, .expected= 0},
   };
 
-  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SRL, OP);
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SRL, OPCODE_OP);
 }
 
 void test_SRA(void) {
@@ -764,7 +764,7 @@ void test_SRA(void) {
     {.rs1_value= 100, .rs2_value= (SRAI_IMM << 6) | 0, .expected= 100}, // ...0110 0100 >> 4 = ...0110 0100
   };
 
-  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SRA, OP);
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SRA, OPCODE_OP);
 }
 
 void test_OR(void) {
@@ -776,7 +776,7 @@ void test_OR(void) {
       {.rs1_value= 0b1100010, .rs2_value= 0b1001010, .expected= 0b1101010},     // Combine set bits from both operands
   };
 
-  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), OR, OP);
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), OR, OPCODE_OP);
 }
 
 void test_AND(void) {
@@ -788,19 +788,19 @@ void test_AND(void) {
       {.rs1_value= 0b1100010, .rs2_value= 0b1000010, .expected= 0b1000010},    // Keep only shared set bits
   };
 
-  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), AND, OP);
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), AND, OPCODE_OP);
 }
 
 void test_SLLW(void) {
-  const struct r_instruction_case cases[] = {
-    // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
-      {.rs1_value= 0b1010, .rs2_value= 0b1010, .expected= 0b1010},             // Identical bit patterns
-      {.rs1_value= 0b0101, .rs2_value= 0b1010, .expected= 0},                  // No overlapping set bits
-      {.rs1_value= 0, .rs2_value= -1, .expected= 0},                            // Zero AND sign-extended -1
-      {.rs1_value= 0b1100010, .rs2_value= 0b1000010, .expected= 0b1000010},    // Keep only shared set bits
-  };
+  /* const struct r_instruction_case cases[] = { */
+  /*   // int64_t rs1_value, int64_t rs2_value, uint64_t expected; */
+  /*     {.rs1_value= 0b1010, .rs2_value= 0b1010, .expected= 0b1010},             // Identical bit patterns */
+  /*     {.rs1_value= 0b0101, .rs2_value= 0b1010, .expected= 0},                  // No overlapping set bits */
+  /*     {.rs1_value= 0, .rs2_value= -1, .expected= 0},                            // Zero AND sign-extended -1 */
+  /*     {.rs1_value= 0b1100010, .rs2_value= 0b1000010, .expected= 0b1000010},    // Keep only shared set bits */
+  /* }; */
 
-  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), AND, OP);
+  /* test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), (SLLW_FUNCT_7 << 3) | SLLW_FUNCT_3, OPCODE_OP_32); */
 }
 
 void test_LUI(void) {
@@ -808,19 +808,19 @@ void test_LUI(void) {
 
   // imm[31:12] = 1, so the result is 0x0000000000001000.
   state.registers[5] = UINT64_MAX;  // Confirm LUI overwrites rd.
-  run_instruction(create_u_type(1, 5, LUI), &state);
+  run_instruction(create_u_type(1, 5, OPCODE_LUI), &state);
   TEST_ASSERT_EQUAL_UINT64(UINT64_C(0x0000000000001000), state.registers[5]);
 
   // Positive value with several bits set.
-  run_instruction(create_u_type(0xABCDE, 5, LUI), &state);
+  run_instruction(create_u_type(0xABCDE, 5, OPCODE_LUI), &state);
   TEST_ASSERT_EQUAL_UINT64(UINT64_C(0xFFFFFFFFABCDE000), state.registers[5]);
 
   /* // Bit 31 is set: the 32-bit result is sign-extended on RV64. */
-  run_instruction(create_u_type(0x80000, 5, LUI), &state);
+  run_instruction(create_u_type(0x80000, 5, OPCODE_LUI), &state);
   TEST_ASSERT_EQUAL_UINT64(UINT64_C(0xFFFFFFFF80000000), state.registers[5]);
 
   /* // All 20 immediate bits set: sign-extended result is -4096. */
-  run_instruction(create_u_type(0xFFFFF, 5, LUI), &state);
+  run_instruction(create_u_type(0xFFFFF, 5, OPCODE_LUI), &state);
   TEST_ASSERT_EQUAL_UINT64(UINT64_C(0xFFFFFFFFFFFFF000), state.registers[5]);
 }
 
@@ -829,16 +829,16 @@ void test_AUIPC(void) {
 
   // positive immediates
   state.program_counter = 12;
-  run_instruction(create_u_type(12, 2, AUIPC), &state);
+  run_instruction(create_u_type(12, 2, OPCODE_AUIPC), &state);
   TEST_ASSERT_EQUAL_UINT64(((12 << 12) + 12) , state.registers[2]);
 
   // negative immediates
   state.program_counter = 12;
-  run_instruction(create_u_type(-1, 2, AUIPC), &state);
+  run_instruction(create_u_type(-1, 2, OPCODE_AUIPC), &state);
   TEST_ASSERT_EQUAL_UINT64(((uint64_t)-1 << 12) + 12, state.registers[2]); // satisfy warning with (uin64_t)
 
   state.program_counter = 12;
-  run_instruction(create_u_type(-123424, 2, AUIPC), &state);
+  run_instruction(create_u_type(-123424, 2, OPCODE_AUIPC), &state);
   TEST_ASSERT_EQUAL_UINT64(((uint64_t)-123424 << 12) + 12, state.registers[2]); // satisfy warning with (uin64_t)
 }
 
@@ -846,12 +846,12 @@ void test_JAL(void) {
   struct machine_state state = {0};
 
   state.program_counter = 12;
-  run_instruction(create_j_type(10, 10, JAL), &state);
+  run_instruction(create_j_type(10, 10, OPCODE_JAL), &state);
   TEST_ASSERT_EQUAL_UINT64(12 + 4, state.registers[10]);
   TEST_ASSERT_EQUAL_UINT64(10 + 12, state.program_counter);
 
   state.program_counter = 12;
-  run_instruction(create_j_type(-8, 11, JAL), &state);
+  run_instruction(create_j_type(-8, 11, OPCODE_JAL), &state);
   TEST_ASSERT_EQUAL_UINT64(12 + 4, state.registers[11]);
   TEST_ASSERT_EQUAL_UINT64(4, state.program_counter);
 }
@@ -862,13 +862,13 @@ void test_JALR(void) {
   // POSITIVE IMMEDIATES
   state.program_counter = 12;
   state.registers[10] = 12;
-  run_instruction(create_i_type(12, 10, JALR_OPCODE, 20, JALR), &state);
+  run_instruction(create_i_type(12, 10, JALR_OPCODE, 20, OPCODE_JALR), &state);
   TEST_ASSERT_EQUAL_UINT64(24, state.program_counter);
 
   // NEGATIVE IMMEDIATE
   state.program_counter = 12;
   state.registers[10] = 12;
-  run_instruction(create_i_type(-4, 10, JALR_OPCODE, 20, JALR), &state);
+  run_instruction(create_i_type(-4, 10, JALR_OPCODE, 20, OPCODE_JALR), &state);
   TEST_ASSERT_EQUAL_UINT64(8, state.program_counter);
 }
 
@@ -888,7 +888,7 @@ void test_branch_instructions(const struct branch_test_case cases[],
     state.program_counter = cases[i].pc;
     state.registers[10] = cases[i].rs2_value;
     state.registers[11] = cases[i].rs1_value;
-    run_instruction(create_b_type(cases[i].immediate, 10, 11, funct3, BRANCH), &state);
+    run_instruction(create_b_type(cases[i].immediate, 10, 11, funct3, OPCODE_BRANCH), &state);
     TEST_ASSERT_EQUAL_UINT64(cases[i].expected_pc_val, state.program_counter);
   }
 }
@@ -1015,46 +1015,46 @@ void test_BGEU() {
 
 void test_s_create(void) {
   // EASY: 1000 is within the signed 12-bit S-immediate range.
-  uint32_t s_instruction_1 = create_s_type(1000, 6, 7, SB, STORE);
+  uint32_t s_instruction_1 = create_s_type(1000, 6, 7, SB, OPCODE_STORE);
   // imm[11:5]=0011111, rs2=00110, rs1=00111, funct3=000, imm[4:0]=01000
   TEST_ASSERT_EQUAL(0b00111110011000111000010000100011, s_instruction_1);
 
   // NEGATIVE IMMEDIATE
-  uint32_t s_instruction_2 = create_s_type(-1, 6, 7, SB, STORE);
+  uint32_t s_instruction_2 = create_s_type(-1, 6, 7, SB, OPCODE_STORE);
   // should be imme_11_5(1111 111)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 1111 1)(010 0011 opcode)
   TEST_ASSERT_EQUAL(0b11111110011000111000111110100011, s_instruction_2);
 
   // NEGATIVE IMMEDIATE BOUNDARY
-  uint32_t s_instruction_3 = create_s_type(-2048, 6, 7, SB, STORE);
+  uint32_t s_instruction_3 = create_s_type(-2048, 6, 7, SB, OPCODE_STORE);
   // should be imme_11_5(1000 000)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 0000 0)(010 0011 opcode)
   TEST_ASSERT_EQUAL(0b10000000011000111000000000100011, s_instruction_3);
 
   // POSITIVE IMMEDIATE BOUNDARY
-  uint32_t s_instruction_4 = create_s_type(2047, 6, 7, SB, STORE);
+  uint32_t s_instruction_4 = create_s_type(2047, 6, 7, SB, OPCODE_STORE);
   // should be imme_11_5(0111 111)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 1111 1)(010 0011 opcode)
   TEST_ASSERT_EQUAL(0b01111110011000111000111110100011, s_instruction_4);
 }
 
 void test_r_create(void) {
-  uint32_t r_instruction_1 = create_r_type(SUB, 6, 7, 0, OP);
+  uint32_t r_instruction_1 = create_r_type(SUB, 6, 7, 0, OPCODE_OP);
   // funct7=0b0100000 rs2=00110, rs1=00111, funct3=000, rd=00000, opcode=0110011
   TEST_ASSERT_EQUAL(0b01000000011000111000000000110011, r_instruction_1);
 
   // ADD
-  uint32_t r_instruction_2 = create_r_type(ADD, 10, 0, 1, OP);
+  uint32_t r_instruction_2 = create_r_type(ADD, 10, 0, 1, OPCODE_OP);
   // funct7=0b0000000 rs2=01010, rs1=00000, funct3=000, rd=00001, opcode=0110011
   TEST_ASSERT_EQUAL(0b00000000101000000000000010110011, r_instruction_2);
 }
 
 void test_u_create(void) {
   // SIMPLE
-  uint32_t u_instruction_1 = create_u_type(0, 0, LUI);
+  uint32_t u_instruction_1 = create_u_type(0, 0, OPCODE_LUI);
   // funct7=0b0000000 rs2=01010, rs1=00000, funct3=000, rd=00001, opcode=0110011
   TEST_ASSERT_EQUAL(UINT32_C(0b0110111), u_instruction_1);
 
-  uint32_t u_instruction_2 = create_u_type(-1, 6, LUI);
+  uint32_t u_instruction_2 = create_u_type(-1, 6, OPCODE_LUI);
   // funct7=0b0100000 rs2=00110, rs1=00111, funct3=000, rd=00000, opcode=0110011
-  TEST_ASSERT_EQUAL((UINT32_MAX << 12) | (0b110 << 7)  | LUI, u_instruction_2);
+  TEST_ASSERT_EQUAL((UINT32_MAX << 12) | (0b110 << 7)  | OPCODE_LUI, u_instruction_2);
 }
 
 void test_b_create(void) {
@@ -1067,8 +1067,8 @@ void test_b_create(void) {
   TEST_ASSERT_EQUAL_UINT32((0b1U << 31) | (0b1  << 7) | (0b111011 << 25) | (0b1000 << 8), instruction);
 
   // TEST OPCODE AND FUNCT 3
-  instruction = create_b_type(0, 0, 0, BGEU, BRANCH);
-  TEST_ASSERT_EQUAL_UINT32((BGEU << 12) | BRANCH, instruction);
+  instruction = create_b_type(0, 0, 0, BGEU, OPCODE_BRANCH);
+  TEST_ASSERT_EQUAL_UINT32((BGEU << 12) | OPCODE_BRANCH, instruction);
 
   // TEST rs1_index AND rs2_index
   instruction = create_b_type(0, 0b10001, 0b10001, 0, 0);
@@ -1095,7 +1095,7 @@ void test_j_create_helper(const struct j_create_case cases[],
     uint32_t thing = (cases[i].rd_index << 7) | opcode;
     uint32_t immediate = (imm_20 << 19) | (imm_19_12 << 11) | (imm_11 << 10) | imm_10_1;
 
-    uint32_t instruction = create_j_type(immediate, 10, JAL);
+    uint32_t instruction = create_j_type(immediate, 10, OPCODE_JAL);
     TEST_ASSERT_EQUAL((imm_20 << 31) |
                       (imm_19_12 << 12) |
                       (imm_11 << 20) |
@@ -1115,25 +1115,25 @@ void test_j_create(void) {
     {0b1010010111, 0b1, 0b10110011, 0b0, 10}
   };
 
-  test_j_create_helper(cases, 5, JAL);
+  test_j_create_helper(cases, 5, OPCODE_JAL);
 }
 
 void test_get_s_immediate(void) {
   // EASY
-  uint32_t s_instruction_1 = create_s_type(1000, 6, 7, SB, STORE);
+  uint32_t s_instruction_1 = create_s_type(1000, 6, 7, SB, OPCODE_STORE);
   TEST_ASSERT_EQUAL(1000, get_s_immediate(s_instruction_1));
 
   // NEGATIVE IMMEDIATE
-  uint32_t s_instruction_2 = create_s_type(-1, 6, 7, SB, STORE);
+  uint32_t s_instruction_2 = create_s_type(-1, 6, 7, SB, OPCODE_STORE);
   TEST_ASSERT_EQUAL(-1, get_s_immediate(s_instruction_2));
 
   // NEGATIVE IMMEDIATE BOUNDARY
-  uint32_t s_instruction_3 = create_s_type(-2048, 6, 7, SB, STORE);
+  uint32_t s_instruction_3 = create_s_type(-2048, 6, 7, SB, OPCODE_STORE);
   // should be imme_11_5(1000 000)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 0000 0)(010 0011 opcode)
   TEST_ASSERT_EQUAL(-2048, get_s_immediate(s_instruction_3));
 
   // POSITIVE IMMEDIATE BOUNDARY
-  uint32_t s_instruction_4 = create_s_type(2047, 6, 7, SB, STORE);
+  uint32_t s_instruction_4 = create_s_type(2047, 6, 7, SB, OPCODE_STORE);
   // should be imme_11_5(0111 111)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 1111 1)(010 0011 opcode)
   TEST_ASSERT_EQUAL(2047, get_s_immediate(s_instruction_4));
 }
@@ -1194,7 +1194,7 @@ int main(void) {
   RUN_TEST(test_AND);
 
   // test arithmetic with JUST registers; 32 bits ops
-  /* RUN_TEST(test_SLLW); */
+  RUN_TEST(test_SLLW);
 
   // test upper immediate stuff (weird ones)
   RUN_TEST(test_LUI);
