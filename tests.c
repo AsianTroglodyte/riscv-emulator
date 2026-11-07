@@ -877,6 +877,27 @@ void test_SRLW(void) {
                      (FUNCT7_SRLW << 3) | FUNCT3_SHIFT_RIGHT, OPCODE_OP_32);
 }
 
+void test_SRAW(void) {
+  const struct r_instruction_case cases[] = {
+      {.rs1_value = 18, .rs2_value = 1, .expected = 9},
+      {.rs1_value = 192, .rs2_value = 6, .expected = 3},
+
+      // arithmetic shifts for negative are sign filled properly
+      {.rs1_value = 0xFFFFAAFF,
+       .rs2_value = 8,
+       .expected =  0xFFFFFFFFFFFFFFAA},
+      // arithmetic shifts for negative signe filled. boundary
+      {.rs1_value = 0x7000000, // (not negative num) 0111 ...
+       .rs2_value = 8,
+       .expected =  0x0070000},
+      /* // making sure that lower 5 bits are only considered */
+      {.rs1_value = 18, .rs2_value = 0b100001, .expected = 9},
+  };
+
+  test_r_instruction(cases, sizeof(cases) / sizeof(cases[0]),
+                     (FUNCT7_SRAW << 3) | FUNCT3_SHIFT_RIGHT, OPCODE_OP_32);
+}
+
 void test_LUI(void) {
   struct machine_state state = {0};
 
@@ -1272,6 +1293,8 @@ int main(void) {
   RUN_TEST(test_ADDW);
   RUN_TEST(test_SUBW);
   RUN_TEST(test_SRLW);
+  RUN_TEST(test_SRAW);
+
   // test upper immediate stuff (weird ones)
   RUN_TEST(test_LUI);
   RUN_TEST(test_AUIPC);

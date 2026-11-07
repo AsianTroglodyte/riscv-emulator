@@ -289,7 +289,7 @@ void run_instruction(uint32_t instruction,
       if (FUNCT7_SRLW == funct7) {
         registers[rd_index] = (uint32_t)registers[rs1_index] >> (registers[rs2_index] & 0b11111);
       } else if (FUNCT7_SRAW == funct7) {
-        /* registers[rd_index] = ()(uint32_t)registers[rs1_index] >> (registers[rs2_index] & 0b111111); */
+        registers[rd_index] = (int32_t)(uint32_t)registers[rs1_index] >> (registers[rs2_index] & 0b11111);
       } else {
         printf("immediate ID SHIFT_RIGHT_FUNCT_3 not valid\n");
       }
