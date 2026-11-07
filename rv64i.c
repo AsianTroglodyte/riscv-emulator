@@ -663,7 +663,7 @@ uint32_t create_i_type_shamt(uint32_t shamt,
     break;
   case OPCODE_OP_IMM_32:
     shamt_bits = 5;
-    if (!((funct3 == (SLLIW & 7) && upper_imm == (SLLIW >> 3)) ||
+    if (!((funct3 == (FUNCT3_SLLIW & 7) && upper_imm == (SLLIW_IMM >> 3)) ||
           (funct3 == FUNCT3_SHIFT_RIGHT_OPP_32 &&
            (upper_imm == SRLIW_IMM || upper_imm == SRAIW_IMM)))) {
       abort();
