@@ -809,8 +809,10 @@ void test_ADDW(void) {
     {.rs1_value=10, .rs2_value= 4, .expected= 14},   // 10 + 4 = 14
     {.rs1_value=-4, .rs2_value= 1, .expected= 0xFFFFFFFFFFFFFFFD},  // sign extends: ...1100 -> ...1101
     {.rs1_value=-3, .rs2_value= -4, .expected= 0xFFFFFFFFFFFFFFF9}, // ...1101 -> ...1001
-    // 1001 ... + 1000 ... -> 0001 ... (at most significant 4 bits)
+    // IMPORTANT overflow working: 1001 ... + 1000 ... -> 0001 ... (at most significant 4 bits)
     {.rs1_value=(uint32_t)0x90000000, .rs2_value= 0x80000000, .expected= (uint32_t)0x10000000},
+    // IMPORTANT: test that upper bits are erased (upper 32 bits) 1111... +  (all bits)0 -> 0000 ... (0 64 bit val)
+    {.rs1_value=(uint32_t)0xFFFFFFFF00000000, .rs2_value= 0, .expected= 0},
     {.rs1_value=0, .rs2_value= 4, .expected= 4},
     {.rs1_value=0, .rs2_value= 0, .expected= 0},
     {.rs1_value=UINT64_MAX, .rs2_value= -1, .expected= UINT64_MAX - 1}, // -10 + 4 = -6
@@ -820,6 +822,25 @@ void test_ADDW(void) {
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]),
                      (FUNCT7_ADDW << 3) | FUNCT3_ADDW_SUBW,
                      OPCODE_OP_32);
+}
+
+void test_SUBW(void) {
+  const struct r_instruction_case cases[] = {
+    // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
+    {.rs1_value = 10, .rs2_value = 4, .expected = 6},    // 10 + 4 = 14
+    {.rs1_value = -10, .rs2_value = 4, .expected = -14}, // -10 + 4 = -6
+    {.rs1_value = -3, .rs2_value = -4, .expected = 1},
+    {.rs1_value = 0, .rs2_value = 4, .expected = -4},
+    {.rs1_value = 0, .rs2_value = 0, .expected = 0},
+    {.rs1_value = UINT64_MAX,
+     .rs2_value = -1,
+     .expected = 0}, // ...1111 + 1 = ...0000
+    /* {INT64_MIN, 1, (INT64_C(1) << 63) - 1}, */
+    {.rs1_value = UINT64_MAX, .rs2_value = 1, .expected = UINT64_MAX - 1}
+  };
+
+  test_r_instruction(cases, sizeof(cases) / sizeof(cases[0]),
+                     (FUNCT7_SUBW << 3) | FUNCT3_ADDW_SUBW, OPCODE_OP_32);
 }
 
 void test_LUI(void) {
@@ -1215,6 +1236,7 @@ int main(void) {
   // test arithmetic with JUST registers; 32 bits ops
   RUN_TEST(test_SLLW);
   RUN_TEST(test_ADDW);
+  /* RUN_TEST(test_SUBW); */
 
   // test upper immediate stuff (weird ones)
   RUN_TEST(test_LUI);

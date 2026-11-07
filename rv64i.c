@@ -279,6 +279,7 @@ void run_instruction(uint32_t instruction,
         registers[rd_index] = (int64_t)(int32_t)((uint32_t) registers[rs1_index] + (uint32_t) registers[rs2_index]);
       }
       else if (FUNCT7_SUBW == funct7) {
+        registers[rd_index] = (int64_t)(int32_t)((uint32_t) registers[rs1_index] - (uint32_t) registers[rs2_index]);
         printf("SUBW\n");
       }
       else {
