@@ -78,11 +78,11 @@ The following handlers currently operate on the emulator's 64-bit registers. The
 - [x] SRAIW
 
 ### 32-bit-result register operations
-- [ ] ADDW
-- [ ] SUBW
-- [ ] SLLW
-- [ ] SRLW
-- [ ] SRAW
+- [x] ADDW
+- [x] SUBW
+- [x] SLLW
+- [x] SRLW
+- [x] SRAW
 
 These W operations produce a 32-bit result sign-extended to 64 bits. OP_IMM_32 and OP_32 are currently print-only placeholders.
 
