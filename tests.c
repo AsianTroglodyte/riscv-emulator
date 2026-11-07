@@ -273,7 +273,7 @@ void test_SB(void) {
     {.immediate = 10, .rs2 = -1, .rs1 = 6, .expected = UINT8_MAX},
   };
 
-  test_store_instruction(cases, sizeof(cases)/sizeof(cases[0]), SB, 1);
+  test_store_instruction(cases, sizeof(cases)/sizeof(cases[0]), FUNCT3_SB, 1);
 }
 
 void test_SH(void) {
@@ -288,7 +288,7 @@ void test_SH(void) {
     {.immediate = 10, .rs2 = -1, .rs1 = 6, .expected = UINT16_MAX},
   };
 
-  test_store_instruction(cases, sizeof(cases)/sizeof(cases[0]), SH, 2);
+  test_store_instruction(cases, sizeof(cases)/sizeof(cases[0]), FUNCT3_SH, 2);
 }
 
 void test_SW(void) {
@@ -303,7 +303,7 @@ void test_SW(void) {
     {.immediate = 10, .rs2 = -1, .rs1 = 6, .expected = UINT32_MAX},
   };
 
-  test_store_instruction(cases, sizeof(cases)/sizeof(cases[0]), SW, 4);
+  test_store_instruction(cases, sizeof(cases)/sizeof(cases[0]), FUNCT3_SW, 4);
 }
 
 void test_SD(void) {
@@ -318,7 +318,7 @@ void test_SD(void) {
     {.immediate = 10, .rs2 = -1, .rs1 = 6, .expected = UINT64_MAX},
   };
 
-  test_store_instruction(cases, sizeof(cases)/sizeof(cases[0]), SD, 8);
+  test_store_instruction(cases, sizeof(cases)/sizeof(cases[0]), FUNCT3_SD, 8);
 }
 
 struct i_instruction_case {
@@ -367,7 +367,7 @@ void test_ADDIW(void) {
       {.rs1_value = INT32_MIN, .immediate = 0, .expected = (int64_t) INT32_MIN} // making sure sign extension works
   };
 
-  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ADDIW_FUNCT_3, OPCODE_OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), FUNCT3_ADDIW, OPCODE_OP_IMM);
 }
 
 void test_ANDI(void) {
@@ -495,7 +495,7 @@ void test_SLLI(void) {
 
 static const struct shamt_instruction SLLIW_DESCRIPTOR = {
     .opcode = OPCODE_OP_IMM_32,
-    .funct3 = SLLIW_FUNCT_3,
+    .funct3 = FUNCT3_SLLIW,
     .upper_imm = SLLIW_IMM,
 };
 
@@ -513,7 +513,7 @@ void test_SLLIW(void) {
 
 static const struct shamt_instruction SRLI_DESCRIPTOR = {
     .opcode = OPCODE_OP_IMM,
-    .funct3 = SHIFT_RIGHT_OPP_FUNCT_3,
+    .funct3 = FUNCT3_SHIFT_RIGHT_OPP,
     .upper_imm = SRLI_IMM,
 };
 
@@ -541,7 +541,7 @@ void test_SRLI(void) {
 
 static const struct shamt_instruction SRLIW_DESCRIPTOR = {
     .opcode = OPCODE_OP_IMM_32,
-    .funct3 = SHIFT_RIGHT_OPP_32_FUNCT_3,
+    .funct3 = FUNCT3_SHIFT_RIGHT_OPP_32,
     .upper_imm = SRLIW_IMM,
 };
 
@@ -561,7 +561,7 @@ void test_SRLIW(void) {
 
 static const struct shamt_instruction SRAI_DESCRIPTOR = {
     .opcode = OPCODE_OP_IMM,
-    .funct3 = SHIFT_RIGHT_OPP_FUNCT_3,
+    .funct3 = FUNCT3_SHIFT_RIGHT_OPP,
     .upper_imm = SRAI_IMM,
 };
 
@@ -580,7 +580,7 @@ void test_SRAI(void) {
 
 static const struct shamt_instruction SRAIW_DESCRIPTOR = {
     .opcode = OPCODE_OP_IMM_32,
-    .funct3 = SHIFT_RIGHT_OPP_32_FUNCT_3,
+    .funct3 = FUNCT3_SHIFT_RIGHT_OPP_32,
     .upper_imm = SRAIW_IMM,
 };
 
@@ -600,12 +600,12 @@ void test_SRAIW(void) {
 
 void test_create_i_type_shamt(void) {
   TEST_ASSERT_EQUAL_HEX32(0x03f09513, create_i_type_shamt(63, 1, 10, OPCODE_OP_IMM, FUNCT3_SLLI, 0));
-  TEST_ASSERT_EQUAL_HEX32(0x03f0d513, create_i_type_shamt(63, 1, 10, OPCODE_OP_IMM, SHIFT_RIGHT_OPP_FUNCT_3, SRLI_IMM));
-  TEST_ASSERT_EQUAL_HEX32(0x43f0d513, create_i_type_shamt(63, 1, 10, OPCODE_OP_IMM, SHIFT_RIGHT_OPP_FUNCT_3, SRAI_IMM));
+  TEST_ASSERT_EQUAL_HEX32(0x03f0d513, create_i_type_shamt(63, 1, 10, OPCODE_OP_IMM, FUNCT3_SHIFT_RIGHT_OPP, SRLI_IMM));
+  TEST_ASSERT_EQUAL_HEX32(0x43f0d513, create_i_type_shamt(63, 1, 10, OPCODE_OP_IMM, FUNCT3_SHIFT_RIGHT_OPP, SRAI_IMM));
   TEST_ASSERT_EQUAL_HEX32(0x01f0951b, create_i_type_shamt(31, 1, 10, OPCODE_OP_IMM_32, SLLIW & 7, SLLIW >> 3));
-  TEST_ASSERT_EQUAL_HEX32(0x01f0d51b, create_i_type_shamt(31, 1, 10, OPCODE_OP_IMM_32, SHIFT_RIGHT_OPP_32_FUNCT_3, SRLIW_IMM));
-  TEST_ASSERT_EQUAL_HEX32(0x41f0d51b, create_i_type_shamt(31, 1, 10, OPCODE_OP_IMM_32, SHIFT_RIGHT_OPP_32_FUNCT_3, SRAIW_IMM));
-  TEST_ASSERT_EQUAL_HEX32(0x4000d513, create_i_type_shamt(0, 1, 10, OPCODE_OP_IMM, SHIFT_RIGHT_OPP_FUNCT_3, SRAI_IMM));
+  TEST_ASSERT_EQUAL_HEX32(0x01f0d51b, create_i_type_shamt(31, 1, 10, OPCODE_OP_IMM_32, FUNCT3_SHIFT_RIGHT_OPP_32, SRLIW_IMM));
+  TEST_ASSERT_EQUAL_HEX32(0x41f0d51b, create_i_type_shamt(31, 1, 10, OPCODE_OP_IMM_32, FUNCT3_SHIFT_RIGHT_OPP_32, SRAIW_IMM));
+  TEST_ASSERT_EQUAL_HEX32(0x4000d513, create_i_type_shamt(0, 1, 10, OPCODE_OP_IMM, FUNCT3_SHIFT_RIGHT_OPP, SRAI_IMM));
 }
 
 
@@ -909,7 +909,7 @@ void test_BEQ(void) {
     {(uint64_t) 1 << 40, (uint64_t) 1 << 40, 12, 12, 24}, // equal; branch taken
   };
 
-  test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BEQ);
+  test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), FUNCT3_BEQ);
 }
 
 void test_BNE() {
@@ -927,7 +927,7 @@ void test_BNE() {
     {(uint64_t) 1 << 40, (uint64_t) 1 << 40, 12, 12, 16}, // equal; branch not taken
   };
 
-  test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BNE);
+  test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), FUNCT3_BNE);
 }
 
 void test_BLT() {
@@ -945,7 +945,7 @@ void test_BLT() {
     {(uint64_t) 2 << 40, (uint64_t) 1 << 40, 12, 12, 16}, // NOT lt; branch not taken
   };
 
-  test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BLT);
+  test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), FUNCT3_BLT);
 }
 
 void test_BGE() {
@@ -966,7 +966,7 @@ void test_BGE() {
     {(uint64_t) 1 << 40, (uint64_t) 2 << 40, 12, 12, 16}, // NOT geq; branch not taken
   };
 
-  test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BGE);
+  test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), FUNCT3_BGE);
 }
 
 void test_BLTU() {
@@ -988,7 +988,7 @@ void test_BLTU() {
     {(uint64_t) 2 << 40, (uint64_t) 1 << 40, 12, 12, 16}, // NOT lt; branch not taken
   };
 
-  test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BLTU);
+  test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), FUNCT3_BLTU);
 }
 
 void test_BGEU() {
@@ -1010,27 +1010,27 @@ void test_BGEU() {
     {(uint64_t) 1 << 40, (uint64_t) 2 << 40, 12, 12, 16}, // NOT geq; branch not taken
   };
   /* printf("Cases: %d \n", sizeof(cases)/sizeof(cases[0])); */
-  test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), BGEU);
+  test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), FUNCT3_BGEU);
 }
 
 void test_s_create(void) {
   // EASY: 1000 is within the signed 12-bit S-immediate range.
-  uint32_t s_instruction_1 = create_s_type(1000, 6, 7, SB, OPCODE_STORE);
+  uint32_t s_instruction_1 = create_s_type(1000, 6, 7, FUNCT3_SB, OPCODE_STORE);
   // imm[11:5]=0011111, rs2=00110, rs1=00111, funct3=000, imm[4:0]=01000
   TEST_ASSERT_EQUAL(0b00111110011000111000010000100011, s_instruction_1);
 
   // NEGATIVE IMMEDIATE
-  uint32_t s_instruction_2 = create_s_type(-1, 6, 7, SB, OPCODE_STORE);
+  uint32_t s_instruction_2 = create_s_type(-1, 6, 7, FUNCT3_SB, OPCODE_STORE);
   // should be imme_11_5(1111 111)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 1111 1)(010 0011 opcode)
   TEST_ASSERT_EQUAL(0b11111110011000111000111110100011, s_instruction_2);
 
   // NEGATIVE IMMEDIATE BOUNDARY
-  uint32_t s_instruction_3 = create_s_type(-2048, 6, 7, SB, OPCODE_STORE);
+  uint32_t s_instruction_3 = create_s_type(-2048, 6, 7, FUNCT3_SB, OPCODE_STORE);
   // should be imme_11_5(1000 000)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 0000 0)(010 0011 opcode)
   TEST_ASSERT_EQUAL(0b10000000011000111000000000100011, s_instruction_3);
 
   // POSITIVE IMMEDIATE BOUNDARY
-  uint32_t s_instruction_4 = create_s_type(2047, 6, 7, SB, OPCODE_STORE);
+  uint32_t s_instruction_4 = create_s_type(2047, 6, 7, FUNCT3_SB, OPCODE_STORE);
   // should be imme_11_5(0111 111)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 1111 1)(010 0011 opcode)
   TEST_ASSERT_EQUAL(0b01111110011000111000111110100011, s_instruction_4);
 }
@@ -1067,8 +1067,8 @@ void test_b_create(void) {
   TEST_ASSERT_EQUAL_UINT32((0b1U << 31) | (0b1  << 7) | (0b111011 << 25) | (0b1000 << 8), instruction);
 
   // TEST OPCODE AND FUNCT 3
-  instruction = create_b_type(0, 0, 0, BGEU, OPCODE_BRANCH);
-  TEST_ASSERT_EQUAL_UINT32((BGEU << 12) | OPCODE_BRANCH, instruction);
+  instruction = create_b_type(0, 0, 0, FUNCT3_BGEU, OPCODE_BRANCH);
+  TEST_ASSERT_EQUAL_UINT32((FUNCT3_BGEU << 12) | OPCODE_BRANCH, instruction);
 
   // TEST rs1_index AND rs2_index
   instruction = create_b_type(0, 0b10001, 0b10001, 0, 0);
@@ -1120,20 +1120,20 @@ void test_j_create(void) {
 
 void test_get_s_immediate(void) {
   // EASY
-  uint32_t s_instruction_1 = create_s_type(1000, 6, 7, SB, OPCODE_STORE);
+  uint32_t s_instruction_1 = create_s_type(1000, 6, 7, FUNCT3_SB, OPCODE_STORE);
   TEST_ASSERT_EQUAL(1000, get_s_immediate(s_instruction_1));
 
   // NEGATIVE IMMEDIATE
-  uint32_t s_instruction_2 = create_s_type(-1, 6, 7, SB, OPCODE_STORE);
+  uint32_t s_instruction_2 = create_s_type(-1, 6, 7, FUNCT3_SB, OPCODE_STORE);
   TEST_ASSERT_EQUAL(-1, get_s_immediate(s_instruction_2));
 
   // NEGATIVE IMMEDIATE BOUNDARY
-  uint32_t s_instruction_3 = create_s_type(-2048, 6, 7, SB, OPCODE_STORE);
+  uint32_t s_instruction_3 = create_s_type(-2048, 6, 7, FUNCT3_SB, OPCODE_STORE);
   // should be imme_11_5(1000 000)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 0000 0)(010 0011 opcode)
   TEST_ASSERT_EQUAL(-2048, get_s_immediate(s_instruction_3));
 
   // POSITIVE IMMEDIATE BOUNDARY
-  uint32_t s_instruction_4 = create_s_type(2047, 6, 7, SB, OPCODE_STORE);
+  uint32_t s_instruction_4 = create_s_type(2047, 6, 7, FUNCT3_SB, OPCODE_STORE);
   // should be imme_11_5(0111 111)(0 0110 rs2) (rs1 0011 1)(000 funct3) (imm_0_4 1111 1)(010 0011 opcode)
   TEST_ASSERT_EQUAL(2047, get_s_immediate(s_instruction_4));
 }

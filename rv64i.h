@@ -71,6 +71,7 @@ enum funct3_enums: uint32_t {
   FUNCT3_LW=         0b010,
   FUNCT3_LBU=        0b100,
   FUNCT3_LHU=        0b101,
+
   // RV64I stuff
   FUNCT3_LWU=        0b110,
   FUNCT3_LD=         0b011,
@@ -81,6 +82,32 @@ enum funct3_enums: uint32_t {
   FUNCT3_ORI=          0b110,
   FUNCT3_ANDI=         0b111,
   FUNCT3_SLLI=         0b001,
+
+  FUNCT3_SHIFT_RIGHT_OPP=   0b101,
+
+  // OP_IMMEDIATE_32
+  FUNCT3_ADDIW=                0b000,
+  FUNCT3_SLLIW=                0b001,
+  SLLIW_IMM=                    0b000,
+  FUNCT3_SHIFT_RIGHT_OPP_32=    0b101,
+
+
+  // store_funct3_enums
+  FUNCT3_SB=         0b000,
+  FUNCT3_SH=         0b001,
+  FUNCT3_SW=         0b010,
+  FUNCT3_SD=         0b011,
+
+  // branch_funct3_enums
+  FUNCT3_BEQ=        0b000,
+  FUNCT3_BNE=        0b001,
+  FUNCT3_BLT=        0b100,
+  FUNCT3_BGE=        0b101,
+  FUNCT3_BLTU=       0b110,
+  FUNCT3_BGEU=       0b111,
+
+  // JALR_funct3_enum
+  JALR_OPCODE = 000,
 };
 
 enum funct7_enusm: uint32_t {
@@ -89,6 +116,20 @@ enum funct7_enusm: uint32_t {
   FUNCT7_SLLW=               0b0000000,
   FUNCT7_SRLW=               0b0000000,
   FUNCT7_SRAW=               0b0100000,
+};
+
+enum immediate_id_enums: uint32_t {
+  /* enum op_imm_funct3_enums: uint32_t { */
+  SLLI_IMM=     0b000000,
+  SRLI_IMM=     0b000000,
+  SRAI_IMM=     0b010000,
+
+  /* enum op_imm_32_enums: uint32_t { */
+  SRLIW_IMM=    0b0000000,
+  SRAIW_IMM=    0b0100000,
+
+  SLLIW=        0b0000000001, // we combine funct7 (technically has len ) with funct3
+
 };
 
 enum MISC_MEM_enum: uint32_t {
@@ -100,29 +141,6 @@ enum MISC_MEM_enum: uint32_t {
 enum SYSTEM_enum: uint32_t {
   ECALL =  0b0000000000000000000000000,  // includes all FENCE_TSO fields. best way to guarantee ID
   EBREAK = 0b0000000000010000000000000,  // includes all FENCE_TSO fields. best way to guarantee ID
-};
-
-enum JALR_funct3_enum: uint32_t {
-  JALR_OPCODE = 000,
-};
-
-enum op_imm_funct3_enums: uint32_t {
-  SLLI_IMM=             0b000,
-  SHIFT_RIGHT_OPP_FUNCT_3=   0b101,
-  SRLI_IMM=     0b000000,
-  SRAI_IMM=     0b010000,
-};
-
-
-//
-enum op_imm_32_enums: uint32_t {
-  ADDIW_FUNCT_3=                0b000,
-  SLLIW_FUNCT_3=                0b001,
-  SLLIW_IMM=                    0b000,
-  SLLIW=                        0b0000000001, // we combine funct7 (technically has len ) with funct3
-  SHIFT_RIGHT_OPP_32_FUNCT_3=   0b101,
-  SRLIW_IMM=                    0b0000000,
-  SRAIW_IMM=                    0b0100000,
 };
 
 // backing numbers are funct7 + funct3
@@ -138,22 +156,6 @@ enum op_enums: uint32_t {
   SRA=         0b0100000101,
   OR=          0b0000000110,
   AND=         0b0000000111,
-};
-
-enum store_funct3_enums: uint32_t {
-  SB=         0b000,
-  SH=         0b001,
-  SW=         0b010,
-  SD=         0b011
-};
-
-enum branch_funct3_enums: uint32_t {
-  BEQ=        0b000,
-  BNE=        0b001,
-  BLT=        0b100,
-  BGE=        0b101,
-  BLTU=       0b110,
-  BGEU=       0b111
 };
 
 

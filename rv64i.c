@@ -109,7 +109,7 @@ void run_instruction(uint32_t instruction,
     case FUNCT3_XORI:
       registers[rd_index] = registers[rs1_index] ^ immediate;
       break;
-    case SHIFT_RIGHT_OPP_FUNCT_3:
+    case FUNCT3_SHIFT_RIGHT_OPP:
       shamt = bits(immediate, 0, 5);
       uint32_t funct6 = bits(immediate, 6, 11);
       switch (funct6) {
@@ -147,10 +147,10 @@ void run_instruction(uint32_t instruction,
     immediate = get_i_immediate(instruction);
     // ADDIW can be determined using juts func3
     switch (funct3) {
-    case ADDIW_FUNCT_3:
+    case FUNCT3_ADDIW:
       registers[rd_index] = (uint32_t) registers[rs1_index] + immediate;
       break;
-    case SLLIW_FUNCT_3:
+    case FUNCT3_SLLIW:
       immediate_id = get_funct7(instruction);
       if (immediate_id == SLLIW_IMM) {
         uint32_t shamt = bits(immediate, 0, 4);
@@ -160,7 +160,7 @@ void run_instruction(uint32_t instruction,
         printf("SLLIW_FUNCT_3 does not have correct corresponding immediate_id/funct7 val");
       }
       break;
-    case SHIFT_RIGHT_OPP_32_FUNCT_3:
+    case FUNCT3_SHIFT_RIGHT_OPP_32:
       uint32_t shamt = bits(immediate, 0, 4);
       immediate_id = get_funct7(instruction);
       switch (immediate_id) {
@@ -181,16 +181,16 @@ void run_instruction(uint32_t instruction,
 
     address = registers[rs1_index] + immediate;
     switch (funct3) {
-    case SB:
+    case FUNCT3_SB:
       write_byte(memory, address, registers[rs2_index]);
       break;
-    case SH:
+    case FUNCT3_SH:
       write_half_word(memory, address, registers[rs2_index]);
       break;
-    case SW:
+    case FUNCT3_SW:
       write_word(memory, address, registers[rs2_index]);
       break;
-    case SD:
+    case FUNCT3_SD:
       write_double_word(memory, address, registers[rs2_index]);
       break;
     default:
@@ -326,37 +326,37 @@ void run_instruction(uint32_t instruction,
     immediate = get_b_immediate(instruction);
     funct3 = get_funct3(instruction);
     switch(funct3) {
-    case BEQ:
+    case FUNCT3_BEQ:
       if (registers[rs2_index] == registers[rs1_index]) {
         next_pc = *program_counter + immediate;
         break;
       }
       break;
-    case BNE:
+    case FUNCT3_BNE:
       if (registers[rs2_index] != registers[rs1_index]) {
         next_pc = *program_counter + immediate;
         break;
       }
       break;
-    case BLT:
+    case FUNCT3_BLT:
       if ((int64_t)registers[rs1_index] < (int64_t)registers[rs2_index]) {
         next_pc = *program_counter + immediate;
         break;
       }
       break;
-    case BGE:
+    case FUNCT3_BGE:
       if ((int64_t)registers[rs1_index] >= (int64_t)registers[rs2_index]) {
         next_pc = *program_counter + immediate;
         break;
       }
       break;
-    case BLTU:
+    case FUNCT3_BLTU:
       if ((uint64_t)registers[rs1_index] < (uint64_t)registers[rs2_index]) {
         next_pc = *program_counter + immediate;
         break;
       }
       break;
-    case BGEU:
+    case FUNCT3_BGEU:
       if ((uint64_t)registers[rs1_index] >= (uint64_t)registers[rs2_index]) {
         next_pc = *program_counter + immediate;
         break;
@@ -651,7 +651,7 @@ uint32_t create_i_type_shamt(uint32_t shamt,
   case OPCODE_OP_IMM:
     shamt_bits = 6;
     if (!((funct3 == FUNCT3_SLLI && upper_imm == 0) ||
-          (funct3 == SHIFT_RIGHT_OPP_FUNCT_3 &&
+          (funct3 == FUNCT3_SHIFT_RIGHT_OPP &&
            (upper_imm == SRLI_IMM || upper_imm == SRAI_IMM)))) {
 
       abort();
@@ -660,7 +660,7 @@ uint32_t create_i_type_shamt(uint32_t shamt,
   case OPCODE_OP_IMM_32:
     shamt_bits = 5;
     if (!((funct3 == (SLLIW & 7) && upper_imm == (SLLIW >> 3)) ||
-          (funct3 == SHIFT_RIGHT_OPP_32_FUNCT_3 &&
+          (funct3 == FUNCT3_SHIFT_RIGHT_OPP_32 &&
            (upper_imm == SRLIW_IMM || upper_imm == SRAIW_IMM)))) {
       abort();
     }
