@@ -869,6 +869,8 @@ void test_SRLW(void) {
        .expected = 1},
       // nothing happens
       {.rs1_value = 1, .rs2_value = 0, .expected = 1},
+      // making sure that lower 5 bits are only considered
+      {.rs1_value = UINT64_MAX, .rs2_value = UINT64_MAX, .expected = 1},
   };
 
   test_r_instruction(cases, sizeof(cases) / sizeof(cases[0]),
