@@ -61,19 +61,38 @@ enum major_opcodes: uint32_t {
   OPCODE_CUSTOM_3=   0b1111011
 };
 
-enum OP_32_funct3_enums: uint32_t {
-  ADDW_SUBW_FUNCT_3=          0b000,
-  ADDW_FUNCT_7=               0b0000000,
-  SUBW_FUNCT_7=               0b0100000,
-  SLLW_FUNCT_3=               0b001,
-  SLLW_FUNCT_7=               0b0000000,
-  SHIFT_RIGHT_FUNCT_3=        0b101,
-  SRLW_FUNCT_7=               0b0000000,
-  SRAW_FUNCT_7=               0b0100000,
+
+enum funct3_enums: uint32_t {
+  FUNCT3_ADDW_SUBW=          0b000,
+  FUNCT3_SHIFT_RIGHT=        0b101,
+  FUNCT3_SLLW=               0b001,
+  FUNCT3_LB=         0b000,
+  FUNCT3_LH=         0b001,
+  FUNCT3_LW=         0b010,
+  FUNCT3_LBU=        0b100,
+  FUNCT3_LHU=        0b101,
+  // RV64I stuff
+  FUNCT3_LWU=        0b110,
+  FUNCT3_LD=         0b011,
+  FUNCT3_ADDI=         0b000,
+  FUNCT3_SLTI=         0b010,
+  FUNCT3_SLTIU=        0b011,
+  FUNCT3_XORI=         0b100,
+  FUNCT3_ORI=          0b110,
+  FUNCT3_ANDI=         0b111,
+  FUNCT3_SLLI=         0b001,
+};
+
+enum funct7_enusm: uint32_t {
+  FUNCT7_ADDW=               0b0000000,
+  FUNCT7_SUBW=               0b0100000,
+  FUNCT7_SLLW=               0b0000000,
+  FUNCT7_SRLW=               0b0000000,
+  FUNCT7_SRAW=               0b0100000,
 };
 
 enum MISC_MEM_enum: uint32_t {
-  FENCE = 0b000,
+  FENCE =     0b000,
   FENCE_TSO = 0b1000001100110000000000000, // includes all FENCE_TSO fields. best way to guarantee ID
   PAUSE =     0b0000000100000000000000000,
 };
@@ -87,25 +106,7 @@ enum JALR_funct3_enum: uint32_t {
   JALR_OPCODE = 000,
 };
 
-enum load_funct3_enums: uint32_t {
-  LB_FUNCT_3=         0b000,
-  LH_FUNCT_3=         0b001,
-  LW_FUNCT_3=         0b010,
-  LBU_FUNCT_3=        0b100,
-  LHU_FUNCT_3=        0b101,
-  // RV64I stuff
-  LWU_FUNCT_3=        0b110,
-  LD_FUNCT_3=         0b011,
-};
-
 enum op_imm_funct3_enums: uint32_t {
-  ADDI_FUNCT_3=         0b000,
-  SLTI_FUNCT_3=         0b010,
-  SLTIU_FUNCT_3=        0b011,
-  XORI_FUNCT_3=         0b100,
-  ORI_FUNCT_3=          0b110,
-  ANDI_FUNCT_3=         0b111,
-  SLLI_FUNCT_3=         0b001,
   SLLI_IMM=             0b000,
   SHIFT_RIGHT_OPP_FUNCT_3=   0b101,
   SRLI_IMM=     0b000000,

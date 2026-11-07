@@ -37,25 +37,25 @@ void run_instruction(uint32_t instruction,
 
     address = (int64_t) registers[rs1_index] + immediate;
     switch (funct3) {
-    case LB_FUNCT_3:
+    case FUNCT3_LB:
       registers[rd_index] = (int8_t) get_byte(memory, address);
       break;
-    case LH_FUNCT_3:
+    case FUNCT3_LH:
       registers[rd_index] = (int16_t) get_half_word(memory, address);
       break;
-    case LW_FUNCT_3:
+    case FUNCT3_LW:
       registers[rd_index] = (int32_t) get_word(memory, address);
       break;
-    case LBU_FUNCT_3:
+    case FUNCT3_LBU:
       registers[rd_index] = get_byte(memory, address);
       break;
-    case LHU_FUNCT_3:
+    case FUNCT3_LHU:
       registers[rd_index] = get_half_word(memory, address);
       break;
-    case LWU_FUNCT_3:
+    case FUNCT3_LWU:
       registers[rd_index] = get_word(memory, address);
       break;
-    case LD_FUNCT_3:
+    case FUNCT3_LD:
       registers[rd_index] = get_double_word(memory, address);
       break;
     default:
@@ -82,22 +82,22 @@ void run_instruction(uint32_t instruction,
 
     switch (funct3) {
       uint32_t shamt;
-    case ADDI_FUNCT_3:
+    case FUNCT3_ADDI:
       registers[rd_index] = registers[rs1_index] + immediate;
       break;
-    case SLTI_FUNCT_3:
+    case FUNCT3_SLTI:
       registers[rd_index] = (int64_t) registers[rs1_index] < immediate;
       break;
-    case SLTIU_FUNCT_3:
+    case FUNCT3_SLTIU:
       registers[rd_index] = registers[rs1_index] < (uint64_t) immediate;
       break;
-    case ORI_FUNCT_3:
+    case FUNCT3_ORI:
       registers[rd_index] = registers[rs1_index] | immediate;
       break;
-    case ANDI_FUNCT_3:
+    case FUNCT3_ANDI:
       registers[rd_index] = registers[rs1_index] & immediate;
       break;
-    case SLLI_FUNCT_3:
+    case FUNCT3_SLLI:
       if (bits(instruction, 26, 31) == SLLI_IMM) {
         shamt = bits(immediate, 0, 5);
         registers[rd_index] = registers[rs1_index] << shamt;
@@ -106,7 +106,7 @@ void run_instruction(uint32_t instruction,
         printf("immediate of potential SLLI is not \n");
       }
       break;
-    case XORI_FUNCT_3:
+    case FUNCT3_XORI:
       registers[rd_index] = registers[rs1_index] ^ immediate;
       break;
     case SHIFT_RIGHT_OPP_FUNCT_3:
@@ -266,31 +266,31 @@ void run_instruction(uint32_t instruction,
     rs2_index = get_rs2_index(instruction);
     rd_index = get_rd_index(instruction);
     switch (funct3) {
-    case SLLW_FUNCT_3:
-      if (SLLW_FUNCT_7 == immediate_id) {
+    case FUNCT3_SLLW:
+      if (FUNCT7_SLLW == immediate_id) {
         printf("SUBW\n");
       }
       else {
         printf("immediate_id not valid given SLLW_FUNCT_3\n");
       }
       break;
-    case ADDW_SUBW_FUNCT_3:
+    case FUNCT3_ADDW_SUBW:
       printf("ADDW_SUBW_FUNCT_3\n");
-      if (ADDW_FUNCT_7 == immediate_id) {
+      if (FUNCT7_ADDW == immediate_id) {
         printf("ADDW\n");
       }
-      else if (SUBW_FUNCT_7 == immediate_id) {
+      else if (FUNCT7_SUBW == immediate_id) {
         printf("SUBW\n");
       }
       else {
         printf("immediate ID given ADDW_SUBW_FUNCT_3 not valid\n");
       }
       break;
-    case SHIFT_RIGHT_FUNCT_3:
+    case FUNCT3_SHIFT_RIGHT:
       printf("SHIFT_RIGHT_FUNCT_3\n");
-      if (SRLW_FUNCT_7 == immediate_id) {
+      if (FUNCT7_SRLW == immediate_id) {
         printf("SRLW\n");
-      } else if (SRAW_FUNCT_7 == immediate_id) {
+      } else if (FUNCT7_SRAW == immediate_id) {
         printf("SRLW\n");
       } else {
         printf("immediate ID SHIFT_RIGHT_FUNCT_3 not valid\n");
@@ -650,7 +650,7 @@ uint32_t create_i_type_shamt(uint32_t shamt,
   switch (opcode) {
   case OPCODE_OP_IMM:
     shamt_bits = 6;
-    if (!((funct3 == SLLI_FUNCT_3 && upper_imm == 0) ||
+    if (!((funct3 == FUNCT3_SLLI && upper_imm == 0) ||
           (funct3 == SHIFT_RIGHT_OPP_FUNCT_3 &&
            (upper_imm == SRLI_IMM || upper_imm == SRAI_IMM)))) {
 

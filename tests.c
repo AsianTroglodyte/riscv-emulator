@@ -93,11 +93,11 @@ void test_LW(void) {
     {.immediate = -1, .rs1_val = 13, .memory_value = 10, .expected = 10}, // negative immediate;
     {.immediate = 13, .rs1_val = -1, .memory_value = 10, .expected = 10}, // negative rs1_val;
   };
-  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LW_FUNCT_3, 4);
+  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), FUNCT3_LW, 4);
 
   struct machine_state state = {0};
   state.registers[30] = 10;
-  uint32_t instruction = create_i_type(4, 0, LW_FUNCT_3, 30, OPCODE_LOAD); // instruction should x0 = 10 to x0 = 0;
+  uint32_t instruction = create_i_type(4, 0, FUNCT3_LW, 30, OPCODE_LOAD); // instruction should x0 = 10 to x0 = 0;
   run_instruction(instruction, &state);
   TEST_ASSERT_EQUAL_UINT64(0, state.registers[30]);
 }
@@ -114,11 +114,11 @@ void test_LB(void) {
     {.immediate = 13, .rs1_val = -1,.memory_value = 10, .expected = 10}, // negative rs1_val;
     /* {.immediate = 1, .rs1_val = 3,.memory_value = (uint16_t)-4, .expected = UINT64_MAX - 3}, // check if -1 is sign extended; */
   };
-  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LB_FUNCT_3, 1);
+  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), FUNCT3_LB, 1);
 
   struct machine_state state1 = {0};
   state1.registers[30] = 10;
-  uint32_t instruction = create_i_type(4, 0, LB_FUNCT_3, 30, OPCODE_LOAD); // instruction should x0 = 10 to x0 = 0;
+  uint32_t instruction = create_i_type(4, 0, FUNCT3_LB, 30, OPCODE_LOAD); // instruction should x0 = 10 to x0 = 0;
   run_instruction(instruction, &state1);
   TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
@@ -134,11 +134,11 @@ void test_LH(void) {
     {.immediate = -1, .rs1_val = 13,.memory_value = 10, .expected = 10}, // negative immediate;
     {.immediate = 13, .rs1_val = -1,.memory_value = 10, .expected = 10}, // negative rs1_val;
   };
-  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LH_FUNCT_3, 2);
+  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), FUNCT3_LH, 2);
 
   struct machine_state state1 = {0};
   state1.registers[30] = 10;
-  uint32_t instruction = create_i_type(4, 0, LH_FUNCT_3, 30, OPCODE_LOAD); // instruction should x30 = 10 to x30 = 0;
+  uint32_t instruction = create_i_type(4, 0, FUNCT3_LH, 30, OPCODE_LOAD); // instruction should x30 = 10 to x30 = 0;
   run_instruction(instruction, &state1);
   TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
@@ -155,11 +155,11 @@ void test_LD() {
     {.immediate = -1, .rs1_val = 9,.memory_value = 10, .expected = 10}, // negative immediate;
     {.immediate = 9, .rs1_val = -1,.memory_value = 10, .expected = 10}, // negative rs1_val;
   };
-  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LD_FUNCT_3, 8);
+  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), FUNCT3_LD, 8);
 
   struct machine_state state1 = {0};
   state1.registers[30] = 10;
-  uint32_t instruction = create_i_type(4, 0, LD_FUNCT_3, 30, OPCODE_LOAD); // instruction should x30 = 10 to x30 = 0;
+  uint32_t instruction = create_i_type(4, 0, FUNCT3_LD, 30, OPCODE_LOAD); // instruction should x30 = 10 to x30 = 0;
   run_instruction(instruction, &state1);
   TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
@@ -176,11 +176,11 @@ void test_LBU(void) {
     {.immediate = 13, .rs1_val = -1,.memory_value = 10, .expected = 10}, // negative rs1_val;
   };
 
-  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LBU_FUNCT_3, 1);
+  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), FUNCT3_LBU, 1);
 
   struct machine_state state1 = {0};
   state1.registers[30] = 10;
-  uint32_t instruction = create_i_type(4, 0, LBU_FUNCT_3, 30, OPCODE_LOAD); // instruction should x30 = 10 to x30 = 0;
+  uint32_t instruction = create_i_type(4, 0, FUNCT3_LBU, 30, OPCODE_LOAD); // instruction should x30 = 10 to x30 = 0;
   run_instruction(instruction, &state1);
   TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
@@ -196,11 +196,11 @@ void test_LHU(void) {
     {.immediate = -1, .rs1_val = 13,.memory_value = 10, .expected = 10}, // negative immediate;
     {.immediate = 13, .rs1_val = -1,.memory_value = 10, .expected = 10}, // negative rs1_val;
   };
-  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LHU_FUNCT_3, 2);
+  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), FUNCT3_LHU, 2);
 
   struct machine_state state1 = {0};
   state1.registers[30] = 10;
-  uint32_t instruction = create_i_type(4, 0, LHU_FUNCT_3, 30, OPCODE_LOAD); // instruction should x30 = 10 to x30 = 0;
+  uint32_t instruction = create_i_type(4, 0, FUNCT3_LHU, 30, OPCODE_LOAD); // instruction should x30 = 10 to x30 = 0;
   run_instruction(instruction, &state1);
   TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
@@ -218,11 +218,11 @@ void test_LWU() {
     {.immediate = -1, .rs1_val = 13,.memory_value = 10, .expected = 10}, // negative immediate;
     {.immediate = 13, .rs1_val = -1,.memory_value = 10, .expected = 10}, // negative rs1_val;
   };
-  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), LWU_FUNCT_3, 4);
+  test_load_instruction(cases, sizeof(cases)/sizeof(cases[0]), FUNCT3_LWU, 4);
 
   struct machine_state state1 = {0};
   state1.registers[30] = 10;
-  uint32_t instruction = create_i_type(4, 0, LWU_FUNCT_3, 30, OPCODE_LOAD); // instruction should x30 = 10 to x30 = 0;
+  uint32_t instruction = create_i_type(4, 0, FUNCT3_LWU, 30, OPCODE_LOAD); // instruction should x30 = 10 to x30 = 0;
   run_instruction(instruction, &state1);
   TEST_ASSERT_EQUAL_UINT64(0, state1.registers[30]);
 }
@@ -355,7 +355,7 @@ void test_ADDI(void) {
       {.rs1_value = 10, .immediate =  -100, .expected =  (uint64_t)-90}, // Result wraps to a negative 64-bit value
   };
 
-  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ADDI_FUNCT_3, OPCODE_OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), FUNCT3_ADDI, OPCODE_OP_IMM);
 }
 
 void test_ADDIW(void) {
@@ -378,7 +378,7 @@ void test_ANDI(void) {
       {.rs1_value = 0b1100010, .immediate =  0b1000010, .expected =  0b1000010},    // Keep only shared set bits
   };
 
-  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ANDI_FUNCT_3, OPCODE_OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), FUNCT3_ANDI, OPCODE_OP_IMM);
 }
 
 void test_ORI(void) {
@@ -389,7 +389,7 @@ void test_ORI(void) {
       {.rs1_value = 0b1100010, .immediate =  0b1001010, .expected =  0b1101010},     // Combine set bits from both operands
   };
 
-  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), ORI_FUNCT_3, OPCODE_OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), FUNCT3_ORI, OPCODE_OP_IMM);
 }
 
 void test_SLTI(void) {
@@ -403,7 +403,7 @@ void test_SLTI(void) {
       {.rs1_value = (uint64_t)-10, .immediate =  -9, .expected =  1},
   };
 
-  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLTI_FUNCT_3, OPCODE_OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), FUNCT3_SLTI, OPCODE_OP_IMM);
 }
 
 void test_SLTIU(void) {
@@ -416,7 +416,7 @@ void test_SLTIU(void) {
       {.rs1_value = UINT64_MAX - 1, .immediate =  -1, .expected =  1},    // UINT64_MAX - 1 < UINT64_MAX
   };
 
-  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), SLTIU_FUNCT_3, OPCODE_OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), FUNCT3_SLTIU, OPCODE_OP_IMM);
 }
 
 
@@ -433,7 +433,7 @@ void test_XORI(void) {
       {.rs1_value = (UINT64_C(1) << 63) | 1, .immediate = 1, .expected = (UINT64_C(1) << 63)}
   };
 
-  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), XORI_FUNCT_3, OPCODE_OP_IMM);
+  test_i_instruction(cases, sizeof(cases) / sizeof(cases[0]), FUNCT3_XORI, OPCODE_OP_IMM);
 }
 
 
@@ -476,7 +476,7 @@ static void test_shamt_instruction(const struct shamt_instruction_case cases[],
 
 static const struct shamt_instruction SLLI_DESCRIPTOR = {
     .opcode = OPCODE_OP_IMM,
-    .funct3 = SLLI_FUNCT_3,
+    .funct3 = FUNCT3_SLLI,
     .upper_imm = 0,
 };
 
@@ -599,7 +599,7 @@ void test_SRAIW(void) {
 }
 
 void test_create_i_type_shamt(void) {
-  TEST_ASSERT_EQUAL_HEX32(0x03f09513, create_i_type_shamt(63, 1, 10, OPCODE_OP_IMM, SLLI_FUNCT_3, 0));
+  TEST_ASSERT_EQUAL_HEX32(0x03f09513, create_i_type_shamt(63, 1, 10, OPCODE_OP_IMM, FUNCT3_SLLI, 0));
   TEST_ASSERT_EQUAL_HEX32(0x03f0d513, create_i_type_shamt(63, 1, 10, OPCODE_OP_IMM, SHIFT_RIGHT_OPP_FUNCT_3, SRLI_IMM));
   TEST_ASSERT_EQUAL_HEX32(0x43f0d513, create_i_type_shamt(63, 1, 10, OPCODE_OP_IMM, SHIFT_RIGHT_OPP_FUNCT_3, SRAI_IMM));
   TEST_ASSERT_EQUAL_HEX32(0x01f0951b, create_i_type_shamt(31, 1, 10, OPCODE_OP_IMM_32, SLLIW & 7, SLLIW >> 3));
