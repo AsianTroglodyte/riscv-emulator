@@ -60,7 +60,7 @@ The following handlers currently operate on the emulator's 64-bit registers. The
 - [x] AND
 
 ### Ordering and environment
-- [ ] FENCE — MISC_MEM currently only prints a message.
+- [] FENCE — MISC_MEM currently only prints a message.
 - [ ] ECALL — SYSTEM currently only prints a message.
 - [ ] EBREAK — SYSTEM currently only prints a message.
 

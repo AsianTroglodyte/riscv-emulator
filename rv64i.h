@@ -107,15 +107,40 @@ enum funct3_enums: uint32_t {
   FUNCT3_BGEU=       0b111,
 
   // JALR_funct3_enum
-  JALR_OPCODE = 000,
+  JALR_OPCODE =       0b000,
+
+  // OP FUNCT3 - Arithemetic register to register
+  FUNCT3_ADD=         0b000,
+  FUNCT3_SUB=         0b000,
+  FUNCT3_SLL=         0b001,
+  FUNCT3_SLT=         0b010,
+  FUNCT3_SLTU=        0b011,
+  FUNCT3_XOR=         0b100,
+  FUNCT3_SRL=         0b101,
+  FUNCT3_SRA=         0b101,
+  FUNCT3_OR=          0b110,
+  FUNCT3_AND=         0b111,
+
 };
 
 enum funct7_enusm: uint32_t {
-  FUNCT7_ADDW=               0b0000000,
-  FUNCT7_SUBW=               0b0100000,
-  FUNCT7_SLLW=               0b0000000,
-  FUNCT7_SRLW=               0b0000000,
-  FUNCT7_SRAW=               0b0100000,
+  FUNCT7_ADDW=       0b0000000,
+  FUNCT7_SUBW=       0b0100000,
+  FUNCT7_SLLW=       0b0000000,
+  FUNCT7_SRLW=       0b0000000,
+  FUNCT7_SRAW=       0b0100000,
+
+  // OP FUNCT7 - Arithemetic register to register
+  FUNCT7_ADD=        0b0000000,
+  FUNCT7_SUB=        0b0100000,
+  FUNCT7_SLL=        0b0000000,
+  FUNCT7_SLT=        0b0000000,
+  FUNCT7_SLTU=       0b0000000,
+  FUNCT7_XOR=        0b0000000,
+  FUNCT7_SRL=        0b0000000,
+  FUNCT7_SRA=        0b0100000,
+  FUNCT7_OR=         0b0000000,
+  FUNCT7_AND=        0b0000000,
 };
 
 enum immediate_id_enums: uint32_t {
@@ -136,8 +161,8 @@ enum MISC_MEM_enum: uint32_t {
 };
 
 enum SYSTEM_enum: uint32_t {
-  ECALL =  0b0000000000000000000000000,  // includes all FENCE_TSO fields. best way to guarantee ID
-  EBREAK = 0b0000000000010000000000000,  // includes all FENCE_TSO fields. best way to guarantee ID
+  ECALL =     0b0000000000000000000000000,  // includes all FENCE_TSO fields. best way to guarantee ID
+  EBREAK =    0b0000000000010000000000000,  // includes all FENCE_TSO fields. best way to guarantee ID
 };
 
 // backing numbers are funct7 + funct3

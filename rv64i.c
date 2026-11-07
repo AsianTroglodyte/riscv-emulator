@@ -215,37 +215,37 @@ void run_instruction(uint32_t instruction,
     rd_index = get_rd_index(instruction);
     uint32_t funct7_funct3 = (get_funct7(instruction) << 3) | get_funct3(instruction);
     switch (funct7_funct3) {
-    case ADD:
+    case (FUNCT7_ADD << 3) | FUNCT3_ADD:
       registers[rd_index] = registers[rs1_index] + registers[rs2_index];
       break;
-    case SUB:
+    case (FUNCT7_SUB << 3) | FUNCT3_SUB:
       registers[rd_index] = registers[rs1_index] - registers[rs2_index];
       break;
-    case SLL:
+    case (FUNCT7_SLL << 3) | FUNCT3_SLL:
       // we only use lowest 6 bits of register value to shift
       registers[rd_index] = registers[rs1_index] << (registers[rs2_index] & 0b111111);
       break;
-    case SLT:
+    case (FUNCT7_SLT << 3) | FUNCT3_SLT:
       registers[rd_index] = (int64_t) registers[rs1_index] < (int64_t) registers[rs2_index];
       break;
-    case SLTU:
+    case (FUNCT7_SLTU << 3) | FUNCT3_SLTU:
       registers[rd_index] = registers[rs1_index] < registers[rs2_index];
       break;
-    case XOR:
+    case (FUNCT7_XOR << 3) | FUNCT3_XOR:
       registers[rd_index] = registers[rs1_index] ^ registers[rs2_index];
       break;
-    case SRL:
+    case (FUNCT7_SRL << 3) | FUNCT3_SRL:
       // we only use lowest 6 bits of register value to shift
       registers[rd_index] = registers[rs1_index] >> (registers[rs2_index] & 0b111111);
       break;
-    case SRA:
+    case (FUNCT7_SRA << 3) | FUNCT3_SRA:
       // we only use lowest 6 bits of register value to shift
       registers[rd_index] = (int64_t) registers[rs1_index] >> (registers[rs2_index] & 0b111111);
       break;
-    case OR:
+    case (FUNCT7_OR << 3) | FUNCT3_OR:
       registers[rd_index] = (int64_t) registers[rs1_index] | registers[rs2_index];
       break;
-    case AND:
+    case (FUNCT7_AND << 3) | FUNCT3_AND:
       registers[rd_index] = (int64_t) registers[rs1_index] & registers[rs2_index];
       break;
     default:

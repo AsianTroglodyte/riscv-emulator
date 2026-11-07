@@ -656,7 +656,7 @@ void test_ADD(void) {
     {.rs1_value=UINT64_MAX, .rs2_value=  1, .expected= 0}
   };
 
-  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), ADD, OPCODE_OP);
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), (FUNCT7_ADD << 3) | (FUNCT3_ADD), OPCODE_OP);
 }
 
 void test_SUB(void) {
@@ -1137,7 +1137,7 @@ void test_r_create(void) {
   TEST_ASSERT_EQUAL(0b01000000011000111000000000110011, r_instruction_1);
 
   // ADD
-  uint32_t r_instruction_2 = create_r_type(ADD, 10, 0, 1, OPCODE_OP);
+  uint32_t r_instruction_2 = create_r_type((FUNCT7_ADD << 3) | (FUNCT3_ADD), 10, 0, 1, OPCODE_OP);
   // funct7=0b0000000 rs2=01010, rs1=00000, funct3=000, rd=00001, opcode=0110011
   TEST_ASSERT_EQUAL(0b00000000101000000000000010110011, r_instruction_2);
 }
