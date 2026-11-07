@@ -280,16 +280,14 @@ void run_instruction(uint32_t instruction,
       }
       else if (FUNCT7_SUBW == funct7) {
         registers[rd_index] = (int64_t)(int32_t)((uint32_t) registers[rs1_index] - (uint32_t) registers[rs2_index]);
-        printf("SUBW\n");
       }
       else {
         printf("immediate ID given ADDW_SUBW_FUNCT_3 not valid\n");
       }
       break;
     case FUNCT3_SHIFT_RIGHT:
-      printf("SHIFT_RIGHT_FUNCT_3\n");
       if (FUNCT7_SRLW == funct7) {
-        printf("SRLW\n");
+        registers[rd_index] = (uint32_t)registers[rs1_index] >> (registers[rs2_index] & 0b111111);
       } else if (FUNCT7_SRAW == funct7) {
         printf("SRLW\n");
       } else {

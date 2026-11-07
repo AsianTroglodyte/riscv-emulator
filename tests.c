@@ -848,6 +848,33 @@ void test_SUBW(void) {
                      (FUNCT7_SUBW << 3) | FUNCT3_ADDW_SUBW, OPCODE_OP_32);
 }
 
+/* struct shift_ */
+
+void test_SRLW(void) {
+  const struct r_instruction_case cases[] = {
+      {.rs1_value = 18, .rs2_value = 1, .expected = 9},
+      {.rs1_value = 192, .rs2_value = 6, .expected = 3},
+
+      // Logical shifts fill vacated high bits with zero, even when the
+      // source's most significant bit is set.
+      {.rs1_value = UINT64_C(0x1000000000000000),
+       .rs2_value = 1,
+       .expected = 0},
+      {.rs1_value = UINT64_MAX,
+       .rs2_value = 10,
+       .expected = UINT32_MAX >> 10},
+      // Boundary shift amounts and bits shifted almost entirely out.
+      {.rs1_value = UINT64_MAX,
+       .rs2_value = 31,
+       .expected = 1},
+      // nothing happens
+      {.rs1_value = 1, .rs2_value = 0, .expected = 1},
+  };
+
+  test_r_instruction(cases, sizeof(cases) / sizeof(cases[0]),
+                     (FUNCT7_SRLW << 3) | FUNCT3_SHIFT_RIGHT, OPCODE_OP_32);
+}
+
 void test_LUI(void) {
   struct machine_state state = {0};
 
@@ -1242,7 +1269,7 @@ int main(void) {
   RUN_TEST(test_SLLW);
   RUN_TEST(test_ADDW);
   RUN_TEST(test_SUBW);
-
+  RUN_TEST(test_SRLW);
   // test upper immediate stuff (weird ones)
   RUN_TEST(test_LUI);
   RUN_TEST(test_AUIPC);
