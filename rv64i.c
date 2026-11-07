@@ -262,6 +262,9 @@ void run_instruction(uint32_t instruction,
     printf("OP_32\n");
     funct3 = get_funct3(instruction);
     immediate_id = get_funct7(instruction);
+    rs1_index = get_rs1_index(instruction);
+    rs2_index = get_rs2_index(instruction);
+    rd_index = get_rd_index(instruction);
     switch (funct3) {
     case SLLW_FUNCT_3:
       if (SLLW_IMM == immediate_id) {

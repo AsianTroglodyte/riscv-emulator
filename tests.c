@@ -643,16 +643,16 @@ static void test_r_instruction(const struct r_instruction_case cases[],
 void test_ADD(void) {
   const struct r_instruction_case cases[] = {
     // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
-    {1, 1, 2},     // 1 + 1 = 2
-    {10, 4, 14},   // 10 + 4 = 14
-    {-10, 4, -6},  // -10 + 4 = -6
-    {-3, -4, -7},
-    {0, 4, 4},
-    {0, 0, 0},
-    {UINT64_MAX, -1, UINT64_MAX - 1}, // -10 + 4 = -6
-    {INT64_MAX, 1, UINT64_C(1) << 63}, // -10 + 4 = -6
-    {INT64_MIN, -1, INT64_MAX}, // -10 + 4 = -6
-    {UINT64_MAX, 1, 0}
+    {.rs1_value=1, .rs2_value=  1, .expected= 2},     // 1 + 1 = 2
+    {.rs1_value=10, .rs2_value=  4, .expected= 14},   // 10 + 4 = 14
+    {.rs1_value=-10, .rs2_value=  4, .expected= -6},  // -10 + 4 = -6
+    {.rs1_value=-3, .rs2_value=  -4, .expected= -7},
+    {.rs1_value=0, .rs2_value=  4, .expected= 4},
+    {.rs1_value=0, .rs2_value=  0, .expected= 0},
+    {.rs1_value=UINT64_MAX, .rs2_value=  -1, .expected= UINT64_MAX - 1}, // -10 + 4 = -6
+    {.rs1_value=INT64_MAX, .rs2_value=  1, .expected= UINT64_C(1) << 63}, // -10 + 4 = -6
+    {.rs1_value=INT64_MIN, .rs2_value=  -1, .expected= INT64_MAX}, // -10 + 4 = -6
+    {.rs1_value=UINT64_MAX, .rs2_value=  1, .expected= 0}
   };
 
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), ADD, OP);
@@ -661,14 +661,14 @@ void test_ADD(void) {
 void test_SUB(void) {
   const struct r_instruction_case cases[] = {
     // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
-    {10, 4, 6},   // 10 + 4 = 14
-    {-10, 4, -14},  // -10 + 4 = -6
-    {-3, -4, 1},
-    {0, 4, -4},
-    {0, 0, 0},
-    {UINT64_MAX, -1, 0}, // ...1111 + 1 = ...0000
+    {.rs1_value=10, .rs2_value=  4, .expected= 6},   // 10 + 4 = 14
+    {.rs1_value=-10, .rs2_value=  4, .expected= -14},  // -10 + 4 = -6
+    {.rs1_value=-3, .rs2_value=  -4, .expected= 1},
+    {.rs1_value=0, .rs2_value=  4, .expected= -4},
+    {.rs1_value=0, .rs2_value=  0, .expected= 0},
+    {.rs1_value=UINT64_MAX, .rs2_value=  -1, .expected= 0}, // ...1111 + 1 = ...0000
     /* {INT64_MIN, 1, (INT64_C(1) << 63) - 1}, */
-    {UINT64_MAX, 1, UINT64_MAX - 1}
+    {.rs1_value=UINT64_MAX, .rs2_value=  1, .expected= UINT64_MAX - 1}
   };
 
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SUB, OP);
@@ -677,10 +677,10 @@ void test_SUB(void) {
 void test_SLL(void) {
   const struct r_instruction_case cases[] = {
     // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
-    {9, 1, 18},
-    {3, 6, 192},                    //  3 * 2^6 = 192
-    {-2, 3, -16},                // -2 * 2 * 2 * 2 = 16
-    {1, 31, INT64_C(1) << 31},   // 0 < UINT64_MAX
+    {.rs1_value=9, .rs2_value=  1, .expected= 18},
+    {.rs1_value=3, .rs2_value=  6, .expected= 192},                    //  3 * 2^6 = 192
+    {.rs1_value=-2, .rs2_value=  3, .expected= -16},                // -2 * 2 * 2 * 2 = 16
+    {.rs1_value=1, .rs2_value=  31, .expected= INT64_C(1) << 31},   // 0 < UINT64_MAX
   };
 
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SLL, OP);
@@ -689,13 +689,13 @@ void test_SLL(void) {
 void test_SLT(void) {
   const struct r_instruction_case cases[] = {
     // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
-      {1, 9, 1},
-      {9, 1, 0},
-      {2, 2, 0},
-      {0, -1, 0},
-      {UINT64_MAX, -1, 0},
-      {UINT64_MAX - 1, -1, 1},
-      {(uint64_t)-10, -9, 1},
+      {.rs1_value=1, .rs2_value=  9, .expected= 1},
+      {.rs1_value=9, .rs2_value=  1, .expected= 0},
+      {.rs1_value=2, .rs2_value=  2, .expected= 0},
+      {.rs1_value=0, .rs2_value=  -1, .expected= 0},
+      {.rs1_value=UINT64_MAX, .rs2_value=  -1, .expected= 0},
+      {.rs1_value=UINT64_MAX - 1, .rs2_value=  -1, .expected= 1},
+      {.rs1_value=(uint64_t)-10, .rs2_value=  -9, .expected= 1},
   };
 
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SLT, OP);
@@ -704,12 +704,12 @@ void test_SLT(void) {
 void test_SLTU(void) {
   const struct r_instruction_case cases[] = {
     // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
-      {1, 9, 1},                  // 1 < 9
-      {9, 1, 0},                  // 9 is not less than 1
-      {2, 2, 0},                  // Equality is false
-      {0, -1, 1},                 // 0 < UINT64_MAX
-      {UINT64_MAX, -1, 0},        // UINT64_MAX is not less than itself
-      {UINT64_MAX - 1, -1, 1},    // UINT64_MAX - 1 < UINT64_MAX
+      {.rs1_value=1, .rs2_value=  9, .expected= 1},                  // 1 < 9
+      {.rs1_value=9, .rs2_value=  1, .expected= 0},                  // 9 is not less than 1
+      {.rs1_value=2, .rs2_value=  2, .expected= 0},                  // Equality is false
+      {.rs1_value=0, .rs2_value=  -1, .expected= 1},                 // 0 < UINT64_MAX
+      {.rs1_value=UINT64_MAX, .rs2_value=  -1, .expected= 0},        // UINT64_MAX is not less than itself
+      {.rs1_value=UINT64_MAX - 1, .rs2_value=  -1, .expected= 1},    // UINT64_MAX - 1 < UINT64_MAX
   };
 
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SLTU, OP);
@@ -718,15 +718,15 @@ void test_SLTU(void) {
 void test_XOR(void) {
   const struct r_instruction_case cases[] = {
     // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
-    {0b0101, 0b1010, 0b1111},
-    {0b0101, 0b0101, 0b0000},
-    {0b1100, 0b1000, 0b0100},
-    {0, 0, 0}, // zero identity
+    {.rs1_value= 0b0101, .rs2_value= 0b1010, .expected= 0b1111},
+    {.rs1_value= 0b0101, .rs2_value= 0b0101, .expected= 0b0000},
+    {.rs1_value= 0b1100, .rs2_value= 0b1000, .expected= 0b0100},
+    {.rs1_value= 0, .rs2_value= 0, .expected= 0}, // zero identity
     // the following aren't the best but whatever
-    {UINT64_MAX, 0, UINT64_MAX},
-    {UINT64_C(1) << 63, 0, UINT64_C(1) << 63},
-    {0, -1, UINT64_MAX},
-    {(UINT64_C(1) << 63) | 1, 1, (UINT64_C(1) << 63)}
+    {.rs1_value= UINT64_MAX, .rs2_value= 0, .expected= UINT64_MAX},
+    {.rs1_value= UINT64_C(1) << 63, .rs2_value= 0, .expected= UINT64_C(1) << 63},
+    {.rs1_value= 0, .rs2_value= -1, .expected= UINT64_MAX},
+    {.rs1_value= (UINT64_C(1) << 63) | 1, .rs2_value= 1, .expected= (UINT64_C(1) << 63)}
   };
 
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), XOR, OP);
@@ -737,18 +737,18 @@ void test_SRL(void) {
     // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
       // Ordinary right shifts.
       // {value_shifted, (funct) | shift amount (shamt), result}
-      {18, (SRLI_IMM << 5) | 1, 9},
-      {192, (SRLI_IMM << 5) | 6, 3},
+      {.rs1_value= 18, .rs2_value= (SRLI_IMM << 5) | 1, .expected= 9},
+      {.rs1_value= 192, .rs2_value= (SRLI_IMM << 5) | 6, .expected= 3},
 
       // Logical shifts fill vacated high bits with zero, even when the
       // source's most significant bit is set.
-      {UINT64_C(0x8000000000000000), (SRLI_IMM << 5) | 1,
+      {.rs1_value= UINT64_C(0x8000000000000000), .rs2_value= (SRLI_IMM << 5) | 1, .expected=
        UINT64_C(0x4000000000000000)},
-      {UINT64_MAX, (SRLI_IMM << 5) | 31, UINT64_C(0x00000001FFFFFFFF)},
+      {.rs1_value= UINT64_MAX, .rs2_value= (SRLI_IMM << 5) | 31, .expected= UINT64_C(0x00000001FFFFFFFF)},
 
       // Boundary shift amounts and bits shifted entirely out.
-      {UINT64_C(0x8000000000000000), (SRLI_IMM << 5) | 63, 1},
-      {1, (SRLI_IMM << 5) | 1, 0},
+      {.rs1_value= UINT64_C(0x8000000000000000), .rs2_value= (SRLI_IMM << 5) | 63, .expected= 1},
+      {.rs1_value= 1, .rs2_value= (SRLI_IMM << 5) | 1, .expected= 0},
   };
 
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SRL, OP);
@@ -757,11 +757,11 @@ void test_SRL(void) {
 void test_SRA(void) {
   const struct r_instruction_case cases[] = {
     // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
-    {-8, (SRAI_IMM << 6) | 2, -2},   // ...1111 1000 >> 2 = ...1111 1110
-    {-15, (SRAI_IMM << 6) | 2, -4},  // ...1111 0001 >> 2 = ...1111 1100
-    {100, (SRAI_IMM << 6) | 4, 6},   // ...0110 0100 >> 4 = ...0000 0110
-    {UINT64_MAX, (SRAI_IMM << 6) | 63, UINT64_MAX}, // ...1111 >> 63 = ...1111
-    {100, (SRAI_IMM << 6) | 0, 100}, // ...0110 0100 >> 4 = ...0110 0100
+    {.rs1_value= -8, .rs2_value= (SRAI_IMM << 6) | 2, .expected= -2},   // ...1111 1000 >> 2 = ...1111 1110
+    {.rs1_value= -15, .rs2_value= (SRAI_IMM << 6) | 2, .expected= -4},  // ...1111 0001 >> 2 = ...1111 1100
+    {.rs1_value= 100, .rs2_value= (SRAI_IMM << 6) | 4, .expected= 6},   // ...0110 0100 >> 4 = ...0000 0110
+    {.rs1_value= UINT64_MAX, .rs2_value= (SRAI_IMM << 6) | 63, .expected= UINT64_MAX}, // ...1111 >> 63 = ...1111
+    {.rs1_value= 100, .rs2_value= (SRAI_IMM << 6) | 0, .expected= 100}, // ...0110 0100 >> 4 = ...0110 0100
   };
 
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SRA, OP);
@@ -770,10 +770,10 @@ void test_SRA(void) {
 void test_OR(void) {
   const struct r_instruction_case cases[] = {
     // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
-      {0b1010, 0b1010, 0b1010},             // Identical bit patterns
-      {0b1010, 0b0101, 0b1111},             // Fill in the unset bits
-      {0, -1, UINT64_MAX},                   // Sign-extended immediate sets all bits
-      {0b1100010, 0b1001010, 0b1101010},     // Combine set bits from both operands
+      {.rs1_value= 0b1010, .rs2_value= 0b1010, .expected= 0b1010},             // Identical bit patterns
+      {.rs1_value= 0b1010, .rs2_value= 0b0101, .expected= 0b1111},             // Fill in the unset bits
+      {.rs1_value= 0, .rs2_value= -1, .expected= UINT64_MAX},                   // Sign-extended immediate sets all bits
+      {.rs1_value= 0b1100010, .rs2_value= 0b1001010, .expected= 0b1101010},     // Combine set bits from both operands
   };
 
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), OR, OP);
@@ -782,10 +782,22 @@ void test_OR(void) {
 void test_AND(void) {
   const struct r_instruction_case cases[] = {
     // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
-      {0b1010, 0b1010, 0b1010},             // Identical bit patterns
-      {0b0101, 0b1010, 0},                  // No overlapping set bits
-      {0, -1, 0},                            // Zero AND sign-extended -1
-      {0b1100010, 0b1000010, 0b1000010},    // Keep only shared set bits
+      {.rs1_value= 0b1010, .rs2_value= 0b1010, .expected= 0b1010},             // Identical bit patterns
+      {.rs1_value= 0b0101, .rs2_value= 0b1010, .expected= 0},                  // No overlapping set bits
+      {.rs1_value= 0, .rs2_value= -1, .expected= 0},                            // Zero AND sign-extended -1
+      {.rs1_value= 0b1100010, .rs2_value= 0b1000010, .expected= 0b1000010},    // Keep only shared set bits
+  };
+
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), AND, OP);
+}
+
+void test_SLLW(void) {
+  const struct r_instruction_case cases[] = {
+    // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
+      {.rs1_value= 0b1010, .rs2_value= 0b1010, .expected= 0b1010},             // Identical bit patterns
+      {.rs1_value= 0b0101, .rs2_value= 0b1010, .expected= 0},                  // No overlapping set bits
+      {.rs1_value= 0, .rs2_value= -1, .expected= 0},                            // Zero AND sign-extended -1
+      {.rs1_value= 0b1100010, .rs2_value= 0b1000010, .expected= 0b1000010},    // Keep only shared set bits
   };
 
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), AND, OP);
@@ -1180,6 +1192,9 @@ int main(void) {
   RUN_TEST(test_SRA);
   RUN_TEST(test_OR);
   RUN_TEST(test_AND);
+
+  // test arithmetic with JUST registers; 32 bits ops
+  /* RUN_TEST(test_SLLW); */
 
   // test upper immediate stuff (weird ones)
   RUN_TEST(test_LUI);
