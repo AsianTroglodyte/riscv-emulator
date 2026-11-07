@@ -802,6 +802,26 @@ void test_SLLW(void) {
   test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), (FUNCT7_SLLW << 3) | FUNCT3_SLLW, OPCODE_OP_32);
 }
 
+void test_ADDW(void) {
+  const struct r_instruction_case cases[] = {
+    // int64_t rs1_value, int64_t rs2_value, uint64_t expected;
+    {.rs1_value=1, .rs2_value= 1, .expected= 2},     // 1 + 1 = 2
+    {.rs1_value=10, .rs2_value= 4, .expected= 14},   // 10 + 4 = 14
+    {.rs1_value=-4, .rs2_value= 1, .expected= 0xFFFFFFFFFFFFFFFD},  // sign extends: ...1100 -> ...1101
+    {.rs1_value=-3, .rs2_value= -4, .expected= 0xFFFFFFFFFFFFFFF9}, // ...1101 -> ...1001
+    // 1001 ... + 1000 ... -> 0001 ... (at most significant 4 bits)
+    {.rs1_value=(uint32_t)0x90000000, .rs2_value= 0x80000000, .expected= (uint32_t)0x10000000},
+    {.rs1_value=0, .rs2_value= 4, .expected= 4},
+    {.rs1_value=0, .rs2_value= 0, .expected= 0},
+    {.rs1_value=UINT64_MAX, .rs2_value= -1, .expected= UINT64_MAX - 1}, // -10 + 4 = -6
+    {.rs1_value=UINT64_MAX, .rs2_value= 1, .expected= 0}
+  };
+
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]),
+                     (FUNCT7_ADDW << 3) | FUNCT3_ADDW_SUBW,
+                     OPCODE_OP_32);
+}
+
 void test_LUI(void) {
   struct machine_state state = {0};
 
@@ -1194,6 +1214,7 @@ int main(void) {
 
   // test arithmetic with JUST registers; 32 bits ops
   RUN_TEST(test_SLLW);
+  RUN_TEST(test_ADDW);
 
   // test upper immediate stuff (weird ones)
   RUN_TEST(test_LUI);

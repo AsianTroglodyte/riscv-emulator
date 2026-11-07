@@ -275,9 +275,8 @@ void run_instruction(uint32_t instruction,
       }
       break;
     case FUNCT3_ADDW_SUBW:
-      printf("ADDW_SUBW_FUNCT_3\n");
       if (FUNCT7_ADDW == funct7) {
-        printf("ADDW\n");
+        registers[rd_index] = (int64_t)(int32_t)((uint32_t) registers[rs1_index] + (uint32_t) registers[rs2_index]);
       }
       else if (FUNCT7_SUBW == funct7) {
         printf("SUBW\n");
