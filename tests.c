@@ -672,7 +672,7 @@ void test_SUB(void) {
     {.rs1_value=UINT64_MAX, .rs2_value=  1, .expected= UINT64_MAX - 1}
   };
 
-  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SUB, OPCODE_OP);
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), (FUNCT7_SUB << 3) | (FUNCT3_SUB) , OPCODE_OP);
 }
 
 void test_SLL(void) {
@@ -684,7 +684,7 @@ void test_SLL(void) {
     {.rs1_value=1, .rs2_value=  31, .expected= INT64_C(1) << 31},   // 0 < UINT64_MAX
   };
 
-  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SLL, OPCODE_OP);
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), (FUNCT7_SLL << 3) | FUNCT3_SLL, OPCODE_OP);
 }
 
 void test_SLT(void) {
@@ -699,7 +699,7 @@ void test_SLT(void) {
       {.rs1_value=(uint64_t)-10, .rs2_value=  -9, .expected= 1},
   };
 
-  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SLT, OPCODE_OP);
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), (FUNCT7_SLT << 3) | FUNCT3_SLT, OPCODE_OP);
 }
 
 void test_SLTU(void) {
@@ -713,7 +713,7 @@ void test_SLTU(void) {
       {.rs1_value=UINT64_MAX - 1, .rs2_value=  -1, .expected= 1},    // UINT64_MAX - 1 < UINT64_MAX
   };
 
-  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SLTU, OPCODE_OP);
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), (FUNCT7_SLTU << 3) | FUNCT3_SLTU, OPCODE_OP);
 }
 
 void test_XOR(void) {
@@ -730,7 +730,7 @@ void test_XOR(void) {
     {.rs1_value= (UINT64_C(1) << 63) | 1, .rs2_value= 1, .expected= (UINT64_C(1) << 63)}
   };
 
-  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), XOR, OPCODE_OP);
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), (FUNCT7_XOR << 3) | FUNCT3_XOR, OPCODE_OP);
 }
 
 void test_SRL(void) {
@@ -752,7 +752,7 @@ void test_SRL(void) {
       {.rs1_value= 1, .rs2_value= (IMM_SRLI << 5) | 1, .expected= 0},
   };
 
-  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SRL, OPCODE_OP);
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), (FUNCT7_SRL << 3) | FUNCT3_SRL, OPCODE_OP);
 }
 
 void test_SRA(void) {
@@ -765,7 +765,7 @@ void test_SRA(void) {
     {.rs1_value= 100, .rs2_value= (IMM_SRAI << 6) | 0, .expected= 100}, // ...0110 0100 >> 4 = ...0110 0100
   };
 
-  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), SRA, OPCODE_OP);
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), (FUNCT7_SRA << 3) | FUNCT3_SRA, OPCODE_OP);
 }
 
 void test_OR(void) {
@@ -777,7 +777,7 @@ void test_OR(void) {
       {.rs1_value= 0b1100010, .rs2_value= 0b1001010, .expected= 0b1101010},     // Combine set bits from both operands
   };
 
-  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), OR, OPCODE_OP);
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), (FUNCT7_OR << 3) | FUNCT3_OR, OPCODE_OP);
 }
 
 void test_AND(void) {
@@ -789,7 +789,7 @@ void test_AND(void) {
       {.rs1_value= 0b1100010, .rs2_value= 0b1000010, .expected= 0b1000010},    // Keep only shared set bits
   };
 
-  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), AND, OPCODE_OP);
+  test_r_instruction(cases, sizeof(cases) /sizeof(cases[0]), (FUNCT7_AND << 3) | FUNCT3_AND, OPCODE_OP);
 }
 
 void test_SLLW(void) {
@@ -1132,7 +1132,7 @@ void test_s_create(void) {
 }
 
 void test_r_create(void) {
-  uint32_t r_instruction_1 = create_r_type(SUB, 6, 7, 0, OPCODE_OP);
+  uint32_t r_instruction_1 = create_r_type((FUNCT7_SUB << 3) | (FUNCT3_SUB), 6, 7, 0, OPCODE_OP);
   // funct7=0b0100000 rs2=00110, rs1=00111, funct3=000, rd=00000, opcode=0110011
   TEST_ASSERT_EQUAL(0b01000000011000111000000000110011, r_instruction_1);
 

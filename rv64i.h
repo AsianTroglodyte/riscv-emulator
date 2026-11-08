@@ -165,21 +165,6 @@ enum SYSTEM_enum: uint32_t {
   EBREAK =    0b0000000000010000000000000,  // includes all FENCE_TSO fields. best way to guarantee ID
 };
 
-// backing numbers are funct7 + funct3
-// sub_funct7 = 0100000; sub_func3 = 000
-enum op_enums: uint32_t {
-  ADD=         0b0000000000,
-  SUB=         0b0100000000,
-  SLL=         0b0000000001,
-  SLT=         0b0000000010,
-  SLTU=        0b0000000011,
-  XOR=         0b0000000100,
-  SRL=         0b0000000101,
-  SRA=         0b0100000101,
-  OR=          0b0000000110,
-  AND=         0b0000000111,
-};
-
 
 void print_registers(const uint64_t registers[NUM_REGISTERS]);
 void print_memory(const uint8_t memory[]);
