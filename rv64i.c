@@ -368,8 +368,8 @@ void run_instruction(uint32_t instruction,
     rs1_index = get_rs1_index(instruction);
     // save address of next instruction
     registers[rd_index] = next_pc;
-    // jump to target address
-    next_pc = (int64_t) get_i_immediate(instruction) + registers[rs1_index];
+    // jump to target address; must set result's least significant bit to zero
+    next_pc = ((int64_t) get_i_immediate(instruction) + registers[rs1_index]) & (UINT64_MAX - 1);
     break;
   case OPCODE_RESERVED:
     printf("RESERVED\n");
@@ -379,7 +379,6 @@ void run_instruction(uint32_t instruction,
     // save address of next instruction
     registers[rd_index] = next_pc;
     // jump to target address
-    /* int64_t immediate_value = (uint32_t) get_j_immediate(instruction) << 1; */
     next_pc = (int64_t) *program_counter + get_j_immediate(instruction);
     break;
   case OPCODE_SYSTEM:

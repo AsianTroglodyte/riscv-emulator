@@ -970,6 +970,17 @@ void test_JALR(void) {
   state.registers[10] = 12;
   run_instruction(create_i_type(-4, 10, JALR_OPCODE, 20, OPCODE_JALR), &state);
   TEST_ASSERT_EQUAL_UINT64(8, state.program_counter);
+
+  state.program_counter = 12;
+  state.registers[10] = 12;
+  run_instruction(create_i_type(5, 10, JALR_OPCODE, 20, OPCODE_JALR), &state);
+  TEST_ASSERT_EQUAL_UINT64(16, state.program_counter); // (rs1) 12 + (imm) 5 = 17 -> 16
+
+  state.program_counter = 12;
+  state.registers[10] = 13;
+  // imm 5 -> 4 caues jump only takes multiples of 2
+  run_instruction(create_i_type(5, 10, JALR_OPCODE, 20, OPCODE_JALR), &state);
+  TEST_ASSERT_EQUAL_UINT64(18, state.program_counter); // (rs1) 13 + (modified immediate) 5 = 18
 }
 
 struct branch_test_case {
