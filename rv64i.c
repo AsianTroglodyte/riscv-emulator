@@ -71,6 +71,7 @@ void run_instruction(uint32_t instruction,
     printf("CUSTOM_0\n");
     break;
   case OPCODE_MISC_MEM:
+    /* if  */
     printf("MISC_MEM\n");
     break;
   case OPCODE_OP_IMM:
@@ -378,7 +379,8 @@ void run_instruction(uint32_t instruction,
     // save address of next instruction
     registers[rd_index] = next_pc;
     // jump to target address
-    next_pc = (int64_t) *program_counter + (int64_t) get_j_immediate(instruction);
+    /* int64_t immediate_value = (uint32_t) get_j_immediate(instruction) << 1; */
+    next_pc = (int64_t) *program_counter + get_j_immediate(instruction);
     break;
   case OPCODE_SYSTEM:
     printf("SYSTEM\n");
@@ -448,10 +450,10 @@ int32_t get_s_immediate(uint32_t instruction) {
 }
 
 int32_t get_j_immediate(uint32_t instruction) {
-  uint32_t imm_20 = bits(instruction, 31, 31) << 19;
-  uint32_t imm_10_1 = bits(instruction, 21, 30);
-  uint32_t imm_11 = bits(instruction, 20, 20) << 10;
-  uint32_t imm_19_12 = bits(instruction, 12, 19) << 11;
+  uint32_t imm_20 = bits(instruction, 31, 31) << 20;
+  uint32_t imm_10_1 = bits(instruction, 21, 30) << 1;
+  uint32_t imm_11 = bits(instruction, 20, 20) << 11;
+  uint32_t imm_19_12 = bits(instruction, 12, 19) << 12;
   uint32_t immediate = sign_extend_32(imm_20 + imm_10_1 + imm_11 + imm_19_12, 20);
   return immediate;
 }
@@ -723,15 +725,17 @@ uint32_t create_u_type(uint32_t upper_immediate, uint32_t rd_index, uint32_t opc
   return (uint32_t) upper_immediate | rd_index | opcode;
 }
 
-uint32_t create_j_type(uint32_t immediate, uint32_t rd_index, uint32_t opcode) {
+int32_t create_j_type(uint32_t immediate, uint32_t rd_index, uint32_t opcode) {
   assert_valid_register(rd_index);
   assert_valid_opcode(opcode);
-  uint32_t imm_20 = (immediate & UINT32_C(1) << 19);
-  uint32_t imm_19_12 = (immediate >> 11) & 0b11111111;
-  uint32_t imm_11 = ((0b1 << 10) & immediate) >> 2;
-  uint32_t imm_10_1 = (0b1111111111 & immediate) << 9;
-  immediate = (imm_20 | imm_10_1 | imm_11 | imm_19_12) << 12;
-  return (uint32_t) immediate | (rd_index << 7) | opcode;
+  // immediate must be a valid
+  assert((immediate % 2 == 0) && "immediate must be a multiple of 2");
+  // Map offset bits [20|10:1|11|19:12] to instruction bits [31:12].
+  uint32_t imm_20 =     (immediate  & (UINT32_C(1) << 20))  << 11;
+  uint32_t imm_19_12 =  immediate   & UINT32_C(0x000ff000);
+  uint32_t imm_11 =     (immediate  & (UINT32_C(1) << 11))  << 9;
+  uint32_t imm_10_1 =   (immediate  & UINT32_C(0x000007fe)) << 20;
+  return imm_20 | imm_10_1 | imm_11 | imm_19_12 | (rd_index << 7) | opcode;
 }
 
 uint32_t create_b_type(uint32_t immediate,

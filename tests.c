@@ -942,12 +942,16 @@ void test_JAL(void) {
   struct machine_state state = {0};
 
   state.program_counter = 12;
+  // NOTE: J type instruction encode upper bits 20:1 not 20:0 thus the bits
+  // shift before sending vals in create_j_type.
+  /* uint32_t immediate, uint32_t rd_index, uint32_t opcode */
   run_instruction(create_j_type(10, 10, OPCODE_JAL), &state);
-  TEST_ASSERT_EQUAL_UINT64(12 + 4, state.registers[10]);
+  TEST_ASSERT_EQUAL_UINT64(12 + 4, state.registers[10]); // address of instruction following must be pc + 4
   TEST_ASSERT_EQUAL_UINT64(10 + 12, state.program_counter);
 
   state.program_counter = 12;
-  run_instruction(create_j_type(-8, 11, OPCODE_JAL), &state);
+  run_instruction(create_j_type((uint32_t)-8,
+                                11, OPCODE_JAL), &state);
   TEST_ASSERT_EQUAL_UINT64(12 + 4, state.registers[11]);
   TEST_ASSERT_EQUAL_UINT64(4, state.program_counter);
 }
@@ -1180,6 +1184,7 @@ struct j_create_case {
   uint32_t rd_index;
 };
 
+
 void test_j_create_helper(const struct j_create_case cases[],
                           size_t case_count,
                           uint32_t opcode) {
@@ -1189,7 +1194,7 @@ void test_j_create_helper(const struct j_create_case cases[],
     uint32_t imm_19_12 = cases[i].imm_19_12;
     uint32_t imm_20 = cases[i].imm_20;
     uint32_t thing = (cases[i].rd_index << 7) | opcode;
-    uint32_t immediate = (imm_20 << 19) | (imm_19_12 << 11) | (imm_11 << 10) | imm_10_1;
+    uint32_t immediate = ((imm_20 << 19) | (imm_19_12 << 11) | (imm_11 << 10) | imm_10_1) << 1;
 
     uint32_t instruction = create_j_type(immediate, 10, OPCODE_JAL);
     TEST_ASSERT_EQUAL((imm_20 << 31) |
@@ -1207,8 +1212,8 @@ void test_j_create(void) {
     {0, 0, 0, 0b1, 10},
     {0, 0, 0b11111111, 0b1, 10},
     {0, 0b1, 0b11111111, 0b1, 10},
-    {0b1111111111, 0b1, 0b11111111, 0b1, 10},
-    {0b1010010111, 0b1, 0b10110011, 0b0, 10}
+    {0b1111111110, 0b1, 0b11111111, 0b1, 10},
+    {0b1010010110, 0b1, 0b10110011, 0b0, 10}
   };
 
   test_j_create_helper(cases, 5, OPCODE_JAL);

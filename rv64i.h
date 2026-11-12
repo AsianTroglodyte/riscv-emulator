@@ -121,6 +121,8 @@ enum funct3_enums: uint32_t {
   FUNCT3_OR=          0b110,
   FUNCT3_AND=         0b111,
 
+  FUNCT3_MISC_MEM=    0b000,
+
 };
 
 enum funct7_enusm: uint32_t {
@@ -141,6 +143,8 @@ enum funct7_enusm: uint32_t {
   FUNCT7_SRA=        0b0100000,
   FUNCT7_OR=         0b0000000,
   FUNCT7_AND=        0b0000000,
+
+
 };
 
 enum immediate_id_enums: uint32_t {
@@ -177,7 +181,7 @@ uint32_t create_i_type_shamt(uint32_t shamt, int32_t rs1_index, int32_t rd_index
 uint32_t create_s_type(uint32_t immediate, int32_t rs2_index, int32_t rs1_index, int32_t funct3, int32_t opcode);
 uint32_t create_r_type(uint32_t funct7_funct3, int32_t rs2_index, int32_t rs1_index, int32_t rd_index, int32_t opcode);
 uint32_t create_u_type(uint32_t upper_immediate, uint32_t rd_index, uint32_t opcode);
-uint32_t create_j_type(uint32_t immediate, uint32_t rd_index, uint32_t opcode);
+int32_t create_j_type(uint32_t immediate, uint32_t rd_index, uint32_t opcode);
 uint32_t create_b_type(uint32_t immediate, uint32_t rs2_index, uint32_t rs1_index, uint32_t funct3, uint32_t opcode);
 uint32_t bits(uint32_t instruction, int start, int end);
 uint64_t bits64(uint64_t bits, int start, int end);
