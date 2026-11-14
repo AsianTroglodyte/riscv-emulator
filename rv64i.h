@@ -121,11 +121,14 @@ enum funct3_enums: uint32_t {
   FUNCT3_OR=          0b110,
   FUNCT3_AND=         0b111,
 
+  // MISC_MEM
   FUNCT3_MISC_MEM=    0b000,
 
+  // PRIV
+  FUNCT3_=    0b000,
 };
 
-enum funct7_enusm: uint32_t {
+enum funct7_enum: uint32_t {
   FUNCT7_ADDW=       0b0000000,
   FUNCT7_SUBW=       0b0100000,
   FUNCT7_SLLW=       0b0000000,
@@ -143,8 +146,11 @@ enum funct7_enusm: uint32_t {
   FUNCT7_SRA=        0b0100000,
   FUNCT7_OR=         0b0000000,
   FUNCT7_AND=        0b0000000,
+};
 
-
+enum funct12_enum: uint32_t {
+  FUNCT12_ECALL=      0b000000000000,
+  FUNCT12_BREAK=      0b000000000001,
 };
 
 enum immediate_id_enums: uint32_t {

@@ -383,6 +383,15 @@ void run_instruction(uint32_t instruction,
     break;
   case OPCODE_SYSTEM:
     printf("SYSTEM\n");
+    uint32_t funct12 = bits(instruction, 20, 31);
+    switch (funct12) {
+    case FUNCT12_ECALL:
+      printf("ECALL\n");
+      break;
+    case FUNCT12_BREAK:
+      printf("EBREAK\n");
+      break;
+    }
     break;
   case OPCODE_OP_VE:
     printf("OP_VE\n");

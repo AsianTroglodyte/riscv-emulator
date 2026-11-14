@@ -1124,6 +1124,22 @@ void test_BGEU() {
   test_branch_instructions(cases, sizeof(cases)/sizeof(cases[0]), FUNCT3_BGEU);
 }
 
+
+void test_ECALL() {
+  /* uint32_t create_i_type(uint32_t immediate, int32_t rs1, int32_t funct3, int32_t rd, int32_t opcode); */
+  const uint32_t test_1 = create_i_type(FUNCT12_ECALL, 0, 0, 0, OPCODE_SYSTEM);
+  struct machine_state state = {0};
+  run_instruction(test_1, &state);
+}
+
+
+void test_BREAK() {
+  const uint32_t test_1 = create_i_type(FUNCT12_BREAK, 0, 0, 0, OPCODE_SYSTEM);
+  struct machine_state state = {0};
+  run_instruction(test_1, &state);
+}
+
+
 void test_s_create(void) {
   // EASY: 1000 is within the signed 12-bit S-immediate range.
   uint32_t s_instruction_1 = create_s_type(1000, 6, 7, FUNCT3_SB, OPCODE_STORE);
@@ -1327,6 +1343,10 @@ int main(void) {
   RUN_TEST(test_BGE);
   RUN_TEST(test_BLTU);
   RUN_TEST(test_BGEU);
+
+  // SYSTEM instruction
+  RUN_TEST(test_ECALL);
+  RUN_TEST(test_BREAK);
 
   UNITY_END();
 }
