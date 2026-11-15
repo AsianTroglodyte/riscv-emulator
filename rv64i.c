@@ -72,8 +72,8 @@ void run_instruction(uint32_t instruction,
     break;
   case OPCODE_MISC_MEM:
     funct3 = get_funct3(instruction);
-    uint32_t pred = bits(instruction, 20, 23);
-    uint32_t succ = bits(instruction, 24, 27);
+    uint32_t succ = bits(instruction, 20, 23);
+    uint32_t pred = bits(instruction, 24, 27);
     rs1_index = get_rs1_index(instruction);
     rd_index = get_rd_index(instruction);
 
