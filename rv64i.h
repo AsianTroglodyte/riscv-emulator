@@ -122,11 +122,24 @@ enum funct3_enums: uint32_t {
   FUNCT3_AND=         0b111,
 
   // MISC_MEM
-  FUNCT3_MISC_MEM=    0b000,
+  FUNCT3_FENCE=    0b000,
 
   // PRIV
-  FUNCT3_=    0b000,
+  /* FUNCT3_=    0b000, */
 };
+
+
+enum MISC_MEM: uint32_t {
+  // FENCE MODE field
+  FM_FENCE=               0b0000,
+  FM_PAUSE=               0b0000,
+
+  // FENCE.TSO
+  FM_FENCE_TSO=           0b1000,
+  PRED_FENCE_TSO=         0b0011,
+  SUCC_FENCE_TSO=         0b0011,
+};
+
 
 enum funct7_enum: uint32_t {
   FUNCT7_ADDW=       0b0000000,
@@ -150,7 +163,7 @@ enum funct7_enum: uint32_t {
 
 enum funct12_enum: uint32_t {
   FUNCT12_ECALL=      0b000000000000,
-  FUNCT12_BREAK=      0b000000000001,
+  FUNCT12_EBREAK=      0b000000000001,
 };
 
 enum immediate_id_enums: uint32_t {
@@ -164,10 +177,10 @@ enum immediate_id_enums: uint32_t {
   IMM_SRAIW=    0b0100000,
 };
 
-enum MISC_MEM_enum: uint32_t {
-  FENCE =     0b000,
-  FENCE_TSO = 0b1000001100110000000000000, // includes all FENCE_TSO fields. best way to guarantee ID
-  PAUSE =     0b0000000100000000000000000,
+enum instructionID: uint32_t {
+  FENCE,
+  FENCE_TSO,
+  PAUSE,
 };
 
 enum SYSTEM_enum: uint32_t {
@@ -189,6 +202,7 @@ uint32_t create_r_type(uint32_t funct7_funct3, int32_t rs2_index, int32_t rs1_in
 uint32_t create_u_type(uint32_t upper_immediate, uint32_t rd_index, uint32_t opcode);
 int32_t create_j_type(uint32_t immediate, uint32_t rd_index, uint32_t opcode);
 uint32_t create_b_type(uint32_t immediate, uint32_t rs2_index, uint32_t rs1_index, uint32_t funct3, uint32_t opcode);
+uint32_t create_fence_type(uint32_t pred, uint32_t succ, uint32_t instruction_type);
 uint32_t bits(uint32_t instruction, int start, int end);
 uint64_t bits64(uint64_t bits, int start, int end);
 

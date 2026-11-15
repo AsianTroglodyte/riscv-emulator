@@ -71,8 +71,43 @@ void run_instruction(uint32_t instruction,
     printf("CUSTOM_0\n");
     break;
   case OPCODE_MISC_MEM:
-    /* if  */
     printf("MISC_MEM\n");
+
+    printf("instruction: ");
+    print_bits(instruction);
+    funct3 = get_funct3(instruction);
+    uint32_t pred = ((0b1111 << 24) & instruction) >> 24;
+    printf("pred: ");
+    print_bits(pred);
+    uint32_t succ = ((0b1111 << 20) & instruction) >> 20;
+    printf("succ: ");
+    print_bits(succ);
+
+    if (FUNCT3_FENCE == funct3) {
+      printf("FENCE\n");
+      uint32_t fm = bits(instruction, 28, 31);
+
+      // check if FENCE_TSO
+      if (FM_FENCE_TSO == fm && pred == 0b0011 && succ == 0b0011) {
+        // TODO: throw some error here when not valid FENCE.TSO not super urgent
+        // these instruction don't do anything on our actual emulator
+        printf("FENCE.TSO\n");
+      }
+      // check if regular FENCE
+      else if (fm == FM_FENCE) {
+        // check if PAUSE instruction (PURELY a perf hint)
+        if (pred == 0b0001 && succ == 0b0000) {
+          printf("PAUSE instruction hit.\n");
+        }
+        // if regular fence FENCE instruction.
+        else {
+          printf("FENCE: regular fence instruction\n");
+        }
+      }
+      else {
+        printf("invalid fence mode value for FENCE instruction\n");
+      }
+    }
     break;
   case OPCODE_OP_IMM:
     // Integer Register-Immediate Instructions
@@ -388,7 +423,7 @@ void run_instruction(uint32_t instruction,
     case FUNCT12_ECALL:
       printf("ECALL\n");
       break;
-    case FUNCT12_BREAK:
+    case FUNCT12_EBREAK:
       printf("EBREAK\n");
       break;
     }
@@ -775,4 +810,32 @@ uint32_t create_b_type(uint32_t immediate,
   immediate = (imm_12 | imm_11 | imm_10_5 | imm_4_1);
 
   return (imm_12 | imm_11 | imm_10_5 | imm_4_1) | rs2_index | rs1_index | funct3 | opcode;
+}
+
+uint32_t create_fence_type(uint32_t pred,
+                           uint32_t succ,
+                           uint32_t instruction_type) {
+  // NOTE: rs1 and rd simply unused fields. they may be used for future
+  // extension. Thus, keep them zero.
+  pred = pred << 24;
+  succ = succ << 20;
+
+  uint32_t instruction_mask = 0;
+  uint32_t funct3_opcode_mask = (FUNCT3_FENCE << 12) | (OPCODE_MISC_MEM);
+
+  if (FENCE == instruction_type) {
+    instruction_mask = (FM_FENCE << 28) | funct3_opcode_mask;
+  } else if (FENCE_TSO == instruction_type) {
+    instruction_mask = (FM_FENCE_TSO << 28)
+                       | (0b0011 << 24) // pred
+                       | (0b0011 << 20) // succ
+                       | funct3_opcode_mask;
+  } else if (PAUSE == instruction_type) {
+    instruction_mask = (FM_PAUSE << 28)
+                       | (0b0001 << 24) // pred
+                       | (0b0000 << 20) // succ
+                       | funct3_opcode_mask;
+  }
+
+  return pred | succ | instruction_mask;
 }

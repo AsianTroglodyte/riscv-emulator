@@ -1134,9 +1134,29 @@ void test_ECALL() {
 
 
 void test_BREAK() {
-  const uint32_t test_1 = create_i_type(FUNCT12_BREAK, 0, 0, 0, OPCODE_SYSTEM);
+  const uint32_t test_1 = create_i_type(FUNCT12_EBREAK, 0, 0, 0, OPCODE_SYSTEM);
   struct machine_state state = {0};
   run_instruction(test_1, &state);
+}
+
+
+void test_FENCE_TSO() {
+  const uint32_t test_1 = create_fence_type(PRED_FENCE_TSO, SUCC_FENCE_TSO, FENCE_TSO);
+  struct machine_state state = {0};
+  run_instruction(test_1, &state);
+}
+
+
+void test_FENCE() {
+  /* const uint32_t test_1 = create_i_type(FUNCT12_BREAK, 0, 0, 0, OPCODE_SYSTEM); */
+  /* struct machine_state state = {0}; */
+  /* run_instruction(test_1, &state); */
+}
+
+void test_PAUSE() {
+  /* const uint32_t test_1 = create_i_type(FUNCT12_BREAK, 0, 0, 0, OPCODE_SYSTEM); */
+  /* struct machine_state state = {0}; */
+  /* run_instruction(test_1, &state); */
 }
 
 
@@ -1345,6 +1365,7 @@ int main(void) {
   RUN_TEST(test_BGEU);
 
   // SYSTEM instruction
+  RUN_TEST(test_FENCE_TSO);
   RUN_TEST(test_ECALL);
   RUN_TEST(test_BREAK);
 
