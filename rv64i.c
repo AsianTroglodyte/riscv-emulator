@@ -71,41 +71,32 @@ void run_instruction(uint32_t instruction,
     printf("CUSTOM_0\n");
     break;
   case OPCODE_MISC_MEM:
-    printf("MISC_MEM\n");
-
-    printf("instruction: ");
-    print_bits(instruction);
     funct3 = get_funct3(instruction);
     uint32_t pred = ((0b1111 << 24) & instruction) >> 24;
-    printf("pred: ");
-    print_bits(pred);
     uint32_t succ = ((0b1111 << 20) & instruction) >> 20;
-    printf("succ: ");
-    print_bits(succ);
 
     if (FUNCT3_FENCE == funct3) {
-      printf("FENCE\n");
       uint32_t fm = bits(instruction, 28, 31);
 
       // check if FENCE_TSO
       if (FM_FENCE_TSO == fm && pred == 0b0011 && succ == 0b0011) {
         printf("FENCE.TSO\n");
       }
-      // check if regular FENCE
-      else if (fm == FM_FENCE) {
-        // check if PAUSE instruction (PURELY a perf hint)
-        if (pred == 0b0001 && succ == 0b0000) {
-          printf("PAUSE instruction hit.\n");
-        }
-        // if regular fence FENCE instruction.
-        else {
-          printf("FENCE: regular fence instruction\n");
-        }
+      // check if PAUSE instruction (PURELY a perf hint)
+      else if (FM_FENCE == fm && pred == 0b0001 && succ == 0b0000) {
+        printf("PAUSE instruction hit.\n");
+      }
+      // if regular fence FENCE instruction.
+      else if (FM_FENCE == fm) {
+        printf("FENCE: regular fence instruction\n");
       }
       else {
         printf("invalid fence mode value for FENCE instruction\n");
       }
+    } else {
+      printf("MISC_MEM opcode does not have corret funct3");
     }
+
     break;
   case OPCODE_OP_IMM:
     // Integer Register-Immediate Instructions
