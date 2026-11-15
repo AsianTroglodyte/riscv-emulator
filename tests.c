@@ -1148,15 +1148,15 @@ void test_FENCE_TSO() {
 
 
 void test_FENCE() {
-  /* const uint32_t test_1 = create_i_type(FUNCT12_BREAK, 0, 0, 0, OPCODE_SYSTEM); */
-  /* struct machine_state state = {0}; */
-  /* run_instruction(test_1, &state); */
+  const uint32_t test_1 = create_fence_type(0b0011, 0b0011, FENCE);
+  struct machine_state state = {0};
+  run_instruction(test_1, &state);
 }
 
 void test_PAUSE() {
-  /* const uint32_t test_1 = create_i_type(FUNCT12_BREAK, 0, 0, 0, OPCODE_SYSTEM); */
-  /* struct machine_state state = {0}; */
-  /* run_instruction(test_1, &state); */
+  const uint32_t test_1 = create_fence_type(PRED_PAUSE, SUCC_PAUSE, PAUSE);
+  struct machine_state state = {0};
+  run_instruction(test_1, &state);
 }
 
 
@@ -1368,6 +1368,7 @@ int main(void) {
   RUN_TEST(test_FENCE_TSO);
   RUN_TEST(test_ECALL);
   RUN_TEST(test_BREAK);
-
+  RUN_TEST(test_FENCE);
+  RUN_TEST(test_PAUSE);
   UNITY_END();
 }

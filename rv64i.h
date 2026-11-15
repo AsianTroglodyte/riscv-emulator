@@ -132,7 +132,12 @@ enum funct3_enums: uint32_t {
 enum MISC_MEM: uint32_t {
   // FENCE MODE field
   FM_FENCE=               0b0000,
+
+
+  // PAUSE
   FM_PAUSE=               0b0000,
+  PRED_PAUSE=             0b0001,
+  SUCC_PAUSE=             0b0000,
 
   // FENCE.TSO
   FM_FENCE_TSO=           0b1000,
