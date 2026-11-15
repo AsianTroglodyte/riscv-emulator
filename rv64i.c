@@ -86,7 +86,7 @@ void run_instruction(uint32_t instruction,
       }
         // check if PAUSE instruction (PURELY a perf hint)
         // TODO: check rd and rs1 too as zero
-      else if (FM_FENCE == fm && pred == 0b0001 && succ == 0b0000) {
+      else if (FM_FENCE == fm && pred == 0b0001 && succ == 0b0000 && rs1_index == 0 && rd_index  == 0) {
         printf("PAUSE instruction hit.\n");
       }
       // if regular fence FENCE instruction. it does NOT need to fm == FM_FENCE/0b0000
