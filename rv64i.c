@@ -89,8 +89,6 @@ void run_instruction(uint32_t instruction,
 
       // check if FENCE_TSO
       if (FM_FENCE_TSO == fm && pred == 0b0011 && succ == 0b0011) {
-        // TODO: throw some error here when not valid FENCE.TSO not super urgent
-        // these instruction don't do anything on our actual emulator
         printf("FENCE.TSO\n");
       }
       // check if regular FENCE
