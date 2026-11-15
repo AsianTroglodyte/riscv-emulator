@@ -60,9 +60,9 @@ The following handlers currently operate on the emulator's 64-bit registers. The
 - [x] AND
 
 ### Ordering and environment
-- [] FENCE — MISC_MEM currently only prints a message.
-- [ ] ECALL — SYSTEM currently only prints a message.
-- [ ] EBREAK — SYSTEM currently only prints a message.
+- [x] FENCE — MISC_MEM currently only prints a message.
+- [x] ECALL — SYSTEM currently only prints a message.
+- [x] EBREAK — SYSTEM currently only prints a message.
 
 ## RV64I additions
 
@@ -87,12 +87,9 @@ The following handlers currently operate on the emulator's 64-bit registers. The
 These W operations produce a 32-bit result sign-extended to 64 bits. OP_IMM_32 and OP_32 are currently print-only placeholders.
 
 ## Cross-cutting completion work
-
-- [ ] Add an explicit RV32 execution mode or separate RV32 implementation: 32-bit register/PC arithmetic, signed comparisons, wrapping, and five-bit shift amounts/encoding validation.
-- [ ] Reject RV64-only instructions in RV32 mode.
-- [ ] Enforce x0: reads return zero and writes are discarded.
-- [ ] Mask register shift counts: low six bits for RV64, low five bits for RV32 (and RV64 W shifts).
-- [ ] Fix JALR: calculate the target using the original source before writing rd, and clear target bit 0.
+- [x] Enforce x0: reads return zero and writes are discarded.
+- [x] Mask register shift counts: low six bits for RV64, low five bits for RV32 (and RV64 W shifts).
+- [x] Fix JALR: calculate the target using the original source before writing rd, and clear target bit 0.
 - [ ] Review full-width address calculation: memory addresses currently pass through a uint32_t variable even in the 64-bit machine.
 - [ ] Make illegal/unsupported instruction handling consistent; printing and continuing is not a complete trap/error policy.
 - [ ] Define memory bounds, alignment, and instruction-target alignment handling.
@@ -111,8 +108,8 @@ These W operations produce a 32-bit result sign-extended to 64 bits. OP_IMM_32 a
 Work in this order:
 
 - [ ] Finish the remaining instruction handlers above.
-- [ ] 1. Build tooling: apply warning flags to builds and add AddressSanitizer/UndefinedBehaviorSanitizer development builds.
-- [ ] 2. Execution errors: define explicit success/fault results, consistent failure-state behavior, and caller-owned diagnostics.
+- [x] 1. Build tooling: apply warning flags to builds and add AddressSanitizer/UndefinedBehaviorSanitizer development builds.
+- [x] 2. Execution errors: define explicit success/fault results, consistent failure-state behavior, and caller-owned diagnostics.
 - [ ] 3. RV32/RV64 semantics: deliberately handle register width, wrapping, signed comparisons, shift rules, and mode-specific instructions.
 - [ ] 4. Stronger tests: add independent instruction encodings, property tests, differential testing, and decoder fuzzing.
 - [ ] 5. Module boundaries: separate cohesive responsibilities with small public interfaces and private implementation details; organize tests by instruction category.

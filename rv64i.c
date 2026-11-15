@@ -407,7 +407,6 @@ void run_instruction(uint32_t instruction,
     next_pc = (int64_t) *program_counter + get_j_immediate(instruction);
     break;
   case OPCODE_SYSTEM:
-    printf("SYSTEM\n");
     uint32_t funct12 = bits(instruction, 20, 31);
     switch (funct12) {
     case FUNCT12_ECALL:
@@ -430,6 +429,9 @@ void run_instruction(uint32_t instruction,
   }
 
   *program_counter = next_pc;
+
+  // writes to x0 are discarded
+  registers[0] = 0;
 }
 
 /**
