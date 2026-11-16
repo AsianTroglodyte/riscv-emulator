@@ -1286,6 +1286,34 @@ void test_get_s_immediate(void) {
   TEST_ASSERT_EQUAL(2047, get_s_immediate(s_instruction_4));
 }
 
+void test_execution_status() {
+  struct machine_state state = {0};
+
+  uint32_t instructions[1] = {
+    create_i_type(10, 10, FUNCT3_LW, 10, OPCODE_LOAD),
+  };
+
+  for (int i = 0; i < 1; i++) {
+    execution_status execution_status_code = run_instruction(instructions[i], &state);
+    switch (execution_status_code) {
+    case SUCCESS:
+      printf("SUCCESS\n");
+      break;
+    case RV64I_ERROR_ILLEGAL_INSTRUCTION:
+      printf("RV64I_ERROR_ILLEGAL_INSTRUCTION\n");
+      goto DONE;
+    case LOAD_ACCESS_FAULT:
+      printf("LOAD_ACCESS_FAULT\n");
+      goto DONE;
+    case STORE_ACCESS_FAULT:
+      printf("STORE_ACCESS_FAULT\n");
+      goto DONE;
+    }
+  }
+
+ DONE:
+}
+
 
 int main(void) {
   UNITY_BEGIN();
@@ -1370,5 +1398,11 @@ int main(void) {
   RUN_TEST(test_BREAK);
   RUN_TEST(test_FENCE);
   RUN_TEST(test_PAUSE);
+
+  // execution status
+  RUN_TEST(test_execution_status);
+
+
   UNITY_END();
+
 }

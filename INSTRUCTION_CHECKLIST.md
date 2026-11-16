@@ -90,10 +90,22 @@ These W operations produce a 32-bit result sign-extended to 64 bits. OP_IMM_32 a
 - [x] Enforce x0: reads return zero and writes are discarded.
 - [x] Mask register shift counts: low six bits for RV64, low five bits for RV32 (and RV64 W shifts).
 - [x] Fix JALR: calculate the target using the original source before writing rd, and clear target bit 0.
-- [ ] Review full-width address calculation: memory addresses currently pass through a uint32_t variable even in the 64-bit machine.
+- [x] Review full-width address calculation: memory addresses currently pass through a uint32_t variable even in the 64-bit machine.
 - [ ] Make illegal/unsupported instruction handling consistent; printing and continuing is not a complete trap/error policy.
 - [ ] Define memory bounds, alignment, and instruction-target alignment handling.
-- [ ] Audit C integer conversions and signed overflow, including PC/address calculations.
+  - [ ] Memory bounds: define and test checked memory accesses and explicit access-fault results.
+    - [x Document the initial memory map: configured RAM is the only accessible region; device mappings and additional regions are deferred.
+    - [ ] Track RAM's guest base address and size explicitly, and validate the entire access range before indexing host memory. Make the bounds check itself safe from integer overflow or underflow.
+    - [ ] Give loads, stores, and instruction fetches a checked success/fault interface; never access outside the host allocation.
+    - [ ] Distinguish instruction access faults (cause 1), load access faults (cause 5), and store/AMO access faults (cause 7), rather than reporting illegal instructions or page faults for unmapped physical memory.
+    - [ ] Return fault information to the caller: fault kind, faulting instruction PC, accessed address, and optionally access width. Keep diagnostics caller-owned; privileged trap delivery is deferred.
+    - [ ] Define initial failure-state behavior: failed loads leave the destination register unchanged; failed stores modify no RAM bytes; failed fetches execute no instruction. Validate the whole access before performing it.
+    - [ ] On a memory fault, bypass normal instruction completion and the ordinary next-PC update; let the caller handle the explicit failure result.
+    - [ ] Test valid accesses at the first and last fitting addresses for each supported width, accesses starting outside RAM, and accesses starting inside RAM but crossing its end. Cover loads, stores, and instruction fetches.
+    - [ ] Test very large addresses and bounds-check arithmetic edge cases, and verify fault details and unchanged state on failure. Run these tests with the sanitizer builds.
+  - [ ] Data alignment: do we deliberately support misaligned loads/stores or reject them with an explicit fault? Document and test the chosen policy.
+  - [ ] Instruction-target alignment: for RV64I without compressed instructions, do taken branches and jumps report misaligned targets during execution of the responsible instruction? Test that untaken branches do not fault for an unused misaligned target.
+- [x] Audit C integer conversions and signed overflow, including PC/address calculations.
 - [ ] Add architectural regression tests, including known encoded instruction words independent of encoder constants.
 
 ## Scope notes

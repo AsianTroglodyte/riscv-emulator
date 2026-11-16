@@ -17,14 +17,31 @@ struct machine_state {
 };
 
 
-void run_instruction(uint32_t instruction,
+typedef enum status_code : uint32_t {
+  SUCCESS= 0,
+
+  // ERROR EXCEPTIONS
+  INSTRUCTION_ACCESS_MISALIGNED,
+  INSTRUCTION_ACCESS_FAULT,
+  RV64I_ERROR_ILLEGAL_INSTRUCTION,
+  BREAKPOINT,
+  LOAD_ADDRESS_MISALIGNED,
+  LOAD_ACCESS_FAULT,
+  STORE_AMO_ADDRESS_MISALIGNED,
+  STORE_AMO_ACCESS_FAULT,
+  ENVIRONMENT_CALL_FROM_U_MODE,
+  ENVIRONMENT_CALL_FROM_S_MODE,
+  ENVIRONMENT_CALL_FROM_M_MODE,
+} execution_status;
+
+//**
+// instruction address misaligned
+// breakpoint
+// load address misaligned
+//*/
+
+execution_status run_instruction(uint32_t instruction,
                      struct machine_state* machine_state);
-
-
-enum status_code {
-  RV64I_OK = 0,
-  RV64I_ERROR_ILLEGAL_INSTRUCTION = 1,
-};
 
 
 enum major_opcodes: uint32_t {

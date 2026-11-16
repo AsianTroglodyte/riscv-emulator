@@ -15,11 +15,25 @@ int main() {
   }
 
   uint32_t instructions[1] = {
-    create_i_type(10, 10, LW, 10, LOAD),
+    create_i_type(10, 10, FUNCT3_LW, 10, OPCODE_LOAD),
   };
 
   for (int i = 0; i < 1; i++) {
-    run_instruction(instructions[i], &state);
+    execution_status execution_status_code = run_instruction(instructions[i], &state);
+    switch (execution_status_code) {
+    case SUCCESS:
+      printf("SUCCESS\n");
+      break;
+    case RV64I_ERROR_ILLEGAL_INSTRUCTION:
+      printf("RV64I_ERROR_ILLEGAL_INSTRUCTION\n");
+      break;
+    case LOAD_ACCESS_FAULT:
+      printf("LOAD_ACCESS_FAULT\n");
+      break;
+    case STORE_ACCESS_FAULT:
+      printf("STORE_ACCESS_FAULT\n");
+      break;
+    }
   }
 
   print_memory(state.memory);

@@ -6,11 +6,14 @@
 #include <stdlib.h>
 
 
-void run_instruction(uint32_t instruction,
+execution_status run_instruction(uint32_t instruction,
                     struct machine_state *machine_state) {
   uint8_t *memory = machine_state->memory;
   uint64_t *registers = machine_state->registers;
   uint64_t *program_counter = &machine_state->program_counter;
+
+  execution_status execution_status_code = SUCCESS;
+
   assert((*program_counter % 4) == 0);
   assert(registers[0] == 0);
 
@@ -61,7 +64,7 @@ void run_instruction(uint32_t instruction,
       break;
     default:
       printf("funct3 %d does not correspond to any LOAD instruction.", funct3);
-      assert(0);
+      execution_status_code = RV64I_ERROR_ILLEGAL_INSTRUCTION;
     }
     break;
   case OPCODE_LOAD_FP:
@@ -95,7 +98,8 @@ void run_instruction(uint32_t instruction,
         printf("FENCE: regular fence instruction\n");
       }
     } else {
-      printf("MISC_MEM opcode does not have corret funct3");
+      execution_status_code = RV64I_ERROR_ILLEGAL_INSTRUCTION;
+      printf("MISC_MEM opcode does not have correct funct3");
     }
 
     break;
@@ -125,12 +129,12 @@ void run_instruction(uint32_t instruction,
       registers[rd_index] = registers[rs1_index] & immediate;
       break;
     case FUNCT3_SLLI:
-      if (bits(instruction, 26, 31) == IMM_SLLI) {
+      if (IMM_SLLI == bits(instruction, 26, 31)) {
         shamt = bits(immediate, 0, 5);
         registers[rd_index] = registers[rs1_index] << shamt;
       } else {
-        /* assert(1 & printf("immediate of potential SLLI is not ")); */
-        printf("immediate of potential SLLI is not \n");
+        execution_status_code = RV64I_ERROR_ILLEGAL_INSTRUCTION;
+        printf("potential SLLI does not have appropriate immediate.\n");
       }
       break;
     case FUNCT3_XORI:
@@ -153,12 +157,13 @@ void run_instruction(uint32_t instruction,
         break;
       }
       default:
-        print_bits(instruction);
+        execution_status_code = RV64I_ERROR_ILLEGAL_INSTRUCTION;
         printf("funct3 %d and funct6 %d does not correspond to any OP_IMM instruction.\n",
                funct3, funct6);
       }
       break;
     default:
+      execution_status_code = RV64I_ERROR_ILLEGAL_INSTRUCTION;
       printf("funct3 %d does not correspond to any OP_IMM instruction.\n", funct3);
       assert(0);
     }
@@ -184,6 +189,7 @@ void run_instruction(uint32_t instruction,
         registers[rd_index] = (uint32_t) registers[rs1_index] << shamt;
       }
       else {
+        execution_status_code = RV64I_ERROR_ILLEGAL_INSTRUCTION;
         printf("SLLIW_FUNCT_3 does not have correct corresponding immediate_id/funct7 val");
       }
       break;
@@ -197,7 +203,14 @@ void run_instruction(uint32_t instruction,
       case (IMM_SRAIW):
         registers[rd_index] = (int64_t)(int32_t)registers[rs1_index] >> shamt;
         break;
+      default:
+        execution_status_code = RV64I_ERROR_ILLEGAL_INSTRUCTION;
+        break;
       }
+      break;
+    default:
+      execution_status_code = RV64I_ERROR_ILLEGAL_INSTRUCTION;
+      break;
     }
     break;
   case OPCODE_STORE:
@@ -222,7 +235,7 @@ void run_instruction(uint32_t instruction,
       break;
     default:
       printf("funct3 %d does not correspond to any STORE instruction.", funct3);
-      assert(0);
+      execution_status_code = RV64I_ERROR_ILLEGAL_INSTRUCTION;
     }
     break;
   case OPCODE_STORE_FP:
@@ -276,7 +289,7 @@ void run_instruction(uint32_t instruction,
       break;
     default:
       printf("funct7_funct3  %d does not correspond to any OP instruction.", funct7_funct3);
-      assert(0);
+      execution_status_code = RV64I_ERROR_ILLEGAL_INSTRUCTION;
     }
     break;
   }
@@ -297,6 +310,7 @@ void run_instruction(uint32_t instruction,
         registers[rd_index] = (uint32_t) registers[rs1_index] << bits64(registers[rs2_index], 0, 4);
       }
       else {
+        execution_status_code = RV64I_ERROR_ILLEGAL_INSTRUCTION;
         printf("funct7 not valid given SLLW_FUNCT_3\n");
       }
       break;
@@ -308,7 +322,8 @@ void run_instruction(uint32_t instruction,
         registers[rd_index] = (int64_t)(int32_t)((uint32_t) registers[rs1_index] - (uint32_t) registers[rs2_index]);
       }
       else {
-        printf("immediate ID given ADDW_SUBW_FUNCT_3 not valid\n");
+        printf("immediate ID for ADDW_SUBW_FUNCT_3 not valid\n");
+        execution_status_code = RV64I_ERROR_ILLEGAL_INSTRUCTION;
       }
       break;
     case FUNCT3_SHIFT_RIGHT:
@@ -317,9 +332,13 @@ void run_instruction(uint32_t instruction,
       } else if (FUNCT7_SRAW == funct7) {
         registers[rd_index] = (int32_t)(uint32_t)registers[rs1_index] >> (registers[rs2_index] & 0b11111);
       } else {
-        printf("immediate ID SHIFT_RIGHT_FUNCT_3 not valid\n");
+        execution_status_code = RV64I_ERROR_ILLEGAL_INSTRUCTION;
+        printf("immediate ID for SHIFT_RIGHT_FUNCT_3 not valid\n");
       }
       break;
+    default:
+      printf("OPCDOE_OP_32 does not have valid funct3\n");
+      execution_status_code = RV64I_ERROR_ILLEGAL_INSTRUCTION;
     }
     break;
   case OPCODE_MADD:
@@ -386,6 +405,8 @@ void run_instruction(uint32_t instruction,
         break;
       }
       break;
+    default:
+      execution_status_code = RV64I_ERROR_ILLEGAL_INSTRUCTION;
     }
     break;
   case OPCODE_JALR:
@@ -415,7 +436,10 @@ void run_instruction(uint32_t instruction,
     case FUNCT12_EBREAK:
       printf("EBREAK\n");
       break;
+    default:
+      execution_status_code = RV64I_ERROR_ILLEGAL_INSTRUCTION;
     }
+
     break;
   case OPCODE_OP_VE:
     printf("OP_VE\n");
@@ -425,13 +449,15 @@ void run_instruction(uint32_t instruction,
     break;
   default:
     printf("Invalid Opcode\n");
+    execution_status_code = RV64I_ERROR_ILLEGAL_INSTRUCTION;
     break;
   }
 
   *program_counter = next_pc;
-
   // writes to x0 are discarded
   registers[0] = 0;
+
+  return execution_status_code;
 }
 
 /**
@@ -604,10 +630,11 @@ inline uint64_t get_double_word(uint8_t const memory[], uint64_t address) {
          ((uint64_t)memory[address + 4]) << 32 |
          ((uint64_t)memory[address + 5]) << 40 |
          ((uint64_t)memory[address + 6]) << 48 |
-         ((uint64_t)memory[address + 7]) << 56 ;
+         ((uint64_t)memory[address + 7]) << 56;
 }
 
 inline uint32_t get_word(uint8_t const memory[], uint64_t address) {
+
   return ((uint32_t)memory[address]) |
          ((uint32_t)memory[address + 1]) << 8  |
          ((uint32_t)memory[address + 2]) << 16 |
