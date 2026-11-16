@@ -1298,20 +1298,55 @@ void test_execution_status() {
     switch (execution_status_code) {
     case SUCCESS:
       printf("SUCCESS\n");
-      break;
+      goto DONE;
+    case INSTRUCTION_ADDRESS_MISALIGNED:
+      printf("INSTRUCTION_ADDRESS_MISALIGNED\n");
+      goto DONE;
+    case INSTRUCTION_ACCESS_FAULT:
+      printf("INSTRUCTION_ACCESS_FAULT\n");
+      goto DONE;
     case RV64I_ERROR_ILLEGAL_INSTRUCTION:
       printf("RV64I_ERROR_ILLEGAL_INSTRUCTION\n");
+      goto DONE;
+    case BREAKPOINT:
+      printf("BREAKPOINT\n");
+      goto DONE;
+    case LOAD_ADDRESS_MISALIGNED:
+      printf("LOAD_ADDRESS_MISALIGNED\n");
       goto DONE;
     case LOAD_ACCESS_FAULT:
       printf("LOAD_ACCESS_FAULT\n");
       goto DONE;
-    case STORE_ACCESS_FAULT:
-      printf("STORE_ACCESS_FAULT\n");
+    case STORE_AMO_ADDRESS_MISALIGNED:
+      printf("STORE_AMO_ADDRESS_MISALIGNED\n");
+      goto DONE;
+    case STORE_AMO_ACCESS_FAULT:
+      printf("STORE_AMO_ACCESS_FAULT\n");
+      goto DONE;
+    case ENVIRONMENT_CALL_FROM_U_MODE:
+      printf("ENVIRONMENT_CALL_FROM_U_MODE\n");
+      goto DONE;
+    case ENVIRONMENT_CALL_FROM_S_MODE:
+      printf("ENVIRONMENT_CALL_FROM_S_MODE\n");
+      goto DONE;
+    case ENVIRONMENT_CALL_FROM_M_MODE:
+      printf("ENVIRONMENT_CALL_FROM_M_MODE\n");
       goto DONE;
     }
   }
 
  DONE:
+}
+
+
+void test_branch_INSTRUCTION_ADDRESS_MISALIGNED() {
+  /* struct branch_test_case cases[] = { */
+  /*   // rs1_value, rs2_value, pc, immediate, expected_pc_val; */
+  /*   {.rs1_value=0, .rs2_value= 1, .pc= 12, .immediate= 12, .expected_pc_val = 24}, // noteq; positive immediate */
+  /*   {.rs1_value=0, .rs2_value= 1, .pc= 12, .immediate= 12, .expected_pc_val = 24}, */
+  /* }; */
+
+  /* run_instruction(); */
 }
 
 

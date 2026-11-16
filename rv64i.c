@@ -368,46 +368,39 @@ execution_status run_instruction(uint32_t instruction,
     rs1_index = get_rs1_index(instruction);
     immediate = get_b_immediate(instruction);
     funct3 = get_funct3(instruction);
+
+    bool branch_taken = false;
+
     switch(funct3) {
     case FUNCT3_BEQ:
-      if (registers[rs2_index] == registers[rs1_index]) {
-        next_pc = *program_counter + immediate;
-        break;
-      }
+      branch_taken = (registers[rs2_index] == registers[rs1_index]);
       break;
     case FUNCT3_BNE:
-      if (registers[rs2_index] != registers[rs1_index]) {
-        next_pc = *program_counter + immediate;
-        break;
-      }
+      branch_taken = (registers[rs2_index] != registers[rs1_index]);
       break;
     case FUNCT3_BLT:
-      if ((int64_t)registers[rs1_index] < (int64_t)registers[rs2_index]) {
-        next_pc = *program_counter + immediate;
-        break;
-      }
+      branch_taken = ((int64_t)registers[rs1_index] < (int64_t)registers[rs2_index]);
       break;
     case FUNCT3_BGE:
-      if ((int64_t)registers[rs1_index] >= (int64_t)registers[rs2_index]) {
-        next_pc = *program_counter + immediate;
-        break;
-      }
+      branch_taken = ((int64_t)registers[rs1_index] >= (int64_t)registers[rs2_index]);
       break;
     case FUNCT3_BLTU:
-      if ((uint64_t)registers[rs1_index] < (uint64_t)registers[rs2_index]) {
-        next_pc = *program_counter + immediate;
-        break;
-      }
+      branch_taken = ((uint64_t)registers[rs1_index] < (uint64_t)registers[rs2_index]);
       break;
     case FUNCT3_BGEU:
-      if ((uint64_t)registers[rs1_index] >= (uint64_t)registers[rs2_index]) {
-        next_pc = *program_counter + immediate;
-        break;
-      }
+      branch_taken = (uint64_t)registers[rs1_index] >= (uint64_t)registers[rs2_index];
       break;
     default:
       execution_status_code = RV64I_ERROR_ILLEGAL_INSTRUCTION;
     }
+
+    bool is_aligned = ((*program_counter + immediate) % IALIGN_32) == 0;
+    if (branch_taken && is_aligned) {
+      next_pc = *program_counter + immediate;
+    } else if (branch_taken && !is_aligned) {
+      execution_status_code = INSTRUCTION_ADDRESS_MISALIGNED;
+    }
+
     break;
   case OPCODE_JALR:
     rd_index = get_rd_index(instruction);
@@ -453,9 +446,12 @@ execution_status run_instruction(uint32_t instruction,
     break;
   }
 
-  *program_counter = next_pc;
   // writes to x0 are discarded
   registers[0] = 0;
+
+  if (execution_status_code == SUCCESS) {
+    *program_counter = next_pc;
+  }
 
   return execution_status_code;
 }

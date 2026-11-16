@@ -26,16 +26,17 @@ int main() {
       break;
     case RV64I_ERROR_ILLEGAL_INSTRUCTION:
       printf("RV64I_ERROR_ILLEGAL_INSTRUCTION\n");
-      break;
+      goto DONE;
     case LOAD_ACCESS_FAULT:
       printf("LOAD_ACCESS_FAULT\n");
-      break;
-    case STORE_ACCESS_FAULT:
+      goto DONE;
+    case STORE_AMO_ACCESS_FAULT:
       printf("STORE_ACCESS_FAULT\n");
-      break;
+      goto DONE;
     }
   }
 
+ DONE:
   print_memory(state.memory);
   print_registers(state.registers);
 
