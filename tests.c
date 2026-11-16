@@ -1339,14 +1339,37 @@ void test_execution_status() {
 }
 
 
-void test_branch_INSTRUCTION_ADDRESS_MISALIGNED() {
-  /* struct branch_test_case cases[] = { */
-  /*   // rs1_value, rs2_value, pc, immediate, expected_pc_val; */
-  /*   {.rs1_value=0, .rs2_value= 1, .pc= 12, .immediate= 12, .expected_pc_val = 24}, // noteq; positive immediate */
-  /*   {.rs1_value=0, .rs2_value= 1, .pc= 12, .immediate= 12, .expected_pc_val = 24}, */
-  /* }; */
+struct branch_error_test_case {
+  uint64_t rs1_value;
+  uint64_t rs2_value;
+  uint64_t pc;
+  int32_t immediate;
+  execution_status expected_execution_status;
+};
 
-  /* run_instruction(); */
+void test_branch_execution_status(const struct branch_error_test_case cases[],
+                             size_t case_count,
+                             uint32_t funct3) {
+  for (size_t i = 0; i < case_count; ++i) {
+    struct machine_state state = {0};
+    state.program_counter = cases[i].pc;
+    state.registers[10] = cases[i].rs2_value;
+    state.registers[11] = cases[i].rs1_value;
+    execution_status execution_status = run_instruction(create_b_type(cases[i].immediate, 10, 11, funct3, OPCODE_BRANCH), &state);
+    TEST_ASSERT_EQUAL_UINT32(execution_status, cases[i].expected_execution_status);
+  }
+}
+
+void test_branch_INSTRUCTION_ADDRESS_MISALIGNED() {
+  struct branch_test_case cases[] = {
+    // rs1_value, rs2_value, pc, immediate, expected_pc_val;
+    {.rs1_value=0, .rs2_value= 1, .pc= 12, .immediate= 2, .expected_pc_val = 24}, // noteq; positive immediate
+  };
+
+
+  /* uint32_t create_b_type(uint32_t immediate, uint32_t rs2_index, uint32_t rs1_index, uint32_t funct3, uint32_t opcode); */
+
+  /* run_instruction(create_b_type(2, 10, 10, )); */
 }
 
 
