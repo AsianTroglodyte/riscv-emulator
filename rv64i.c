@@ -17,6 +17,10 @@ execution_status run_instruction(uint32_t instruction,
   assert((*program_counter % 4) == 0);
   assert(registers[0] == 0);
 
+  if (*program_counter > MEMORY_BYTES) {
+    return INSTRUCTION_ACCESS_FAULT;
+  }
+
   // program_counter set to next_pc at end
   // default value here overrided by JUMP and BRANCH instructions if needed.
   int64_t next_pc = *program_counter + 4;
@@ -43,6 +47,10 @@ execution_status run_instruction(uint32_t instruction,
     switch (funct3) {
     case FUNCT3_LB:
       registers[rd_index] = (int8_t) get_byte(memory, address);
+      // make sure that access is correct.
+      if (*program_counter > MEMORY_BYTES) {
+        return INSTRUCTION_ACCESS_FAULT;
+      }
       break;
     case FUNCT3_LH:
       registers[rd_index] = (int16_t) get_half_word(memory, address);

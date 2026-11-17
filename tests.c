@@ -1376,14 +1376,25 @@ void test_branch_error_cases() {
   struct machine_state state = {0};
   state.program_counter = 12;
   execution_status execution_status = run_instruction(create_j_type(10, 10, OPCODE_JAL), &state);
-  printf("state.program_counter: %" PRIu64 "\n", state.program_counter);
   char message[128];
   snprintf(message, sizeof(message), "Case %d was incorrect", 2);
   TEST_ASSERT_EQUAL_UINT32_MESSAGE(INSTRUCTION_ADDRESS_MISALIGNED,
                                    execution_status,
                                    message);
 
+  // INSTRUCTION_ACCESS_FAULT test
+  state.program_counter = 100;
+  execution_status = run_instruction(create_j_type(10, 10, OPCODE_JAL), &state);
+  snprintf(message, sizeof(message), "Case %d was incorrect", 3);
+  TEST_ASSERT_EQUAL_UINT32_MESSAGE(INSTRUCTION_ACCESS_FAULT,
+                                   execution_status,
+                                   message);
 
+  /* struct branch_error_test_case cases_2[] = { */
+  /*   {.rs1_value=0, .rs2_value= 0, .pc= 12, .immediate= 2, .expected_execution_status = INSTRUCTION_ADDRESS_MISALIGNED}, */
+  /* }; */
+  /* // This alone, prob enough for testing INSTRUCTION_ADDRESS_MISALIGNED for BRANCH instructions */
+  /* test_branch_execution_status(cases_2, sizeof(cases_2) / sizeof(cases_2[0]), FUNCT3_BEQ); */
 }
 
 
