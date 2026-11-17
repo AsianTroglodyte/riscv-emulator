@@ -7,17 +7,14 @@ DEBUG= -Wall -Wextra -std=c23 -g -O0
 
 # main build
 MAIN_BUILD=./build/main
-
 .PHONY: main
 main: $(MAIN_BUILD)
-
 $(MAIN_BUILD): main.c rv64i.c rv64i.h | build
 	$(CC) $(CFLAGS) main.c rv64i.c -o $(MAIN_BUILD)
 
 
 # tests
 TEST_BIN=./build/tests
-
 ## build and run test
 .PHONY: test
 test: $(TEST_BIN)
@@ -37,8 +34,13 @@ build:
 	mkdir -p build
 
 # build debug
-# test-debug: tests.c rv64i.c
-# 	$(CC) tests.c rv64i.c ./unity/src/unity.c -o ./build/debug_test
+.PHONY: debug
+DEBUG_TEST_BIN=./build/debug_test
+debug: $(DEBUG_TEST_BIN)
+$(DEBUG_TEST_BIN): tests.c rv64i.c rv64i.h ./unity/src/unity.c | build
+	$(CC) $(DEBUG) tests.c rv64i.c ./unity/src/unity.c -o $(DEBUG_TEST_BIN)
+
+
 
 clean:
-	rm -f ./build/tests ./build/main
+	rm -f $(DEBUG_TEST_BIN) $(TEST_BIN) $(MAIN_BUILD)

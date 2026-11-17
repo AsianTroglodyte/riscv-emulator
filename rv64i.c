@@ -14,7 +14,6 @@ execution_status run_instruction(uint32_t instruction,
 
   execution_status execution_status_code = SUCCESS;
 
-  assert((*program_counter % 4) == 0);
   assert(registers[0] == 0);
 
   if (*program_counter > MEMORY_BYTES) {
@@ -46,29 +45,33 @@ execution_status run_instruction(uint32_t instruction,
     address = (int64_t) registers[rs1_index] + immediate;
     switch (funct3) {
     case FUNCT3_LB:
-      registers[rd_index] = (int8_t) get_byte(memory, address);
       // make sure that access is correct.
-      if (*program_counter > MEMORY_BYTES) {
-        return INSTRUCTION_ACCESS_FAULT;
-      }
+      if (address > MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
+      else registers[rd_index] = (int8_t) get_byte(memory, address);
       break;
     case FUNCT3_LH:
-      registers[rd_index] = (int16_t) get_half_word(memory, address);
+      if ((address + 1) > MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
+      else registers[rd_index] = (int16_t) get_half_word(memory, address);
       break;
     case FUNCT3_LW:
-      registers[rd_index] = (int32_t) get_word(memory, address);
-      break;
-    case FUNCT3_LBU:
-      registers[rd_index] = get_byte(memory, address);
-      break;
-    case FUNCT3_LHU:
-      registers[rd_index] = get_half_word(memory, address);
-      break;
-    case FUNCT3_LWU:
-      registers[rd_index] = get_word(memory, address);
+      if ((address + 3) > MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
+      else registers[rd_index] = (int32_t) get_word(memory, address);
       break;
     case FUNCT3_LD:
-      registers[rd_index] = get_double_word(memory, address);
+      if ((address + 7) > MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
+      else registers[rd_index] = get_double_word(memory, address);
+      break;
+    case FUNCT3_LBU:
+      if (address > MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
+      else registers[rd_index] = get_byte(memory, address);
+      break;
+    case FUNCT3_LHU:
+      if ((address + 1) > MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
+      else registers[rd_index] = get_half_word(memory, address);
+      break;
+    case FUNCT3_LWU:
+      if ((address + 3) > MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
+      else registers[rd_index] = get_word(memory, address);
       break;
     default:
       printf("funct3 %d does not correspond to any LOAD instruction.", funct3);

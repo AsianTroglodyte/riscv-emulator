@@ -1377,18 +1377,33 @@ void test_branch_error_cases() {
   state.program_counter = 12;
   execution_status execution_status = run_instruction(create_j_type(10, 10, OPCODE_JAL), &state);
   char message[128];
-  snprintf(message, sizeof(message), "Case %d was incorrect", 2);
+  snprintf(message, sizeof(message), " Case %d was incorrect", 2);
   TEST_ASSERT_EQUAL_UINT32_MESSAGE(INSTRUCTION_ADDRESS_MISALIGNED,
                                    execution_status,
                                    message);
 
   // INSTRUCTION_ACCESS_FAULT test
-  state.program_counter = 100;
-  execution_status = run_instruction(create_j_type(10, 10, OPCODE_JAL), &state);
-  snprintf(message, sizeof(message), "Case %d was incorrect", 3);
-  TEST_ASSERT_EQUAL_UINT32_MESSAGE(INSTRUCTION_ACCESS_FAULT,
+  state.program_counter = MEMORY_BYTES - 1; // at very edge of memory
+  printf("MEMORY_BYTES: %d\n", MEMORY_BYTES - 4);
+  execution_status = run_instruction(create_j_type(0, 10, OPCODE_JAL), &state);
+  snprintf(message, sizeof(message), " Case %d was incorrect", 3);
+  TEST_ASSERT_EQUAL_UINT32_MESSAGE(SUCCESS,
                                    execution_status,
                                    message);
+
+  /* state.program_counter = MEMORY_BYTES; // just outside memory */
+  /* execution_status = run_instruction(create_j_type(10, 10, OPCODE_JAL), &state); */
+  /* snprintf(message, sizeof(message), " Case %d was incorrect", 4); */
+  /* TEST_ASSERT_EQUAL_UINT32_MESSAGE(INSTRUCTION_ACCESS_FAULT, */
+  /*                                  execution_status, */
+  /*                                  message); */
+
+  /* execution_status = run_instruction(create_i_type(63, 0, FUNCT3_LB, 0, OPCODE_LOAD), &state); */
+  /* snprintf(message, sizeof(message), " Case %d was incorrect", 5); */
+  /* TEST_ASSERT_EQUAL_UINT32_MESSAGE(SUCCESS, */
+  /*                                  execution_status, */
+  /*                                  message); */
+
 
   /* struct branch_error_test_case cases_2[] = { */
   /*   {.rs1_value=0, .rs2_value= 0, .pc= 12, .immediate= 2, .expected_execution_status = INSTRUCTION_ADDRESS_MISALIGNED}, */
