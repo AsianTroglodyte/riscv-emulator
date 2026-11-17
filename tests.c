@@ -1356,20 +1356,31 @@ void test_branch_execution_status(const struct branch_error_test_case cases[],
     state.registers[10] = cases[i].rs2_value;
     state.registers[11] = cases[i].rs1_value;
     execution_status execution_status = run_instruction(create_b_type(cases[i].immediate, 10, 11, funct3, OPCODE_BRANCH), &state);
-    TEST_ASSERT_EQUAL_UINT32(execution_status, cases[i].expected_execution_status);
+
+    char message[128];
+    snprintf(message, sizeof(message), " Case %zu was incorrect", i + 1);
+    TEST_ASSERT_EQUAL_UINT32_MESSAGE(cases[i].expected_execution_status,
+                                     execution_status,
+                                     message);
   }
 }
 
 void test_branch_INSTRUCTION_ADDRESS_MISALIGNED() {
-  struct branch_test_case cases[] = {
+  struct branch_error_test_case cases[] = {
     // rs1_value, rs2_value, pc, immediate, expected_pc_val;
-    {.rs1_value=0, .rs2_value= 1, .pc= 12, .immediate= 2, .expected_pc_val = 24}, // noteq; positive immediate
+    {.rs1_value=0, .rs2_value= 1, .pc= 12, .immediate= 2, .expected_execution_status = INSTRUCTION_ADDRESS_MISALIGNED}, // noteq; positive immediate
   };
 
 
   /* uint32_t create_b_type(uint32_t immediate, uint32_t rs2_index, uint32_t rs1_index, uint32_t funct3, uint32_t opcode); */
 
-  /* run_instruction(create_b_type(2, 10, 10, )); */
+  test_branch_execution_status(cases, sizeof(cases) / sizeof(cases[0]), FUNCT3_BEQ);
+  /* test_branch_execution_status(cases, sizeof(cases), FUNCT3_BNE); */
+  /* test_branch_execution_status(cases, sizeof(cases), FUNCT3_BLT); */
+  /* test_branch_execution_status(cases, sizeof(cases), FUNCT3_BGE); */
+  /* test_branch_execution_status(cases, sizeof(cases), FUNCT3_BLTU); */
+  /* test_branch_execution_status(cases, sizeof(cases), FUNCT3_BGEU); */
+
 }
 
 

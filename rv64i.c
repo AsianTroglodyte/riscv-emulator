@@ -394,7 +394,7 @@ execution_status run_instruction(uint32_t instruction,
       execution_status_code = RV64I_ERROR_ILLEGAL_INSTRUCTION;
     }
 
-    bool is_aligned = ((*program_counter + immediate) % IALIGN_32) == 0;
+    bool is_aligned = (((*program_counter + immediate) * 8) % IALIGN_32) == 0;
     if (branch_taken && is_aligned) {
       next_pc = *program_counter + immediate;
     } else if (branch_taken && !is_aligned) {
