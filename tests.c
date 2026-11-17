@@ -945,9 +945,9 @@ void test_JAL(void) {
   // NOTE: J type instruction encode upper bits 20:1 not 20:0 thus the bits
   // shift before sending vals in create_j_type.
   /* uint32_t immediate, uint32_t rd_index, uint32_t opcode */
-  run_instruction(create_j_type(10, 10, OPCODE_JAL), &state);
+  run_instruction(create_j_type(12, 10, OPCODE_JAL), &state);
   TEST_ASSERT_EQUAL_UINT64(12 + 4, state.registers[10]); // address of instruction following must be pc + 4
-  TEST_ASSERT_EQUAL_UINT64(10 + 12, state.program_counter);
+  TEST_ASSERT_EQUAL_UINT64(12 + 12, state.program_counter);
 
   state.program_counter = 12;
   run_instruction(create_j_type((uint32_t)-8,
@@ -1365,21 +1365,24 @@ void test_branch_execution_status(const struct branch_error_test_case cases[],
   }
 }
 
-void test_branch_INSTRUCTION_ADDRESS_MISALIGNED() {
-  struct branch_error_test_case cases[] = {
-    // rs1_value, rs2_value, pc, immediate, expected_pc_val;
-    {.rs1_value=0, .rs2_value= 1, .pc= 12, .immediate= 2, .expected_execution_status = INSTRUCTION_ADDRESS_MISALIGNED}, // noteq; positive immediate
+void test_branch_error_cases() {
+  struct branch_error_test_case cases_1[] = {
+    {.rs1_value=0, .rs2_value= 0, .pc= 12, .immediate= 2, .expected_execution_status = INSTRUCTION_ADDRESS_MISALIGNED},
   };
+  // This alone, prob enough for testing INSTRUCTION_ADDRESS_MISALIGNED for BRANCH instructions
+  test_branch_execution_status(cases_1, sizeof(cases_1) / sizeof(cases_1[0]), FUNCT3_BEQ);
 
+  // This alone, prob enough for testing INSTRUCTION_ADDRESS_MISALIGNED for JUMP instructions
+  struct machine_state state = {0};
+  state.program_counter = 12;
+  execution_status execution_status = run_instruction(create_j_type(10, 10, OPCODE_JAL), &state);
+  printf("state.program_counter: %" PRIu64 "\n", state.program_counter);
+  char message[128];
+  snprintf(message, sizeof(message), "Case %d was incorrect", 2);
+  TEST_ASSERT_EQUAL_UINT32_MESSAGE(INSTRUCTION_ADDRESS_MISALIGNED,
+                                   execution_status,
+                                   message);
 
-  /* uint32_t create_b_type(uint32_t immediate, uint32_t rs2_index, uint32_t rs1_index, uint32_t funct3, uint32_t opcode); */
-
-  test_branch_execution_status(cases, sizeof(cases) / sizeof(cases[0]), FUNCT3_BEQ);
-  /* test_branch_execution_status(cases, sizeof(cases), FUNCT3_BNE); */
-  /* test_branch_execution_status(cases, sizeof(cases), FUNCT3_BLT); */
-  /* test_branch_execution_status(cases, sizeof(cases), FUNCT3_BGE); */
-  /* test_branch_execution_status(cases, sizeof(cases), FUNCT3_BLTU); */
-  /* test_branch_execution_status(cases, sizeof(cases), FUNCT3_BGEU); */
 
 }
 
@@ -1469,7 +1472,7 @@ int main(void) {
   RUN_TEST(test_PAUSE);
 
   // execution status
-  RUN_TEST(test_execution_status);
+  RUN_TEST(test_branch_error_cases);
 
 
   UNITY_END();

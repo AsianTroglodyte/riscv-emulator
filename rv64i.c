@@ -363,7 +363,7 @@ execution_status run_instruction(uint32_t instruction,
     printf("CUSTOM_2\n");
     break;
 
-  case OPCODE_BRANCH:
+  case OPCODE_BRANCH: {
     rs2_index = get_rs2_index(instruction);
     rs1_index = get_rs1_index(instruction);
     immediate = get_b_immediate(instruction);
@@ -402,6 +402,7 @@ execution_status run_instruction(uint32_t instruction,
     }
 
     break;
+  }
   case OPCODE_JALR:
     rd_index = get_rd_index(instruction);
     rs1_index = get_rs1_index(instruction);
@@ -417,8 +418,14 @@ execution_status run_instruction(uint32_t instruction,
     rd_index = get_rd_index(instruction);
     // save address of next instruction
     registers[rd_index] = next_pc;
+    immediate = get_j_immediate(instruction);
+    bool is_aligned = (((*program_counter + immediate) * 8) % IALIGN_32) == 0;
+    if (is_aligned) {
     // jump to target address
-    next_pc = (int64_t) *program_counter + get_j_immediate(instruction);
+      next_pc = (int64_t) *program_counter + get_j_immediate(instruction);
+    } else {
+      execution_status_code = INSTRUCTION_ADDRESS_MISALIGNED;
+    }
     break;
   case OPCODE_SYSTEM:
     uint32_t funct12 = bits(instruction, 20, 31);
