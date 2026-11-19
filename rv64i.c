@@ -47,31 +47,31 @@ execution_status run_instruction(uint32_t instruction,
     switch (funct3) {
     case FUNCT3_LB:
       // make sure that access is correct.
-      if (address > MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
+      if (address >= MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
       else registers[rd_index] = (int8_t) get_byte(memory, address);
       break;
     case FUNCT3_LH:
-      if ((address + 1) > MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
+      if ((address + 1) >= MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
       else registers[rd_index] = (int16_t) get_half_word(memory, address);
       break;
     case FUNCT3_LW:
-      if ((address + 3) > MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
+      if ((address + 3) >= MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
       else registers[rd_index] = (int32_t) get_word(memory, address);
       break;
     case FUNCT3_LD:
-      if ((address + 7) > MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
+      if ((address + 7) >= MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
       else registers[rd_index] = get_double_word(memory, address);
       break;
     case FUNCT3_LBU:
-      if (address > MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
+      if (address >= MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
       else registers[rd_index] = get_byte(memory, address);
       break;
     case FUNCT3_LHU:
-      if ((address + 1) > MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
+      if ((address + 1) >= MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
       else registers[rd_index] = get_half_word(memory, address);
       break;
     case FUNCT3_LWU:
-      if ((address + 3) > MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
+      if ((address + 3) >= MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
       else registers[rd_index] = get_word(memory, address);
       break;
     default:
@@ -415,18 +415,26 @@ execution_status run_instruction(uint32_t instruction,
 
     break;
   }
-  case OPCODE_JALR:
+  case OPCODE_JALR: {
     rd_index = get_rd_index(instruction);
     rs1_index = get_rs1_index(instruction);
     // save address of next instruction
     registers[rd_index] = next_pc;
     // jump to target address; must set result's least significant bit to zero
+    immediate = get_j_immediate(instruction);
+    bool is_aligned = (((*program_counter + immediate) * 8) % IALIGN_32) == 0;
+    if (is_aligned) {
+      next_pc = *program_counter + immediate;
+    } else {
+      execution_status_code = INSTRUCTION_ADDRESS_MISALIGNED;
+    }
     next_pc = ((int64_t) get_i_immediate(instruction) + registers[rs1_index]) & (UINT64_MAX - 1);
     break;
+  }
   case OPCODE_RESERVED:
     printf("RESERVED\n");
     break;
-  case OPCODE_JAL:
+  case OPCODE_JAL: {
     rd_index = get_rd_index(instruction);
     // save address of next instruction
     registers[rd_index] = next_pc;
@@ -439,6 +447,7 @@ execution_status run_instruction(uint32_t instruction,
       execution_status_code = INSTRUCTION_ADDRESS_MISALIGNED;
     }
     break;
+  }
   case OPCODE_SYSTEM:
     uint32_t funct12 = bits(instruction, 20, 31);
     switch (funct12) {

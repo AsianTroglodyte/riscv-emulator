@@ -1381,25 +1381,47 @@ void test_branch_error_cases() {
   TEST_ASSERT_EQUAL_UINT32_MESSAGE(INSTRUCTION_ADDRESS_MISALIGNED,
                                    execution_status,
                                    message);
-
-  // INSTRUCTION_ACCESS_FAULT test state.program_counter = MEMORY_BYTES; // just outside memory
-  /* run_instruction(create_j_type(10, 10, OPCODE_JAL), &state); */
-  /* const uint32_t jump = create_j_type(MEMORY_BYTES + 2, 10, OPCODE_JAL); */
-  /* const uint32_t jump_immediate = get_j_immediate(jump); */
-  /* printf("jump_immediate: %d\n", jump_immediate); */
-  state.program_counter = MEMORY_BYTES;
-  execution_status = run_instruction(create_j_type(MEMORY_BYTES + 2, 10, OPCODE_JAL), &state);
+  execution_status = run_instruction(create_j_type(10, 10, OPCODE_JALR), &state);
   snprintf(message, sizeof(message), " Case %d was incorrect", 3);
+  TEST_ASSERT_EQUAL_UINT32_MESSAGE(INSTRUCTION_ADDRESS_MISALIGNED,
+                                   execution_status,
+                                   message);
+
+
+  // INSTRUCTION_ACCESS_FAULT test state.program_counter = MEMORY_BYTES;
+  state.program_counter = MEMORY_BYTES;
+  execution_status = run_instruction(create_j_type(12, 10, OPCODE_JAL), &state);
+  snprintf(message, sizeof(message), " Case %d was incorrect", 4);
   TEST_ASSERT_EQUAL_UINT32_MESSAGE(INSTRUCTION_ACCESS_FAULT,
                                    execution_status,
                                    message);
 
-  /* execution_status = run_instruction(create_i_type(63, 0, FUNCT3_LB, 0, OPCODE_LOAD), &state); */
-  /* snprintf(message, sizeof(message), " Case %d was incorrect", 5); */
-  /* TEST_ASSERT_EQUAL_UINT32_MESSAGE(SUCCESS, */
-  /*                                  execution_status, */
-  /*                                  message); */
+  state.program_counter = MEMORY_BYTES - 4;
+  execution_status = run_instruction(create_j_type(12, 10, OPCODE_JAL), &state);
+  snprintf(message, sizeof(message), " Case %d was incorrect", 5);
+  TEST_ASSERT_EQUAL_UINT32_MESSAGE(SUCCESS,
+                                   execution_status,
+                                   message);
 
+
+  // LOAD_ACCESS_FAULT
+  state.program_counter = 0;
+  execution_status = run_instruction(create_i_type(63, 0, FUNCT3_LH, 0, OPCODE_LOAD), &state); // Fault here
+  snprintf(message, sizeof(message), " Case %d was incorrect", 6);
+  TEST_ASSERT_EQUAL_UINT32_MESSAGE(LOAD_ACCESS_FAULT,
+                                   execution_status,
+                                   message);
+  execution_status = run_instruction(create_i_type(63, 0, FUNCT3_LB, 0, OPCODE_LOAD), &state); // NO fault here
+  snprintf(message, sizeof(message), " Case %d was incorrect", 7);
+  TEST_ASSERT_EQUAL_UINT32_MESSAGE(SUCCESS,
+                                   execution_status,
+                                   message);
+
+  execution_status = run_instruction(create_i_type(62, 0, FUNCT3_LH, 0, OPCODE_LOAD), &state); // NO fault here
+  snprintf(message, sizeof(message), " Case %d was incorrect", 8);
+  TEST_ASSERT_EQUAL_UINT32_MESSAGE(SUCCESS,
+                                   execution_status,
+                                   message);
 
   /* struct branch_error_test_case cases_2[] = { */
   /*   {.rs1_value=0, .rs2_value= 0, .pc= 12, .immediate= 2, .expected_execution_status = INSTRUCTION_ADDRESS_MISALIGNED}, */

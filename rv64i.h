@@ -19,12 +19,14 @@ struct machine_state {
 
 
 typedef enum status_code : uint32_t {
-  SUCCESS= 0,
+  SUCCESS= 0, // implemented
 
   // ERROR EXCEPTIONS
-  INSTRUCTION_ADDRESS_MISALIGNED,
-  INSTRUCTION_ACCESS_FAULT,
-  RV64I_ERROR_ILLEGAL_INSTRUCTION,
+  INSTRUCTION_ADDRESS_MISALIGNED,   // activated by misaligned jump address for
+                                    // JALR, JAL, and BRANCH (if BRANCH taken)
+                                    // IMPLEMENTED
+  INSTRUCTION_ACCESS_FAULT,         // IMPLEMENTED
+  RV64I_ERROR_ILLEGAL_INSTRUCTION,  // IMPLEMENTED
   BREAKPOINT,
   LOAD_ADDRESS_MISALIGNED,
   LOAD_ACCESS_FAULT,
