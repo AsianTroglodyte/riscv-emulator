@@ -1382,21 +1382,17 @@ void test_branch_error_cases() {
                                    execution_status,
                                    message);
 
-  // INSTRUCTION_ACCESS_FAULT test
-  state.program_counter = MEMORY_BYTES - 1; // at very edge of memory
-  printf("MEMORY_BYTES: %d\n", MEMORY_BYTES - 4);
-  execution_status = run_instruction(create_j_type(0, 10, OPCODE_JAL), &state);
+  // INSTRUCTION_ACCESS_FAULT test state.program_counter = MEMORY_BYTES; // just outside memory
+  /* run_instruction(create_j_type(10, 10, OPCODE_JAL), &state); */
+  /* const uint32_t jump = create_j_type(MEMORY_BYTES + 2, 10, OPCODE_JAL); */
+  /* const uint32_t jump_immediate = get_j_immediate(jump); */
+  /* printf("jump_immediate: %d\n", jump_immediate); */
+  state.program_counter = MEMORY_BYTES;
+  execution_status = run_instruction(create_j_type(MEMORY_BYTES + 2, 10, OPCODE_JAL), &state);
   snprintf(message, sizeof(message), " Case %d was incorrect", 3);
-  TEST_ASSERT_EQUAL_UINT32_MESSAGE(SUCCESS,
+  TEST_ASSERT_EQUAL_UINT32_MESSAGE(INSTRUCTION_ACCESS_FAULT,
                                    execution_status,
                                    message);
-
-  /* state.program_counter = MEMORY_BYTES; // just outside memory */
-  /* execution_status = run_instruction(create_j_type(10, 10, OPCODE_JAL), &state); */
-  /* snprintf(message, sizeof(message), " Case %d was incorrect", 4); */
-  /* TEST_ASSERT_EQUAL_UINT32_MESSAGE(INSTRUCTION_ACCESS_FAULT, */
-  /*                                  execution_status, */
-  /*                                  message); */
 
   /* execution_status = run_instruction(create_i_type(63, 0, FUNCT3_LB, 0, OPCODE_LOAD), &state); */
   /* snprintf(message, sizeof(message), " Case %d was incorrect", 5); */

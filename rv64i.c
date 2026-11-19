@@ -16,7 +16,8 @@ execution_status run_instruction(uint32_t instruction,
 
   assert(registers[0] == 0);
 
-  if (*program_counter > MEMORY_BYTES) {
+  /* >= cuz PC from 0-63. where MEMORY_BYTES = 64. memory[64]*/
+  if (*program_counter >= MEMORY_BYTES) {
     return INSTRUCTION_ACCESS_FAULT;
   }
 
@@ -430,7 +431,7 @@ execution_status run_instruction(uint32_t instruction,
     // save address of next instruction
     registers[rd_index] = next_pc;
     immediate = get_j_immediate(instruction);
-    bool is_aligned = (((*program_counter + immediate) * 8) % IALIGN_32) == 0;
+    bool is_aligned = ((((*program_counter) + immediate) * 8) % IALIGN_32) == 0;
     if (is_aligned) {
     // jump to target address
       next_pc = (int64_t) *program_counter + get_j_immediate(instruction);
@@ -805,7 +806,6 @@ int32_t create_j_type(uint32_t immediate, uint32_t rd_index, uint32_t opcode) {
   assert_valid_register(rd_index);
   assert_valid_opcode(opcode);
   // immediate must be a valid
-  assert((immediate % 2 == 0) && "immediate must be a multiple of 2");
   // Map offset bits [20|10:1|11|19:12] to instruction bits [31:12].
   uint32_t imm_20 =     (immediate  & (UINT32_C(1) << 20))  << 11;
   uint32_t imm_19_12 =  immediate   & UINT32_C(0x000ff000);

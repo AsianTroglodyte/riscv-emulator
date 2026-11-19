@@ -41,6 +41,5 @@ $(DEBUG_TEST_BIN): tests.c rv64i.c rv64i.h ./unity/src/unity.c | build
 	$(CC) $(DEBUG) tests.c rv64i.c ./unity/src/unity.c -o $(DEBUG_TEST_BIN)
 
 
-
 clean:
 	rm -f $(DEBUG_TEST_BIN) $(TEST_BIN) $(MAIN_BUILD)
