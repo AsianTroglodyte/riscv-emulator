@@ -234,9 +234,6 @@ execution_status run_instruction(uint32_t instruction,
 
     address = registers[rs1_index] + immediate;
 
-    if (address >= MEMORY_BYTES) {
-      execution_status_code = STORE_AMO_ACCESS_FAULT;
-    }
     switch (funct3) {
     case FUNCT3_SB:
       /* STORE_AMO_ACCESS_FAULT */
