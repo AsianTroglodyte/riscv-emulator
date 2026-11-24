@@ -44,6 +44,7 @@ execution_status run_instruction(uint32_t instruction,
     funct3 = get_funct3(instruction);
 
     address = (int64_t) registers[rs1_index] + immediate;
+
     switch (funct3) {
     case FUNCT3_LB:
       // make sure that access is correct.
@@ -232,20 +233,27 @@ execution_status run_instruction(uint32_t instruction,
     funct3 = get_funct3(instruction);
 
     address = registers[rs1_index] + immediate;
-    // LOAD access fault
+
+    if (address >= MEMORY_BYTES) {
+      execution_status_code = STORE_AMO_ACCESS_FAULT;
+    }
     switch (funct3) {
     case FUNCT3_SB:
       /* STORE_AMO_ACCESS_FAULT */
-      write_byte(memory, address, registers[rs2_index]);
+      if (address > (MEMORY_BYTES - 1 /*LOAD width*/)) execution_status_code = STORE_AMO_ACCESS_FAULT;
+      else write_byte(memory, address, registers[rs2_index]);
       break;
     case FUNCT3_SH:
-      write_half_word(memory, address, registers[rs2_index]);
+      if (address > (MEMORY_BYTES - 2 /*LOAD width*/)) execution_status_code = STORE_AMO_ACCESS_FAULT;
+      else write_half_word(memory, address, registers[rs2_index]);
       break;
     case FUNCT3_SW:
-      write_word(memory, address, registers[rs2_index]);
+      if (address > (MEMORY_BYTES - 4 /*LOAD width*/)) execution_status_code = STORE_AMO_ACCESS_FAULT;
+      else write_word(memory, address, registers[rs2_index]);
       break;
     case FUNCT3_SD:
-      write_double_word(memory, address, registers[rs2_index]);
+      if (address > (MEMORY_BYTES - 8 /*LOAD width*/)) execution_status_code = STORE_AMO_ACCESS_FAULT;
+      else write_double_word(memory, address, registers[rs2_index]);
       break;
     default:
       printf("funct3 %d does not correspond to any STORE instruction.", funct3);

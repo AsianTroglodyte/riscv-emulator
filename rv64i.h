@@ -31,7 +31,7 @@ typedef enum status_code : uint32_t {
   LOAD_ADDRESS_MISALIGNED,          // misaligned access permitted for RAM
   LOAD_ACCESS_FAULT,                // IMPLEMENTED
   STORE_AMO_ADDRESS_MISALIGNED,     // misaligned access permitted for RAM
-  STORE_AMO_ACCESS_FAULT,
+  STORE_AMO_ACCESS_FAULT,           //
   ENVIRONMENT_CALL_FROM_U_MODE,
   ENVIRONMENT_CALL_FROM_S_MODE,
   ENVIRONMENT_CALL_FROM_M_MODE,
