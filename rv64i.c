@@ -47,31 +47,31 @@ execution_status run_instruction(uint32_t instruction,
     switch (funct3) {
     case FUNCT3_LB:
       // make sure that access is correct.
-      if (address >= MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
+      if (address > (MEMORY_BYTES - 1)) execution_status_code = LOAD_ACCESS_FAULT;
       else registers[rd_index] = (int8_t) get_byte(memory, address);
       break;
     case FUNCT3_LH:
-      if ((address + 1) >= MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
+      if (address > (MEMORY_BYTES - 2 /*LOAD width*/)) execution_status_code = LOAD_ACCESS_FAULT;
       else registers[rd_index] = (int16_t) get_half_word(memory, address);
       break;
     case FUNCT3_LW:
-      if ((address + 3) >= MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
+      if (address > (MEMORY_BYTES - 4 /*LOAD width*/)) execution_status_code = LOAD_ACCESS_FAULT;
       else registers[rd_index] = (int32_t) get_word(memory, address);
       break;
     case FUNCT3_LD:
-      if ((address + 7) >= MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
+      if (address > (MEMORY_BYTES - 8 /*LOAD width*/)) execution_status_code = LOAD_ACCESS_FAULT;
       else registers[rd_index] = get_double_word(memory, address);
       break;
     case FUNCT3_LBU:
-      if (address >= MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
+      if (address > (MEMORY_BYTES - 1 /*LOAD width*/)) execution_status_code = LOAD_ACCESS_FAULT;
       else registers[rd_index] = get_byte(memory, address);
       break;
     case FUNCT3_LHU:
-      if ((address + 1) >= MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
+      if (address > (MEMORY_BYTES - 2 /*LOAD width*/)) execution_status_code = LOAD_ACCESS_FAULT;
       else registers[rd_index] = get_half_word(memory, address);
       break;
     case FUNCT3_LWU:
-      if ((address + 3) >= MEMORY_BYTES) execution_status_code = LOAD_ACCESS_FAULT;
+      if (address > (MEMORY_BYTES - 4 /*LOAD width*/)) execution_status_code = LOAD_ACCESS_FAULT;
       else registers[rd_index] = get_word(memory, address);
       break;
     default:
@@ -232,8 +232,10 @@ execution_status run_instruction(uint32_t instruction,
     funct3 = get_funct3(instruction);
 
     address = registers[rs1_index] + immediate;
+    // LOAD access fault
     switch (funct3) {
     case FUNCT3_SB:
+      /* STORE_AMO_ACCESS_FAULT */
       write_byte(memory, address, registers[rs2_index]);
       break;
     case FUNCT3_SH:

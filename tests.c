@@ -1347,6 +1347,7 @@ struct branch_error_test_case {
   execution_status expected_execution_status;
 };
 
+
 void test_branch_execution_status(const struct branch_error_test_case cases[],
                              size_t case_count,
                              uint32_t funct3) {
@@ -1364,6 +1365,7 @@ void test_branch_execution_status(const struct branch_error_test_case cases[],
                                      message);
   }
 }
+
 
 void test_branch_error_cases() {
   struct branch_error_test_case cases_1[] = {
@@ -1422,6 +1424,9 @@ void test_branch_error_cases() {
   TEST_ASSERT_EQUAL_UINT32_MESSAGE(SUCCESS,
                                    execution_status,
                                    message);
+
+  // LOAD_ADDRESS_MISALIGNED
+
 
   /* struct branch_error_test_case cases_2[] = { */
   /*   {.rs1_value=0, .rs2_value= 0, .pc= 12, .immediate= 2, .expected_execution_status = INSTRUCTION_ADDRESS_MISALIGNED}, */
@@ -1518,7 +1523,5 @@ int main(void) {
   // execution status
   RUN_TEST(test_branch_error_cases);
 
-
   UNITY_END();
-
 }
